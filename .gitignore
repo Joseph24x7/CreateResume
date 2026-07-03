@@ -1,0 +1,18 @@
+# Maven
+/backend/target/
+/backend/target_dependency/
+
+# Node/NPM
+/frontend/node_modules/
+/frontend/dist/
+
+# IDE / System
+/.idea/
+/*.iml
+.DS_Store
+
+# Local H2 Database
+/backend/data/
+/data/
+*.mv.db
+*.trace.db

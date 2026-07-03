@@ -1,0 +1,486 @@
+@import url('./editor.css');
+
+.preview-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-label {
+  padding: 10px 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.preview-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-2) transparent;
+  display: flex;
+  justify-content: center;
+}
+
+.preview-scroll::-webkit-scrollbar { width: 4px; }
+.preview-scroll::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+
+.preview-paper-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.preview-paper {
+  background: #f1f3f9;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .editor-page, .editor-topbar, .editor-left, .preview-panel, .preview-label, .preview-scroll, .preview-paper-wrapper {
+    all: unset !important;
+    display: block !important;
+  }
+
+  .preview-paper {
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+  }
+
+  body > * { display: none !important; }
+  .preview-paper { display: block !important; }
+}
+
+.en-resume {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1a1a2e;
+  background: #f1f3f9;
+}
+
+.en-page {
+  width: 794px;
+  height: 1123px;
+  background: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+@media print {
+  .en-page {
+    page-break-after: always;
+    break-after: page;
+    height: 1123px !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}
+
+
+.en-header {
+  background: #1a2744;
+  padding: 22px 28px 16px;
+}
+
+.en-header-inner {}
+
+.en-name {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.en-job-title {
+  font-size: 13px;
+  color: #a8c4e0;
+  font-weight: 400;
+}
+
+.en-summary-band {
+  background: #1e3057;
+  padding: 12px 28px;
+}
+
+.en-summary-text {
+  font-size: 9.5px;
+  color: #e8f0f8;
+  line-height: 1.65;
+}
+
+.en-contact-bar {
+  display: flex;
+  gap: 0;
+  padding: 10px 28px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.en-contact-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.en-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9.5px;
+  color: #374151;
+}
+
+.en-icon {
+  font-size: 10px;
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+  color: #1a2744;
+}
+
+.en-section {
+  padding: 0 28px;
+  margin-top: 16px;
+}
+
+.en-section-header {
+  margin-bottom: 8px;
+}
+
+.en-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1a2744;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 5px;
+}
+
+.en-section-rule {
+  height: 1.5px;
+  background: #1a2744;
+  border-radius: 1px;
+}
+
+.en-skills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.en-skill-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.en-skill-category {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #1a1a2e;
+  min-width: 160px;
+  flex-shrink: 0;
+}
+
+.en-skill-values {
+  font-size: 9.5px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.en-experience {
+  margin-bottom: 14px;
+}
+
+.en-exp-role {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.en-exp-company {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 2px;
+}
+
+.en-exp-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #6b7280;
+  font-style: italic;
+  margin-bottom: 2px;
+}
+
+.en-exp-project {
+  font-size: 9px;
+  color: #6b7280;
+  font-style: italic;
+  margin-bottom: 3px;
+}
+
+.en-exp-ach-label {
+  font-size: 9px;
+  font-style: italic;
+  color: #4b5563;
+  margin-bottom: 3px;
+}
+
+.en-exp-bullets {
+  margin-left: 14px;
+  list-style: none;
+}
+
+.en-exp-bullets li {
+  font-size: 9.5px;
+  line-height: 1.6;
+  margin-bottom: 2px;
+  position: relative;
+  padding-left: 10px;
+}
+
+.en-exp-bullets li::before {
+  content: '▪';
+  position: absolute;
+  left: 0;
+  color: #1a2744;
+  font-size: 8px;
+  top: 2px;
+}
+
+.en-achievements-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.en-achievement-cell {
+  font-size: 9.5px;
+  line-height: 1.55;
+  color: #374151;
+}
+
+.en-education {
+  margin-bottom: 10px;
+}
+
+.en-edu-degree {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.en-edu-institution {
+  font-size: 10px;
+  color: #1a1a2e;
+  margin-bottom: 2px;
+}
+
+.en-edu-meta {
+  font-size: 9px;
+  color: #6b7280;
+  font-style: italic;
+  display: flex;
+  justify-content: space-between;
+}
+
+.en-edu-location {}
+
+.en-languages-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.en-language-item {}
+
+.en-lang-name {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.en-lang-proficiency {
+  font-size: 9px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Bullet list & item controls */
+.bullet-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bullet-wrapper .editable-text {
+  flex: 1;
+}
+
+.bullet-delete-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.bullet-delete-btn:hover {
+  opacity: 1;
+}
+
+.bullet-wrapper:hover .bullet-delete-btn {
+  display: inline-block;
+}
+
+/* Print optimizations for WYSIWYG elements */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .editable-text:hover {
+    background: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Page 2 Continuation Header */
+.en-header-subtle {
+  border-bottom: 2.5px solid #1a2744;
+  padding: 18px 28px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+}
+
+.en-name-subtle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a2744;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.en-title-subtle {
+  font-size: 9.5px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Page Break Separator in Editor */
+.page-break-gap {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #f1f3f9;
+  user-select: none;
+}
+
+.page-break-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  border-top: 1px dashed #cbd5e1;
+  z-index: 1;
+}
+
+.page-break-label {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 20px;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* User-friendly Inline Add Buttons */
+.inline-add-btn {
+  display: block;
+  width: calc(100% - 56px);
+  margin: 16px auto;
+  padding: 8px;
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.inline-add-btn:hover {
+  border-color: #1a2744;
+  color: #1a2744;
+  background: #f8fafc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Smooth left-border segment block hover highlight */
+.canvas-block-wrapper {
+  position: relative;
+  transition: background 0.15s, box-shadow 0.15s;
+  padding-left: 6px;
+  margin-left: -6px;
+  padding-right: 6px;
+  margin-right: -6px;
+}
+
+.canvas-block-wrapper:hover {
+  background: #f8fafc;
+  box-shadow: -3px 0 0 0 #1a2744;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Smooth Focus Glow for all Editable Text */
+.editable-text:hover {
+  background: rgba(108, 99, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(108, 99, 255, 0.2);
+  border-radius: 2px;
+}
+
+.editable-text:focus {
+  background: rgba(108, 99, 255, 0.12);
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: 2px;
+}
+
+

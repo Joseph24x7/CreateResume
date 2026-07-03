@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: mynovoresume
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:h2:file:~/.mynovoresume/resumemaker;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  thymeleaf:
+    mode: XML
+    suffix: .html
+    cache: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.resumemaker: INFO
+    org.hibernate.SQL: WARN
