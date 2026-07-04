@@ -358,10 +358,6 @@ export default function ExecutiveNavyTemplate({ data }) {
 
       {/* PAGE 2 */}
       <div className="en-page">
-        <header className="en-header-subtle">
-          <h2 className="en-name-subtle">{fullName || 'Your Name'}</h2>
-          <span className="en-title-subtle">Resume Continued</span>
-        </header>
 
         {!hiddenSections.includes('achievements') && (
           <section className="en-section">

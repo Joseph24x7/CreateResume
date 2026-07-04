@@ -28,9 +28,17 @@ public class ResumeService {
 
     @PostConstruct
     public void initData() {
-        if (repo.count() == 0) {
+        var existing = repo.findAll().stream()
+                .filter(r -> r.getTitle().toLowerCase().contains("joseph"))
+                .toList();
+        if (!existing.isEmpty()) {
+            for (var r : existing) {
+                r.setDataJson(toJson(sampleData()));
+                repo.save(r);
+            }
+        } else {
             var resume = new Resume();
-            resume.setTitle("Joseph's Resume");
+            resume.setTitle("JosephResume");
             resume.setDataJson(toJson(sampleData()));
             repo.save(resume);
         }
