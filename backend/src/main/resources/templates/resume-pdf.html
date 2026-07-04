@@ -6,6 +6,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title th:text="${resume.title}">Resume</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Outfit:wght@400;600;700&amp;family=Roboto:wght@400;500;700&amp;family=Lora:ital,wght@0,400;0,700;1,400&amp;display=swap');
+
         @page {
             size: A4;
             margin: 0;
@@ -14,14 +16,16 @@
         
         body { 
             font-family: Arial, Helvetica, sans-serif; 
-            font-size: 10pt; 
+            font-size: 10px; 
             color: #1a1a2e; 
             background-color: #ffffff;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .page {
-            width: 210mm;
-            height: 297mm;
+            width: 794px;
+            height: 1123px;
             overflow: hidden;
             position: relative;
             background-color: #ffffff;
@@ -35,59 +39,55 @@
             break-after: avoid;
         }
 
-        .header { background-color: #1a2744; color: white; padding: 22pt 28pt 16pt 28pt; }
-        .header-name { font-size: 26pt; font-weight: bold; margin-bottom: 4pt; }
-        .header-title { font-size: 13pt; color: #a8c4e0; }
+        .header { background-color: #1a2744; color: white; padding: 22px 28px 16px 28px; }
+        .header-name { font-size: 26px; font-weight: bold; margin-bottom: 4px; }
+        .header-title { font-size: 13px; color: #a8c4e0; }
 
-        .summary-band { background-color: #1e3057; color: #e8f0f8; padding: 12pt 28pt; font-size: 9.5pt; line-height: 1.65; }
+        .summary-band { background-color: #1e3057; color: #e8f0f8; padding: 12px 28px; font-size: 9.5px; line-height: 1.65; }
 
-        .contact-bar { padding: 10pt 28pt; border-bottom: 1px solid #e2e8f0; }
+        .contact-bar { padding: 10px 28px; border-bottom: 1px solid #e2e8f0; }
         .contact-table { width: 100%; }
-        .contact-item { font-size: 9.5pt; color: #374151; padding: 2pt 0; }
-        .contact-icon { color: #1a2744; font-weight: bold; margin-right: 6pt; }
+        .contact-item { font-size: 9.5px; color: #374151; padding: 2px 0; }
+        .contact-icon { color: #1a2744; font-weight: bold; margin-right: 6px; }
 
-        .body-content { padding: 0 28pt; }
+        .body-content { padding: 0 28px; }
 
-        .section { margin-top: 16pt; }
-        .section-title { font-size: 10.5pt; font-weight: bold; color: #1a2744; text-transform: uppercase;
-                          letter-spacing: 1.2px; padding-bottom: 5pt; border-bottom: 1.5pt solid #1a2744; margin-bottom: 8pt; }
+        .section { margin-top: 16px; }
+        .section-title { font-size: 10.5px; font-weight: bold; color: #1a2744; text-transform: uppercase;
+                          letter-spacing: 1.2px; padding-bottom: 5px; border-bottom: 1.5px solid #1a2744; margin-bottom: 8px; }
 
         .skills-table { width: 100%; }
-        .skill-category { font-weight: bold; font-size: 9.5pt; width: 25%; vertical-align: top; padding: 4pt 12pt 4pt 0; color: #1a1a2e; }
-        .skill-values { font-size: 9.5pt; vertical-align: top; padding: 4pt 0; color: #374151; line-height: 1.5; }
+        .skill-category { font-weight: bold; font-size: 9.5px; width: 160px; vertical-align: top; padding: 4px 12px 4px 0; color: #1a1a2e; }
+        .skill-values { font-size: 9.5px; vertical-align: top; padding: 4px 0; color: #374151; line-height: 1.5; }
 
-        .exp-entry { margin-bottom: 14pt; }
-        .exp-role { font-weight: bold; font-size: 11pt; color: #1a1a2e; }
-        .exp-company { font-weight: bold; font-size: 10.5pt; color: #1a1a2e; margin-bottom: 2pt; }
-        .exp-meta { color: #6b7280; font-size: 9pt; font-style: italic; margin-bottom: 2pt; }
-        .exp-project { color: #6b7280; font-size: 9pt; font-style: italic; margin-bottom: 3pt; }
-        .exp-label { font-size: 9pt; font-style: italic; color: #4b5563; margin-bottom: 3pt; }
-        .exp-bullets { margin-left: 14pt; }
-        .exp-bullets li { font-size: 9.5pt; line-height: 1.6; margin-bottom: 2pt; list-style-type: square; color: #374151; }
+        .exp-entry { margin-bottom: 14px; }
+        .exp-role { font-weight: bold; font-size: 11px; color: #1a1a2e; }
+        .exp-company { font-weight: bold; font-size: 10.5px; color: #1a1a2e; margin-bottom: 2px; }
+        
+        .exp-meta { color: #6b7280; font-size: 9px; font-style: italic; margin-bottom: 2px; }
+        .exp-dates { float: left; }
+        .exp-location { float: right; }
 
-        /* Page 2 Subtle Header */
-        .header-subtle {
-            border-bottom: 2.5pt solid #1a2744;
-            padding: 18pt 28pt 12pt 28pt;
-            background-color: #f8fafc;
-            margin-bottom: 10pt;
-        }
-        .header-subtle-table { width: 100%; }
-        .header-subtle-name { font-size: 13pt; font-weight: bold; color: #1a2744; text-transform: uppercase; letter-spacing: 0.5px; }
-        .header-subtle-title { font-size: 9.5pt; color: #6b7280; font-style: italic; text-align: right; }
+        .exp-project { color: #6b7280; font-size: 9px; font-style: italic; margin-bottom: 3px; }
+        .exp-label { font-size: 9px; font-style: italic; color: #4b5563; margin-bottom: 3px; }
+        .exp-bullets { margin-left: 14px; list-style-type: square; color: #1a2744; }
+        .exp-bullets li { font-size: 9.5px; line-height: 1.6; margin-bottom: 2px; color: #374151; }
 
         .achievements-table { width: 100%; }
-        .achievement-cell { width: 50%; vertical-align: top; padding: 4pt 16pt 4pt 0; font-size: 9.5pt; line-height: 1.55; color: #374151; }
+        .achievement-cell { width: 50%; vertical-align: top; padding: 4px 16px 4px 0; font-size: 9.5px; line-height: 1.55; color: #374151; }
 
-        .edu-entry { margin-bottom: 10pt; }
-        .edu-degree { font-weight: bold; font-size: 10.5pt; color: #1a1a2e; }
-        .edu-institution { font-size: 10pt; color: #1a1a2e; margin-bottom: 2pt; }
-        .edu-meta { color: #6b7280; font-size: 9pt; font-style: italic; }
+        .edu-entry { margin-bottom: 10px; }
+        .edu-degree { font-weight: bold; font-size: 10.5px; color: #1a1a2e; }
+        .edu-institution { font-size: 10px; color: #1a1a2e; margin-bottom: 2px; }
+        
+        .edu-meta { color: #6b7280; font-size: 9px; font-style: italic; }
+        .edu-dates { float: left; }
+        .edu-location { float: right; }
 
         .lang-table { width: 100%; }
-        .lang-cell { width: 25%; vertical-align: top; padding: 4pt 8pt; }
-        .lang-name { font-size: 9.5pt; font-weight: bold; color: #1a1a2e; }
-        .lang-proficiency { font-size: 9pt; color: #6b7280; font-style: italic; }
+        .lang-cell { width: 25%; vertical-align: top; padding: 4px 8px; }
+        .lang-name { font-size: 9.5px; font-weight: bold; color: #1a1a2e; }
+        .lang-proficiency { font-size: 9px; color: #6b7280; font-style: italic; }
     </style>
 </head>
 <body th:style="'font-family: ' + (${resume.data.font != null} ? ${resume.data.font} : 'Arial') + ', sans-serif;'">
@@ -149,10 +149,9 @@
                 <div class="exp-role" th:text="${exp.role}"></div>
                 <div class="exp-company" th:text="${exp.company}"></div>
                 <div class="exp-meta">
-                    <span th:text="${exp.startDate}"></span> -
-                    <span th:text="${exp.endDate != null and !#strings.isEmpty(exp.endDate)} ? ${exp.endDate} : 'Present'"></span>
-                    <span th:if="${exp.location != null and !#strings.isEmpty(exp.location)}"
-                          th:text="' | ' + ${exp.location}"></span>
+                    <span class="exp-dates" th:text="${exp.startDate} + ' – ' + (${exp.endDate != null and !#strings.isEmpty(exp.endDate)} ? ${exp.endDate} : 'Present')"></span>
+                    <span class="exp-location" th:if="${exp.location != null and !#strings.isEmpty(exp.location)}" th:text="${exp.location}"></span>
+                    <div style="clear: both;"></div>
                 </div>
                 <div class="exp-project" th:if="${exp.project != null and !#strings.isEmpty(exp.project)}">
                     Project Team: <span th:text="${exp.project}"></span>
@@ -190,10 +189,9 @@
                 <div class="edu-degree" th:text="${edu.degree}"></div>
                 <div class="edu-institution" th:text="${edu.institution}"></div>
                 <div class="edu-meta">
-                    <span th:text="${edu.startDate}"></span> -
-                    <span th:text="${edu.endDate}"></span>
-                    <span th:if="${edu.location != null and !#strings.isEmpty(edu.location)}"
-                          th:text="' | ' + ${edu.location}"></span>
+                    <span class="edu-dates" th:text="${edu.startDate} + ' – ' + ${edu.endDate}"></span>
+                    <span class="edu-location" th:if="${edu.location != null and !#strings.isEmpty(edu.location)}" th:text="${edu.location}"></span>
+                    <div style="clear: both;"></div>
                 </div>
             </div>
         </div>
