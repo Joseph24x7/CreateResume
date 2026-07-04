@@ -5,69 +5,48 @@ const newUuid = () => crypto.randomUUID()
 
 export const defaultData = () => ({
   personalInfo: {
-    firstName: 'Joseph Praveen',
-    lastName: 'Kumar S',
-    title: 'AVP - Application Development',
-    email: 'joseph.praveen@example.com',
-    phone: '+91 98765 43210',
-    location: 'Chennai, India',
-    linkedin: 'linkedin.com/in/josephpraveen',
-    github: 'github.com/josephpraveen',
-    website: 'josephpraveen.dev',
-    leetcode: 'leetcode.com/josephpraveen',
+    firstName: '',
+    lastName: '',
+    title: '',
+    email: '',
+    phone: '',
+    location: '',
+    linkedin: '',
+    github: '',
+    website: '',
+    leetcode: '',
   },
-  summary: 'Senior Software Developer and AVP with 11+ years of experience in Java Enterprise development, microservices, cloud applications, and frontend frameworks. Skilled in leading teams and designing high-throughput, low-latency financial systems.',
+  summary: '',
   skillCategories: [
-    { id: newUuid(), category: 'Languages', skills: 'Java 21 | SQL | JavaScript | HTML/CSS' },
-    { id: newUuid(), category: 'Frameworks', skills: 'Spring Boot 4 | Spring Cloud | Hibernate | React' },
-    { id: newUuid(), category: 'Tools & Infra', skills: 'Docker | Kubernetes | AWS | Git | Maven' }
+    { id: newUuid(), category: '', skills: '' }
   ],
   experiences: [
     {
       id: newUuid(),
-      role: 'AVP - Application Development',
-      company: 'Major Financial Institution',
-      startDate: '06/2021',
-      endDate: 'Present',
-      location: 'Chennai, India',
-      project: 'Custody Tax Reclaims Platform',
-      achievements: [
-        'Led a team of 8 developers in migrating a legacy monolithic custody platform to Spring Boot microservices.',
-        'Designed and implemented a real-time event-driven transaction processing system handling 1M+ daily transactions.',
-        'Reduced processing latencies by 45% using Project Loom virtual threads and optimized JPA database queries.'
-      ]
-    },
-    {
-      id: newUuid(),
-      role: 'Senior Software Engineer',
-      company: 'Tech Solutions Inc.',
-      startDate: '08/2016',
-      endDate: '05/2021',
-      location: 'Chennai, India',
-      project: 'Core Banking Integration',
-      achievements: [
-        'Developed reusable REST APIs and SOAP integrations connecting third-party payment gateways.',
-        'Mentored 4 junior engineers and implemented standard CI/CD pipelines reducing deployment times by 50%.'
-      ]
+      role: '',
+      company: '',
+      startDate: '',
+      endDate: '',
+      location: '',
+      project: '',
+      achievements: ['']
     }
   ],
   achievements: [
-    { id: newUuid(), text: 'Spot Award for Outstanding Delivery of Custody Tax Reclaims in Q3 2023.' },
-    { id: newUuid(), text: 'Successfully migrated 12 legacy applications to cloud-native platforms ahead of schedule.' }
+    { id: newUuid(), text: '' }
   ],
   educations: [
     {
       id: newUuid(),
-      degree: 'Bachelor of Engineering in Computer Science',
-      institution: 'Sathyabama University',
-      startDate: '08/2011',
-      endDate: '04/2015',
-      location: 'Chennai, India'
+      degree: '',
+      institution: '',
+      startDate: '',
+      endDate: '',
+      location: ''
     }
   ],
   languages: [
-    { id: newUuid(), language: 'English', proficiency: 'Full Professional Proficiency' },
-    { id: newUuid(), language: 'Tamil', proficiency: 'Native or Bilingual Proficiency' }
+    { id: newUuid(), language: '', proficiency: '' }
   ],
   hiddenSections: [],
   font: 'Inter',
