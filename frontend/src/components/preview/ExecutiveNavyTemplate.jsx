@@ -199,8 +199,6 @@ export default function ExecutiveNavyTemplate({ data }) {
 
   return (
     <div className="en-resume" style={{ fontFamily: font }}>
-      {/* PAGE 1 */}
-      <div className="en-page">
         <header className="en-header">
           <div className="en-header-inner">
             <h1 className="en-name">
@@ -351,16 +349,7 @@ export default function ExecutiveNavyTemplate({ data }) {
             ))}
           </section>
         )}
-      </div>
 
-      {/* PAGE BREAK SEPARATOR FOR EDITOR */}
-      <div className="page-break-gap no-print">
-        <div className="page-break-line"></div>
-        <span className="page-break-label">Page 2 (Continuation)</span>
-      </div>
-
-      {/* PAGE 2 */}
-      <div className="en-page">
 
         {!hiddenSections.includes('achievements') && (
           <section className="en-section">
@@ -437,7 +426,6 @@ export default function ExecutiveNavyTemplate({ data }) {
             </div>
           </section>
         )}
-      </div>
     </div>
   )
 }

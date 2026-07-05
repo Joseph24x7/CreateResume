@@ -659,3 +659,30 @@
   background: rgba(248, 113, 113, 0.2);
   color: var(--danger);
 }
+
+/* Dynamic Page Break Lines for Preview */
+.preview-page-break-line {
+  position: absolute;
+  left: 0;
+  width: 794px;
+  height: 0;
+  border-top: 2px dashed var(--accent);
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-page-break-label {
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: -1px; /* Center it exactly on the dashed border */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}

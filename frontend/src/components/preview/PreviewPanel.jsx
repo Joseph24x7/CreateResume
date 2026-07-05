@@ -32,12 +32,37 @@ export default function PreviewPanel({ printRef }) {
     }
   }, [resume])
 
+  const [contentHeight, setContentHeight] = useState(2246)
+
+  useEffect(() => {
+    if (!resume || !printRef.current) return
+
+    const resumeEl = printRef.current.querySelector('.en-resume')
+    if (!resumeEl) return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setContentHeight(entry.contentRect.height)
+      }
+    })
+
+    resizeObserver.observe(resumeEl)
+    return () => resizeObserver.disconnect()
+  }, [resume, printRef])
+
   if (!resume) return null
 
-  // Page 1 (1123px) + Gap (40px) + Page 2 (1123px) = 2286px
-  const totalUnscaledHeight = 2286
+  const pageHeight = 1123
+  const numPages = Math.max(Math.ceil(contentHeight / pageHeight), 1)
+  const totalUnscaledHeight = numPages * pageHeight
   const scaledWidth = 794 * scale
   const scaledHeight = totalUnscaledHeight * scale
+
+  // Generate vertical offsets for the page break lines
+  const pageBreaks = []
+  for (let i = 1; i < numPages; i++) {
+    pageBreaks.push(i * pageHeight)
+  }
 
   return (
     <div className="preview-panel">
@@ -67,6 +92,17 @@ export default function PreviewPanel({ printRef }) {
               }}
             >
               <ExecutiveNavyTemplate data={resume.data} />
+              
+              {/* Dynamic Page Break Lines */}
+              {pageBreaks.map((topVal, idx) => (
+                <div
+                  key={idx}
+                  className="preview-page-break-line no-print"
+                  style={{ top: `${topVal}px` }}
+                >
+                  <span className="preview-page-break-label">Page {idx + 2} Starts Here</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
