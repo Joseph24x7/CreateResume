@@ -284,9 +284,6 @@ export default function ExecutiveNavyTemplate({ data }) {
                   />
                 </div>
               ))}
-              <button className="inline-add-btn no-print" onClick={addSkillCategory}>
-                + Add Skill Category
-              </button>
             </div>
           </section>
         )}
@@ -352,9 +349,6 @@ export default function ExecutiveNavyTemplate({ data }) {
                 </ul>
               </div>
             ))}
-            <button className="inline-add-btn no-print" onClick={addExperience}>
-              + Add Job Experience
-            </button>
           </section>
         )}
       </div>
@@ -387,9 +381,6 @@ export default function ExecutiveNavyTemplate({ data }) {
                 </div>
               ))}
             </div>
-            <button className="inline-add-btn no-print" onClick={addAchievement}>
-              + Add Achievement
-            </button>
           </section>
         )}
 
@@ -421,9 +412,6 @@ export default function ExecutiveNavyTemplate({ data }) {
                 </div>
               </div>
             ))}
-            <button className="inline-add-btn no-print" onClick={addEducation}>
-              + Add Education
-            </button>
           </section>
         )}
 
@@ -447,9 +435,6 @@ export default function ExecutiveNavyTemplate({ data }) {
                 </div>
               ))}
             </div>
-            <button className="inline-add-btn no-print" onClick={addLanguage}>
-              + Add Language
-            </button>
           </section>
         )}
       </div>

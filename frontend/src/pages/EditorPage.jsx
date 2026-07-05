@@ -1,19 +1,21 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useReactToPrint } from 'react-to-print'
 import useResumeStore from '../store/resumeStore'
 import PreviewPanel from '../components/preview/PreviewPanel'
 import ATSScore from '../components/ui/ATSScore'
+import { generatePdfFromPreview } from '../utils/pdfGenerator'
 import '../styles/editor.css'
 
 export default function EditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const printRef = useRef(null)
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   const {
     resume, loading, saving, lastSaved, error,
-    loadResume, saveResume, updateTitle, downloadPdf, updateFont,
+    loadResume, saveResume, updateTitle, updateFont,
   } = useResumeStore()
 
   useEffect(() => { loadResume(id) }, [id])
@@ -31,8 +33,18 @@ export default function EditorPage() {
   }, [saveResume])
 
   const handleDownloadPdf = useCallback(async () => {
-    await downloadPdf()
-  }, [downloadPdf])
+    if (!printRef.current) return
+    setPdfLoading(true)
+    try {
+      const filename = (resume?.title || 'resume').replace(/[^a-zA-Z0-9\-_ ]/g, '_') + '.pdf'
+      await generatePdfFromPreview(printRef.current, filename)
+    } catch (err) {
+      console.error('PDF generation failed:', err)
+      alert('PDF generation failed. Please try again.')
+    } finally {
+      setPdfLoading(false)
+    }
+  }, [resume?.title, printRef])
 
   if (loading && !resume) {
     return (
@@ -116,8 +128,13 @@ export default function EditorPage() {
           <button id="btn-print" className="topbar-btn" onClick={handlePrint}>
             Print
           </button>
-          <button id="btn-download-pdf" className="topbar-btn topbar-btn-primary" onClick={handleDownloadPdf}>
-            ↓ Download PDF
+          <button
+            id="btn-download-pdf"
+            className="topbar-btn topbar-btn-primary"
+            onClick={handleDownloadPdf}
+            disabled={pdfLoading}
+          >
+            {pdfLoading ? '⟳ Generating…' : '↓ Download PDF'}
           </button>
         </div>
       </header>
