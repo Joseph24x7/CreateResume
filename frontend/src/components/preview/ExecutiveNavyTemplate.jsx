@@ -1,5 +1,6 @@
-import useResumeStore from '../../store/resumeStore'
+import '../../styles/resume-common.css';
 import EditableText from '../canvas/EditableText'
+import useResumeStore from '../../store/resumeStore'
 
 const newUuid = () => crypto.randomUUID()
 
@@ -46,16 +47,24 @@ export default function ExecutiveNavyTemplate({ data }) {
   } = useResumeStore()
 
   const {
-    personalInfo = {},
+    personalInfo: rawPersonalInfo,
     summary = '',
-    skillCategories = [],
-    experiences = [],
-    achievements = [],
-    educations = [],
-    languages = [],
-    hiddenSections = [],
+    skillCategories: rawSkillCategories,
+    experiences: rawExperiences,
+    achievements: rawAchievements,
+    educations: rawEducations,
+    languages: rawLanguages,
+    hiddenSections: rawHiddenSections,
     font = 'Inter'
   } = data || {}
+
+  const personalInfo = rawPersonalInfo || {}
+  const skillCategories = rawSkillCategories || []
+  const experiences = rawExperiences || []
+  const achievements = rawAchievements || []
+  const educations = rawEducations || []
+  const languages = rawLanguages || []
+  const hiddenSections = rawHiddenSections || []
 
   const fullName = [personalInfo.firstName, personalInfo.lastName].filter(Boolean).join(' ')
 

@@ -1,0 +1,14 @@
+/* Shared resume styles for preview and PDF */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-size: 10pt;
+  line-height: 1.4;
+  color: #1a1a2e;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+.page-break { page-break-before: always; }

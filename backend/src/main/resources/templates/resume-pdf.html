@@ -6,209 +6,265 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title th:text="${resume.title}">Resume</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Outfit:wght@400;600;700&amp;family=Roboto:wght@400;500;700&amp;family=Lora:ital,wght@0,400;0,700;1,400&amp;display=swap');
-
         @page {
             size: A4;
-            margin: 0;
+            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: Arial, Helvetica, sans-serif; 
-            font-size: 10px; 
-            color: #1a1a2e; 
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10pt;
+            color: #1a1a2e;
             background-color: #ffffff;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+            -fs-table-paginate: paginate;
         }
 
-        .page {
-            width: 794px;
-            height: 1123px;
-            overflow: hidden;
-            position: relative;
-            background-color: #ffffff;
-            page-break-after: always;
-            break-after: page;
+        /* ── HEADER ── */
+        .header {
+            background-color: #1a2744;
+            color: white;
+            padding: 18px 24px 14px 24px;
+            margin-bottom: 0;
+        }
+        .header-name {
+            font-size: 22pt;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 3px;
+        }
+        .header-title {
+            font-size: 11pt;
+            color: #a8c4e0;
         }
 
-        /* Page 2 Continuation page does not need page-break-after if it's the last page */
-        .page-2 {
-            page-break-after: avoid;
-            break-after: avoid;
+        /* ── SUMMARY ── */
+        .summary-band {
+            background-color: #1e3057;
+            color: #e8f0f8;
+            padding: 10px 24px;
+            font-size: 9.5pt;
+            line-height: 1.65;
         }
 
-        .header { background-color: #1a2744; color: white; padding: 22px 28px 16px 28px; }
-        .header-name { font-size: 26px; font-weight: bold; margin-bottom: 4px; }
-        .header-title { font-size: 13px; color: #a8c4e0; }
-
-        .summary-band { background-color: #1e3057; color: #e8f0f8; padding: 12px 28px; font-size: 9.5px; line-height: 1.65; }
-
-        .contact-bar { padding: 10px 28px; border-bottom: 1px solid #e2e8f0; }
+        /* ── CONTACT BAR ── */
+        .contact-bar {
+            padding: 8px 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
         .contact-table { width: 100%; }
-        .contact-item { font-size: 9.5px; color: #374151; padding: 2px 0; }
-        .contact-icon { color: #1a2744; font-weight: bold; margin-right: 6px; }
+        .contact-item {
+            font-size: 9pt;
+            color: #374151;
+            padding: 2px 0;
+        }
+        .contact-icon {
+            color: #1a2744;
+            font-weight: bold;
+            margin-right: 5px;
+        }
 
-        .body-content { padding: 0 28px; }
+        /* ── BODY ── */
+        .body-content { padding: 0 24px; }
 
-        .section { margin-top: 16px; }
-        .section-title { font-size: 10.5px; font-weight: bold; color: #1a2744; text-transform: uppercase;
-                          letter-spacing: 1.2px; padding-bottom: 5px; border-bottom: 1.5px solid #1a2744; margin-bottom: 8px; }
+        .section { margin-top: 14px; }
+        .section-title {
+            font-size: 9.5pt;
+            font-weight: bold;
+            color: #1a2744;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding-bottom: 4px;
+            border-bottom: 1.5px solid #1a2744;
+            margin-bottom: 6px;
+        }
 
+        /* ── SKILLS ── */
         .skills-table { width: 100%; }
-        .skill-category { font-weight: bold; font-size: 9.5px; width: 160px; vertical-align: top; padding: 4px 12px 4px 0; color: #1a1a2e; }
-        .skill-values { font-size: 9.5px; vertical-align: top; padding: 4px 0; color: #374151; line-height: 1.5; }
+        .skill-category {
+            font-weight: bold;
+            font-size: 9pt;
+            width: 150px;
+            vertical-align: top;
+            padding: 3px 10px 3px 0;
+            color: #1a1a2e;
+        }
+        .skill-values {
+            font-size: 9pt;
+            vertical-align: top;
+            padding: 3px 0;
+            color: #374151;
+            line-height: 1.5;
+        }
 
-        .exp-entry { margin-bottom: 14px; }
-        .exp-role { font-weight: bold; font-size: 11px; color: #1a1a2e; }
-        .exp-company { font-weight: bold; font-size: 10.5px; color: #1a1a2e; margin-bottom: 2px; }
-        
-        .exp-meta { color: #6b7280; font-size: 9px; font-style: italic; margin-bottom: 2px; }
-        .exp-dates { float: left; }
-        .exp-location { float: right; }
-
-        .exp-project { color: #6b7280; font-size: 9px; font-style: italic; margin-bottom: 3px; }
-        .exp-label { font-size: 9px; font-style: italic; color: #4b5563; margin-bottom: 3px; }
+        /* ── EXPERIENCE ── */
+        .exp-entry { margin-bottom: 12px; page-break-inside: avoid; }
+        .exp-role { font-weight: bold; font-size: 10pt; color: #1a1a2e; }
+        .exp-company { font-weight: bold; font-size: 9.5pt; color: #1a1a2e; margin-bottom: 2px; }
+        .exp-meta-table { width: 100%; }
+        .exp-dates { font-size: 8.5pt; color: #6b7280; font-style: italic; }
+        .exp-location { font-size: 8.5pt; color: #6b7280; font-style: italic; text-align: right; }
+        .exp-project { font-size: 8.5pt; color: #6b7280; font-style: italic; margin-bottom: 3px; }
+        .exp-label { font-size: 8.5pt; font-style: italic; color: #4b5563; margin-bottom: 2px; }
         .exp-bullets { margin-left: 14px; list-style-type: square; color: #1a2744; }
-        .exp-bullets li { font-size: 9.5px; line-height: 1.6; margin-bottom: 2px; color: #374151; }
+        .exp-bullets li { font-size: 9pt; line-height: 1.55; margin-bottom: 2px; color: #374151; }
 
+        /* ── ACHIEVEMENTS ── */
         .achievements-table { width: 100%; }
-        .achievement-cell { width: 50%; vertical-align: top; padding: 4px 16px 4px 0; font-size: 9.5px; line-height: 1.55; color: #374151; }
+        .achievement-cell {
+            width: 50%;
+            vertical-align: top;
+            padding: 3px 14px 3px 0;
+            font-size: 9pt;
+            line-height: 1.5;
+            color: #374151;
+        }
 
-        .edu-entry { margin-bottom: 10px; }
-        .edu-degree { font-weight: bold; font-size: 10.5px; color: #1a1a2e; }
-        .edu-institution { font-size: 10px; color: #1a1a2e; margin-bottom: 2px; }
-        
-        .edu-meta { color: #6b7280; font-size: 9px; font-style: italic; }
-        .edu-dates { float: left; }
-        .edu-location { float: right; }
+        /* ── EDUCATION ── */
+        .edu-entry { margin-bottom: 8px; page-break-inside: avoid; }
+        .edu-degree { font-weight: bold; font-size: 10pt; color: #1a1a2e; }
+        .edu-institution { font-size: 9.5pt; color: #1a1a2e; margin-bottom: 2px; }
+        .edu-meta-table { width: 100%; }
+        .edu-dates { font-size: 8.5pt; color: #6b7280; font-style: italic; }
+        .edu-location { font-size: 8.5pt; color: #6b7280; font-style: italic; text-align: right; }
 
+        /* ── LANGUAGES ── */
         .lang-table { width: 100%; }
-        .lang-cell { width: 25%; vertical-align: top; padding: 4px 8px; }
-        .lang-name { font-size: 9.5px; font-weight: bold; color: #1a1a2e; }
-        .lang-proficiency { font-size: 9px; color: #6b7280; font-style: italic; }
+        .lang-cell { width: 25%; vertical-align: top; padding: 3px 6px; }
+        .lang-name { font-size: 9pt; font-weight: bold; color: #1a1a2e; }
+        .lang-proficiency { font-size: 8.5pt; color: #6b7280; font-style: italic; }
     </style>
 </head>
-<body th:style="'font-family: ' + (${resume.data.font != null} ? ${resume.data.font} : 'Arial') + ', sans-serif;'">
+<body>
 
-<!-- PAGE 1 -->
-<div class="page">
-    <div class="header">
-        <div class="header-name" th:text="${personalInfo.firstName} + ' ' + ${personalInfo.lastName}">Full Name</div>
-        <div class="header-title" th:text="${personalInfo.title}">Job Title</div>
+<!-- ══ HEADER ══ -->
+<div class="header">
+    <div class="header-name" th:text="${personalInfo.firstName} + ' ' + ${personalInfo.lastName}">Full Name</div>
+    <div class="header-title" th:text="${personalInfo.title}">Job Title</div>
+</div>
+
+<!-- ══ SUMMARY ══ -->
+<div class="summary-band"
+     th:if="${resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('summary')}"
+     th:text="${summary}">Summary goes here.</div>
+
+<!-- ══ CONTACT BAR ══ -->
+<div class="contact-bar">
+    <table class="contact-table">
+        <tr>
+            <td style="width:50%; vertical-align:top;">
+                <div class="contact-item" th:if="${personalInfo.email != null and !#strings.isEmpty(personalInfo.email)}">
+                    <span class="contact-icon">&#x2709;</span><span th:text="${personalInfo.email}"></span>
+                </div>
+                <div class="contact-item" th:if="${personalInfo.location != null and !#strings.isEmpty(personalInfo.location)}">
+                    <span class="contact-icon">&#x1F4CD;</span><span th:text="${personalInfo.location}"></span>
+                </div>
+                <div class="contact-item" th:if="${personalInfo.linkedin != null and !#strings.isEmpty(personalInfo.linkedin)}">
+                    <span class="contact-icon">in</span><span th:text="${personalInfo.linkedin}"></span>
+                </div>
+            </td>
+            <td style="width:50%; vertical-align:top;">
+                <div class="contact-item" th:if="${personalInfo.phone != null and !#strings.isEmpty(personalInfo.phone)}">
+                    <span class="contact-icon">&#x1F4F1;</span><span th:text="${personalInfo.phone}"></span>
+                </div>
+                <div class="contact-item" th:if="${personalInfo.leetcode != null and !#strings.isEmpty(personalInfo.leetcode)}">
+                    <span class="contact-icon">&#x1F4BB;</span><span th:text="${personalInfo.leetcode}"></span>
+                </div>
+                <div class="contact-item" th:if="${personalInfo.github != null and !#strings.isEmpty(personalInfo.github)}">
+                    <span class="contact-icon">&#x2325;</span><span th:text="${personalInfo.github}"></span>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="body-content">
+
+    <!-- ══ SKILLS ══ -->
+    <div class="section"
+         th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('skills')) and skillCategories != null and !skillCategories.isEmpty()}">
+        <div class="section-title">Primary Skills</div>
+        <table class="skills-table">
+            <tr th:each="cat : ${skillCategories}" th:if="${cat.skills != null and !#strings.isEmpty(cat.skills)}">
+                <td class="skill-category" th:text="${cat.category}"></td>
+                <td class="skill-values" th:text="${cat.skills}"></td>
+            </tr>
+        </table>
     </div>
-    
-    <div class="summary-band" th:if="${resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('summary')}" th:text="${summary}">Summary goes here.</div>
-    
-    <div class="contact-bar">
-        <table class="contact-table">
+
+    <!-- ══ EXPERIENCE ══ -->
+    <div class="section"
+         th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('experience')) and experiences != null and !experiences.isEmpty()}">
+        <div class="section-title">Employment History</div>
+        <div class="exp-entry" th:each="exp : ${experiences}">
+            <div class="exp-role" th:text="${exp.role}"></div>
+            <div class="exp-company" th:text="${exp.company}"></div>
+            <table class="exp-meta-table">
+                <tr>
+                    <td class="exp-dates"
+                        th:text="${exp.startDate} + ' – ' + (${exp.endDate != null and !#strings.isEmpty(exp.endDate)} ? ${exp.endDate} : 'Present')"></td>
+                    <td class="exp-location" th:if="${exp.location != null and !#strings.isEmpty(exp.location)}"
+                        th:text="${exp.location}"></td>
+                </tr>
+            </table>
+            <div class="exp-project" th:if="${exp.project != null and !#strings.isEmpty(exp.project)}">
+                Project Team: <span th:text="${exp.project}"></span>
+            </div>
+            <div class="exp-label" th:if="${exp.achievements != null and !exp.achievements.isEmpty()}">Achievements/Tasks</div>
+            <ul class="exp-bullets" th:if="${exp.achievements != null and !exp.achievements.isEmpty()}">
+                <li th:each="item : ${exp.achievements}"
+                    th:if="${item != null and !#strings.isEmpty(item)}"
+                    th:text="${item}"></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ══ ACHIEVEMENTS ══ -->
+    <div class="section"
+         th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('achievements')) and achievements != null and !achievements.isEmpty()}">
+        <div class="section-title">Achievements</div>
+        <table class="achievements-table">
+            <tr th:each="row, stat : ${achievements}" th:if="${stat.index % 2 == 0}">
+                <td class="achievement-cell" th:text="${achievements[stat.index].text}"></td>
+                <td class="achievement-cell"
+                    th:text="${stat.index + 1 &lt; achievements.size()} ? ${achievements[stat.index + 1].text} : ''"></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ══ EDUCATION ══ -->
+    <div class="section"
+         th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('education')) and educations != null and !educations.isEmpty()}">
+        <div class="section-title">Education</div>
+        <div class="edu-entry" th:each="edu : ${educations}">
+            <div class="edu-degree" th:text="${edu.degree}"></div>
+            <div class="edu-institution" th:text="${edu.institution}"></div>
+            <table class="edu-meta-table">
+                <tr>
+                    <td class="edu-dates" th:text="${edu.startDate} + ' – ' + ${edu.endDate}"></td>
+                    <td class="edu-location" th:if="${edu.location != null and !#strings.isEmpty(edu.location)}"
+                        th:text="${edu.location}"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ══ LANGUAGES ══ -->
+    <div class="section"
+         th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('languages')) and languages != null and !languages.isEmpty()}">
+        <div class="section-title">Languages</div>
+        <table class="lang-table">
             <tr>
-                <td style="width:50%">
-                    <div class="contact-item" th:if="${personalInfo.email != null and !#strings.isEmpty(personalInfo.email)}">
-                        <span class="contact-icon">✉</span> <span th:text="${personalInfo.email}"></span>
-                    </div>
-                    <div class="contact-item" th:if="${personalInfo.location != null and !#strings.isEmpty(personalInfo.location)}">
-                        <span class="contact-icon">📍</span> <span th:text="${personalInfo.location}"></span>
-                    </div>
-                    <div class="contact-item" th:if="${personalInfo.linkedin != null and !#strings.isEmpty(personalInfo.linkedin)}">
-                        <span class="contact-icon">in</span> <span th:text="${personalInfo.linkedin}"></span>
-                    </div>
-                </td>
-                <td style="width:50%">
-                    <div class="contact-item" th:if="${personalInfo.phone != null and !#strings.isEmpty(personalInfo.phone)}">
-                        <span class="contact-icon">📱</span> <span th:text="${personalInfo.phone}"></span>
-                    </div>
-                    <div class="contact-item" th:if="${personalInfo.leetcode != null and !#strings.isEmpty(personalInfo.leetcode)}">
-                        <span class="contact-icon">💻</span> <span th:text="${personalInfo.leetcode}"></span>
-                    </div>
-                    <div class="contact-item" th:if="${personalInfo.github != null and !#strings.isEmpty(personalInfo.github)}">
-                        <span class="contact-icon">⌥</span> <span th:text="${personalInfo.github}"></span>
-                    </div>
+                <td class="lang-cell" th:each="lang : ${languages}"
+                    th:if="${lang.language != null and !#strings.isEmpty(lang.language)}">
+                    <div class="lang-name" th:text="${lang.language}"></div>
+                    <div class="lang-proficiency" th:text="${lang.proficiency}"></div>
                 </td>
             </tr>
         </table>
     </div>
-    
-    <div class="body-content">
-        <!-- PRIMARY SKILLS -->
-        <div class="section" th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('skills')) and skillCategories != null and !skillCategories.isEmpty()}">
-            <div class="section-title">Primary Skills</div>
-            <table class="skills-table">
-                <tr th:each="cat : ${skillCategories}" th:if="${cat.skills != null and !#strings.isEmpty(cat.skills)}">
-                    <td class="skill-category" th:text="${cat.category}"></td>
-                    <td class="skill-values" th:text="${cat.skills}"></td>
-                </tr>
-            </table>
-        </div>
 
-        <!-- EXPERIENCE -->
-        <div class="section" th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('experience')) and experiences != null and !experiences.isEmpty()}">
-            <div class="section-title">Employment History</div>
-            <div class="exp-entry" th:each="exp : ${experiences}">
-                <div class="exp-role" th:text="${exp.role}"></div>
-                <div class="exp-company" th:text="${exp.company}"></div>
-                <div class="exp-meta">
-                    <span class="exp-dates" th:text="${exp.startDate} + ' – ' + (${exp.endDate != null and !#strings.isEmpty(exp.endDate)} ? ${exp.endDate} : 'Present')"></span>
-                    <span class="exp-location" th:if="${exp.location != null and !#strings.isEmpty(exp.location)}" th:text="${exp.location}"></span>
-                    <div style="clear: both;"></div>
-                </div>
-                <div class="exp-project" th:if="${exp.project != null and !#strings.isEmpty(exp.project)}">
-                    Project Team: <span th:text="${exp.project}"></span>
-                </div>
-                <div class="exp-label" th:if="${exp.achievements != null and !exp.achievements.isEmpty()}">Achievements/Tasks</div>
-                <ul class="exp-bullets" th:if="${exp.achievements != null and !exp.achievements.isEmpty()}">
-                    <li th:each="item : ${exp.achievements}" th:if="${item != null and !#strings.isEmpty(item)}"
-                        th:text="${item}"></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- PAGE 2 -->
-<div class="page page-2">
-
-    <div class="body-content">
-        <!-- ACHIEVEMENTS -->
-        <div class="section" th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('achievements')) and achievements != null and !achievements.isEmpty()}">
-            <div class="section-title">Achievements</div>
-            <table class="achievements-table">
-                <tr th:each="row, stat : ${achievements}" th:if="${stat.index % 2 == 0}">
-                    <td class="achievement-cell" th:text="${achievements[stat.index].text}"></td>
-                    <td class="achievement-cell"
-                        th:text="${stat.index + 1 < achievements.size()} ? ${achievements[stat.index + 1].text} : ''"></td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- EDUCATION -->
-        <div class="section" th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('education')) and educations != null and !educations.isEmpty()}">
-            <div class="section-title">Education</div>
-            <div class="edu-entry" th:each="edu : ${educations}">
-                <div class="edu-degree" th:text="${edu.degree}"></div>
-                <div class="edu-institution" th:text="${edu.institution}"></div>
-                <div class="edu-meta">
-                    <span class="edu-dates" th:text="${edu.startDate} + ' – ' + ${edu.endDate}"></span>
-                    <span class="edu-location" th:if="${edu.location != null and !#strings.isEmpty(edu.location)}" th:text="${edu.location}"></span>
-                    <div style="clear: both;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LANGUAGES -->
-        <div class="section" th:if="${(resume.data.hiddenSections == null or !resume.data.hiddenSections.contains('languages')) and languages != null and !languages.isEmpty()}">
-            <div class="section-title">Languages</div>
-            <table class="lang-table">
-                <tr>
-                    <td class="lang-cell" th:each="lang : ${languages}" th:if="${lang.language != null and !#strings.isEmpty(lang.language)}">
-                        <div class="lang-name" th:text="${lang.language}"></div>
-                        <div class="lang-proficiency" th:text="${lang.proficiency}"></div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
 </div>
 
 </body>
