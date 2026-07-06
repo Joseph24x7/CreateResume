@@ -117,7 +117,7 @@
 
 .en-header {
   background: #1a2744;
-  padding: 12px 28px 16px;
+  padding: 12px 28px 10px;
 }
 
 .en-header-inner {}
@@ -140,7 +140,7 @@
 
 .en-summary-band {
   background: #1e3057;
-  padding: 12px 28px;
+  padding: 8px 28px 12px;
 }
 
 .en-summary-text {
@@ -152,7 +152,7 @@
 .en-contact-bar {
   display: flex;
   gap: 0;
-  padding: 10px 28px;
+  padding: 10px 28px 6px;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -196,7 +196,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .en-section {
   padding: 0 28px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .en-section-header {
@@ -536,7 +536,7 @@ svg[stroke="currentColor"].en-svg-icon {
 /* 1. Minimalist Accent Template (Image 3/4 style) */
 .template-minimalist-accent .en-header {
   background: transparent;
-  padding: 30px 28px 10px;
+  padding: 30px 28px 6px;
 }
 
 .template-minimalist-accent .en-name {
@@ -559,7 +559,7 @@ svg[stroke="currentColor"].en-svg-icon {
   background: #111111;
   border-radius: 4px;
   padding: 14px 24px;
-  margin: 12px 28px 4px;
+  margin: 8px 28px 4px;
 }
 
 .template-minimalist-accent .en-summary-text {
@@ -570,7 +570,11 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-minimalist-accent .en-contact-bar {
   border-bottom: none;
-  padding: 12px 28px 16px;
+  padding: 12px 28px 10px;
+}
+
+.template-minimalist-accent .en-section {
+  margin-top: 12px;
 }
 
 .template-minimalist-accent .en-contact-item {
@@ -648,7 +652,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-header {
   background: transparent;
-  padding: 28px 28px 12px;
+  padding: 28px 28px 6px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -672,7 +676,7 @@ svg[stroke="currentColor"].en-svg-icon {
   font-style: italic;
   font-family: 'Lora', 'Georgia', serif;
   letter-spacing: 0.5px;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .template-elegant-diamond .en-summary-band {
@@ -691,7 +695,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .template-elegant-diamond .en-contact-bar {
   border-top: 1px solid #c8d3e6;
   border-bottom: 1px solid #c8d3e6;
-  padding: 12px 28px;
+  padding: 12px 28px 8px;
   background: #f8fafc;
   display: flex;
   gap: 16px;
@@ -725,7 +729,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-section {
   padding: 0 28px;
-  margin-top: 20px;
+  margin-top: 14px;
 }
 
 .template-elegant-diamond .en-section-header {
