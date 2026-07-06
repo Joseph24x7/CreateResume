@@ -143,7 +143,8 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
       )
     }
 
-    const imgData = pageCanvas.toDataURL('image/jpeg', 0.95)
+    // JPEG at 0.99 quality: imperceptible artifacts, 3-5x smaller than PNG
+    const imgData = pageCanvas.toDataURL('image/jpeg', 0.99)
 
     if (pageIdx > 0) pdf.addPage()
 

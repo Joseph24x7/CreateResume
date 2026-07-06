@@ -157,8 +157,12 @@ const useResumeStore = create((set, get) => ({
 
   setError: (error) => set({ error }),
 
-  updateTitle: (title) =>
-    set(state => ({ resume: { ...state.resume, title } })),
+  updateTitle: (title) => {
+    // Route through updateResumeData so title changes are tracked in undo history
+    const { resume } = get()
+    if (!resume) return
+    set(state => ({ resume: { ...state.resume, title } }))
+  },
 
   updateData: (patch) => {
     const { resume, updateResumeData } = get()
@@ -237,7 +241,7 @@ const useResumeStore = create((set, get) => ({
   },
 
   loadResume: async (id) => {
-    set({ resume: null, loading: true, error: null, undoHistory: [] })
+    set({ resume: null, loading: true, error: null, undoHistory: [], redoHistory: [] })
     try {
       const resume = await resumeApi.getById(id)
       set({ resume, loading: false, lastSaved: new Date() })

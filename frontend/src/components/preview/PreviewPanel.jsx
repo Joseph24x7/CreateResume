@@ -1,182 +1,179 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import useResumeStore from '../../store/resumeStore'
 import ExecutiveNavyTemplate from './ExecutiveNavyTemplate'
 import FloatingToolbar from '../canvas/FloatingToolbar'
 import '../../styles/executive-navy.css'
 
-export default function PreviewPanel({ printRef }) {
+const PAGE_H = 1051   // A4 content height in px (1123 - 36*2 margins)
+const PAGE_W = 794    // A4 width in px
+
+export default function PreviewPanel({ printRef, zoom = 1 }) {
   const { resume } = useResumeStore()
   const scrollRef = useRef(null)
-  const [scale, setScale] = useState(0.8)
+
+  const [baseScale, setBaseScale] = useState(0.8)
   const [spacers, setSpacers] = useState({})
   const [currentPageIdx, setCurrentPageIdx] = useState(0)
   const [previewReady, setPreviewReady] = useState(false)
   const [layoutCalculated, setLayoutCalculated] = useState(false)
+  const [contentHeight, setContentHeight] = useState(0)
 
-  // Handle auto scaling on resize
-  useEffect(() => {
-    if (!resume) return
+  // Guard: onLayoutCalculated fires only ONCE per resumeId load
+  const layoutCalledRef = useRef(false)
 
-    const handleResize = () => {
+  // Stable memoized callbacks to avoid re-triggering master's useLayoutEffect
+  const stableSetSpacers = useCallback((s) => setSpacers(s), [])
+
+  const stableOnLayoutCalculated = useCallback(() => {
+    if (!layoutCalledRef.current) {
+      layoutCalledRef.current = true
+      setLayoutCalculated(true)
+    }
+  }, [])
+
+  // Compute final scale: base scale × user zoom factor
+  const scale = useMemo(() => baseScale * zoom, [baseScale, zoom])
+  const scaledWidth = PAGE_W * scale
+  const scaledHeight = 1123 * scale
+
+  // Computed page layout values
+  const numPages = useMemo(
+    () => (contentHeight > 0 ? Math.max(Math.ceil(contentHeight / PAGE_H), 1) : 1),
+    [contentHeight]
+  )
+  const totalUnscaledHeight = numPages * PAGE_H
+  const activePageIdx = Math.min(currentPageIdx, numPages - 1)
+
+  const pageNumbers = useMemo(() => {
+    const arr = []
+    for (let i = 0; i < numPages; i++) {
+      arr.push({ page: i + 1, topVal: (i + 1) * PAGE_H - 25 })
+    }
+    return arr
+  }, [numPages])
+
+  // ── Scale on window resize ───────────────────────────────────────────────
+  // Uses useLayoutEffect so scale is correct before first paint (no setTimeout flicker)
+  useLayoutEffect(() => {
+    const compute = () => {
       if (scrollRef.current) {
-        // available width inside preview-scroll (accounting for padding and toolbar width)
-        const scrollWidth = scrollRef.current.clientWidth - 120
-        // A4 page width is 794px
-        const computedScale = Math.max(Math.min(scrollWidth / 794, 1.2), 0.4)
-        setScale(computedScale)
+        const available = scrollRef.current.clientWidth - 80
+        setBaseScale(Math.max(Math.min(available / PAGE_W, 1.2), 0.4))
       }
     }
+    compute()
+    window.addEventListener('resize', compute)
+    return () => window.removeEventListener('resize', compute)
+  }, []) // runs once; resume change doesn't affect viewport width
 
-    window.addEventListener('resize', handleResize)
-    // Run after DOM rendering yields
-    const timer = setTimeout(handleResize, 100)
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      clearTimeout(timer)
-    }
-  }, [resume])
-
-  const [contentHeight, setContentHeight] = useState(2246)
-
-  // Observe master continuous element height changes
+  // ── ResizeObserver: track master content height ──────────────────────────
   useEffect(() => {
-    if (!resume || !printRef.current) return
-
+    if (!printRef.current) return
     const resumeEl = printRef.current.querySelector('.en-resume')
     if (!resumeEl) return
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
         setContentHeight(entry.contentRect.height)
       }
     })
+    ro.observe(resumeEl)
+    return () => ro.disconnect()
+  }, [printRef]) // printRef.current is stable after mount
 
-    resizeObserver.observe(resumeEl)
-    return () => resizeObserver.disconnect()
-  }, [resume, printRef])
-
-  // Font loading sync to prevent partial layout rendering flashes
+  // ── Font loading gate — one timer with proper cleanup ────────────────────
   const resumeId = resume?.id
   useEffect(() => {
     if (!resumeId) return
+
+    // Reset all readiness flags for this new resume
     setPreviewReady(false)
     setLayoutCalculated(false)
-    document.fonts.ready.then(() => {
-      const timer = setTimeout(() => {
-        setPreviewReady(true)
-      }, 150)
-      return () => clearTimeout(timer)
-    })
+    setCurrentPageIdx(0)
+    layoutCalledRef.current = false
+
+    let timer
+    const onFontsReady = () => {
+      // Extra 100ms ensures any remaining CSS reflow settles
+      timer = setTimeout(() => setPreviewReady(true), 100)
+    }
+
+    document.fonts.ready.then(onFontsReady)
+
+    // Proper cleanup: cancels timer if component unmounts or resumeId changes
+    return () => clearTimeout(timer)
   }, [resumeId])
 
   if (!resume) return null
 
-  const isReady = previewReady && layoutCalculated
-
-  const pageHeight = 1051 // CONTENT_H_PX (1123 - 36*2)
-  const numPages = Math.max(Math.ceil(contentHeight / pageHeight), 1)
-  const totalUnscaledHeight = numPages * pageHeight
-  const scaledWidth = 794 * scale
-
-  // Clamp current page index if pages list shrinks
-  const activePageIdx = Math.min(currentPageIdx, numPages - 1)
-
-  // Generate page numbers
-  const pageNumbers = []
-  for (let i = 0; i < numPages; i++) {
-    pageNumbers.push({
-      page: i + 1,
-      topVal: (i + 1) * pageHeight - 25,
-    })
-  }
+  const isReady = previewReady && layoutCalculated && contentHeight > 0
 
   return (
     <div className="preview-panel">
       <div className="preview-scroll" ref={scrollRef}>
-        <div 
-          className="preview-paper-wrapper" 
-          style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '12px', 
-            padding: '12px 0 24px', // Reduced top padding to position closer to toolbar
+        <div
+          className="preview-paper-wrapper"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            padding: '12px 0 24px',
             alignItems: 'center',
             width: '100%',
-            position: 'relative'
+            position: 'relative',
           }}
         >
           <FloatingToolbar />
 
-          {/* Premium layout loading screen that takes exact page space to eliminate shifts */}
-          {!isReady && (
-            <div 
-              className="preview-panel-loader" 
-              style={{ 
-                width: `${scaledWidth}px`, 
-                height: `${1123 * scale}px`,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: '#ffffff',
-                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
-                borderRadius: '4px',
-                zIndex: 10,
-                position: 'absolute',
-                top: '50px'
-              }}
+          {/* Pagination bar — always reserve its space to avoid layout shift */}
+          <div
+            className="preview-pagination-bar"
+            style={{ visibility: isReady && numPages > 1 ? 'visible' : 'hidden' }}
+          >
+            <button
+              className="pagination-btn"
+              disabled={activePageIdx === 0}
+              onClick={() => setCurrentPageIdx(activePageIdx - 1)}
+              title="Previous Page"
             >
-              <div className="preview-spinner"></div>
-              <span style={{ marginTop: '16px', color: '#64748b', fontSize: '13px', fontWeight: 500 }}>
-                Preparing document layout…
-              </span>
-            </div>
-          )}
+              ◀ Prev
+            </button>
+            <span className="pagination-text">
+              Page <strong>{activePageIdx + 1}</strong> of <strong>{numPages}</strong>
+            </span>
+            <button
+              className="pagination-btn"
+              disabled={activePageIdx === numPages - 1}
+              onClick={() => setCurrentPageIdx(activePageIdx + 1)}
+              title="Next Page"
+            >
+              Next ▶
+            </button>
+          </div>
 
-          {/* Sticky/Header Pagination Bar */}
-          {isReady && numPages > 1 && (
-            <div className="preview-pagination-bar">
-              <button 
-                className="pagination-btn"
-                disabled={activePageIdx === 0}
-                onClick={() => setCurrentPageIdx(activePageIdx - 1)}
-                title="Previous Page"
-              >
-                ◀ Prev
-              </button>
-              <span className="pagination-text">
-                Page <strong>{activePageIdx + 1}</strong> of <strong>{numPages}</strong>
-              </span>
-              <button 
-                className="pagination-btn"
-                disabled={activePageIdx === numPages - 1}
-                onClick={() => setCurrentPageIdx(activePageIdx + 1)}
-                title="Next Page"
-              >
-                Next ▶
-              </button>
-            </div>
-          )}
-          
-          {/* Scaled wrapper to reserve layout space */}
+          {/* Page card slot — always reserves exact space to eliminate layout shift */}
           <div
             className="preview-page-sheet-wrapper"
             style={{
               width: `${scaledWidth}px`,
-              height: `${1123 * scale}px`,
+              height: `${scaledHeight}px`,
               position: 'relative',
               flexShrink: 0,
-              opacity: isReady ? 1 : 0,
-              visibility: isReady ? 'visible' : 'hidden',
-              transition: 'opacity 0.3s ease'
             }}
           >
-            {/* Unscaled sheet container (794 x 1123) scaled via transform */}
-            <div 
+            {/* Skeleton shimmer shown while loading */}
+            {!isReady && (
+              <div
+                className="preview-page-skeleton"
+                style={{ width: '100%', height: '100%' }}
+              />
+            )}
+
+            {/* Live page — fades in once fully ready */}
+            <div
               className="preview-page-sheet-container"
               style={{
-                width: '794px',
+                width: `${PAGE_W}px`,
                 height: '1123px',
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left',
@@ -187,35 +184,37 @@ export default function PreviewPanel({ printRef }) {
                 boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
                 borderRadius: '4px',
                 overflow: 'hidden',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                opacity: isReady ? 1 : 0,
+                transition: 'opacity 0.35s ease',
               }}
             >
-              {/* Viewport content area with top and bottom margins (unscaled) */}
+              {/* Viewport: clips to one A4 content page */}
               <div
                 style={{
                   position: 'absolute',
                   top: '36px',
                   left: 0,
-                  width: '794px',
-                  height: '1051px',
-                  overflow: 'hidden'
+                  width: `${PAGE_W}px`,
+                  height: `${PAGE_H}px`,
+                  overflow: 'hidden',
                 }}
               >
                 <div
                   style={{
-                    width: '794px',
+                    width: `${PAGE_W}px`,
                     height: `${totalUnscaledHeight}px`,
-                    transform: `translate3d(0, ${-activePageIdx * 1051}px, 0)`,
+                    transform: `translate3d(0, ${-activePageIdx * PAGE_H}px, 0)`,
                     position: 'absolute',
                     top: 0,
-                    left: 0
+                    left: 0,
                   }}
                 >
                   <ExecutiveNavyTemplate data={resume.data} spacers={spacers} />
                 </div>
               </div>
 
-              {/* Page Number (positioned relative to bottom-right of page sheet in unscaled pixels) */}
+              {/* Page number badge */}
               <div
                 className="preview-page-number"
                 style={{
@@ -223,12 +222,12 @@ export default function PreviewPanel({ printRef }) {
                   right: '28px',
                   bottom: '20px',
                   fontSize: '8.5px',
-                  color: '#64748b',
+                  color: '#94a3b8',
                   fontWeight: 500,
                   zIndex: 90,
                   pointerEvents: 'none',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.5px',
                 }}
               >
                 Page {activePageIdx + 1} of {numPages}
@@ -236,44 +235,43 @@ export default function PreviewPanel({ printRef }) {
             </div>
           </div>
 
-          {/* Hidden continuous element specifically for PDF generation/capture.
-              This must ALWAYS remain rendered in the DOM to run layout measurements. */}
-          <div 
+          {/* ── Hidden continuous master — ALWAYS rendered for layout measurement ── */}
+          <div
             ref={printRef}
             className="print-only-continuous"
             style={{
               position: 'fixed',
               top: '-9999px',
               left: '-9999px',
-              width: '794px',
+              width: `${PAGE_W}px`,
               height: 'auto',
               background: '#ffffff',
-              zIndex: -9999
+              zIndex: -9999,
             }}
           >
-            <ExecutiveNavyTemplate 
-              data={resume.data} 
-              spacers={spacers} 
-              setSpacers={setSpacers} 
-              isMaster 
-              onLayoutCalculated={() => setLayoutCalculated(true)} 
+            <ExecutiveNavyTemplate
+              data={resume.data}
+              spacers={spacers}
+              setSpacers={stableSetSpacers}
+              isMaster
+              onLayoutCalculated={stableOnLayoutCalculated}
             />
-            
-            {/* Draw page numbers on print-only continuous element so they end up in the PDF */}
+
+            {/* Page number overlays for PDF capture */}
             {pageNumbers.map(({ page, topVal }) => (
               <div
                 key={page}
-                style={{ 
+                style={{
                   position: 'absolute',
                   right: '28px',
                   top: `${topVal}px`,
                   fontSize: '8.5px',
-                  color: '#64748b',
+                  color: '#94a3b8',
                   fontWeight: 500,
                   zIndex: 90,
                   pointerEvents: 'none',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.5px',
                 }}
               >
                 Page {page} of {numPages}

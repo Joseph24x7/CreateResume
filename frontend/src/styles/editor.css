@@ -92,7 +92,8 @@
   padding: 7px 16px;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.2s;
+  /* Scope transitions to hover-only properties — 'all' causes blink on every re-render */
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, opacity 0.15s;
 }
 
 .topbar-btn:hover {
@@ -770,4 +771,34 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Skeleton shimmer for preview while document loads ── */
+.preview-page-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.preview-page-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(225, 230, 240, 0.6) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

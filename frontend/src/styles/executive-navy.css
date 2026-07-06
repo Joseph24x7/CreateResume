@@ -72,10 +72,13 @@
 }
 
 .en-resume {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, Helvetica, sans-serif; /* overridden per-element by inline style={fontFamily} */
   color: #000000;
   background: #ffffff;
   width: 794px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   /* No fixed height — content flows naturally, PDF slices at A4 boundaries */
 }
 

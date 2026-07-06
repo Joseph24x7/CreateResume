@@ -1,9 +1,10 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { useReactToPrint } from 'react-to-print'
 import useResumeStore from '../store/resumeStore'
 import PreviewPanel from '../components/preview/PreviewPanel'
 import ATSScore from '../components/ui/ATSScore'
+import EditorTopbar from '../components/ui/EditorTopbar'
 import { generatePdfFromPreview } from '../utils/pdfGenerator'
 import '../styles/editor.css'
 
@@ -18,16 +19,33 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Editor page crash caught by boundary:", error, errorInfo)
+    console.error('Editor page crash caught by boundary:', error, errorInfo)
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="editor-error" style={{ padding: '40px', textAlign: 'center', background: 'var(--background)', color: 'var(--text-1)', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '24px', marginBottom: '12px' }}>Something went wrong displaying this resume.</h2>
-          <p style={{ margin: '16px 0', color: 'var(--text-2)', maxWidth: '500px', lineHeight: '1.6' }}>{this.state.error?.message || String(this.state.error)}</p>
-          <button className="btn-primary" onClick={() => window.location.href = '/'}>
+        <div
+          className="editor-error"
+          style={{
+            padding: '40px',
+            textAlign: 'center',
+            background: 'var(--bg)',
+            color: 'var(--text-1)',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <h2 style={{ fontSize: '24px', marginBottom: '12px' }}>
+            Something went wrong displaying this resume.
+          </h2>
+          <p style={{ margin: '16px 0', color: 'var(--text-2)', maxWidth: '500px', lineHeight: '1.6' }}>
+            {this.state.error?.message || String(this.state.error)}
+          </p>
+          <button className="btn-primary" onClick={() => (window.location.href = '/')}>
             ← Go to Home Page
           </button>
         </div>
@@ -37,103 +55,84 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+/**
+ * ATSWrapper — reads data directly from the store with a narrow selector.
+ * Re-renders independently of EditorPage and EditorTopbar.
+ */
+function ATSWrapper() {
+  const data = useResumeStore(s => s.resume?.data)
+  if (!data) return null
+  return <ATSScore data={data} />
+}
+
 export default function EditorPage() {
   const { id } = useParams()
-  const navigate = useNavigate()
   const printRef = useRef(null)
   const [pdfLoading, setPdfLoading] = useState(false)
-  const [savedStatus, setSavedStatus] = useState('')
+  const [zoom, setZoom] = useState(1)
 
-  const {
-    resume, loading, saving, lastSaved, error,
-    loadResume, saveResume, updateTitle, updateFont, updateTemplate, updateFontSize,
-    undo, redo, undoHistory, redoHistory
-  } = useResumeStore()
+  // EditorPage only reads the minimum it needs for lifecycle management
+  const loading = useResumeStore(s => s.loading)
+  const error   = useResumeStore(s => s.error)
+  const hasResume = useResumeStore(s => !!s.resume)
+  const { loadResume, saveResume } = useResumeStore.getState()
 
-  useEffect(() => { loadResume(id) }, [id])
-
-  // Ctrl+Z (Undo) and Ctrl+Shift+Z / Ctrl+Y (Redo) listener
+  // Stable save ref — avoids stale closure in auto-save effect
+  const saveResumeRef = useRef(saveResume)
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      const isCtrlOrMeta = e.ctrlKey || e.metaKey
-      if (isCtrlOrMeta && e.key?.toLowerCase() === 'z') {
-        if (e.shiftKey) {
-          if (redoHistory.length > 0) {
-            e.preventDefault()
-            redo()
-          }
-        } else {
-          if (undoHistory.length > 0) {
-            e.preventDefault()
-            undo()
-          }
-        }
-      } else if (isCtrlOrMeta && e.key?.toLowerCase() === 'y') {
-        if (redoHistory.length > 0) {
-          e.preventDefault()
-          redo()
-        }
-      }
+    saveResumeRef.current = useResumeStore.getState().saveResume
+  })
+
+  // Load resume on mount / id change
+  useEffect(() => { loadResume(id) }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Auto-save: only fires when actual title or data content changes, avoiding infinite loops ──
+  const resumeTitle = useResumeStore(s => s.resume?.title)
+  const resumeData  = useResumeStore(s => s.resume?.data)
+  const resumeId    = useResumeStore(s => s.resume?.id)
+  const serializedRef = useRef('')
+
+  // Initialize the ref on load or resume switch
+  useEffect(() => {
+    if (resumeId && resumeData) {
+      serializedRef.current = JSON.stringify({ title: resumeTitle, data: resumeData })
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [undo, redo, undoHistory, redoHistory])
+  }, [resumeId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Debounced Auto Save (runs 1000ms after last data edit)
   useEffect(() => {
-    if (!resume) return
+    if (!resumeData) return
+    const currentSerialized = JSON.stringify({ title: resumeTitle, data: resumeData })
+    if (currentSerialized === serializedRef.current) return
+
     const t = setTimeout(() => {
-      saveResume()
+      saveResumeRef.current()
+      serializedRef.current = currentSerialized
     }, 1000)
     return () => clearTimeout(t)
-  }, [resume?.data, saveResume])
+  }, [resumeTitle, resumeData])
 
-  // Calculate dynamic relative saved status string
-  useEffect(() => {
-    if (saving) {
-      setSavedStatus('Saving…')
-      return
-    }
-    if (!lastSaved) {
-      setSavedStatus('')
-      return
-    }
-
-    const updateStatus = () => {
-      const diffMs = Date.now() - new Date(lastSaved).getTime()
-      const diffSec = Math.floor(diffMs / 1000)
-      if (diffSec < 5) {
-        setSavedStatus('Saved just now')
-      } else if (diffSec < 60) {
-        setSavedStatus(`Saved ${diffSec}s ago`)
-      } else {
-        const diffMin = Math.floor(diffSec / 60)
-        setSavedStatus(`Saved ${diffMin}m ago`)
-      }
-    }
-
-    updateStatus()
-    const interval = setInterval(updateStatus, 5000)
-    return () => clearInterval(interval)
-  }, [lastSaved, saving])
-
+  // ── Print ─────────────────────────────────────────────────────────────────
   const handlePrint = useReactToPrint({ contentRef: printRef })
 
+  // ── PDF download ──────────────────────────────────────────────────────────
   const handleDownloadPdf = useCallback(async () => {
     if (!printRef.current) return
     setPdfLoading(true)
     try {
-      const filename = (resume?.title || 'resume').replace(/[^a-zA-Z0-9\-_ ]/g, '_') + '.pdf'
+      const resumeTitle = useResumeStore.getState().resume?.title
+      const filename = (resumeTitle || 'resume').replace(/[^a-zA-Z0-9\-_ ]/g, '_') + '.pdf'
       await generatePdfFromPreview(printRef.current, filename)
     } catch (err) {
       console.error('PDF generation failed:', err)
-      alert('PDF generation failed. Please try again.')
     } finally {
       setPdfLoading(false)
     }
-  }, [resume?.title, printRef])
+  }, [])
 
-  if (loading && !resume) {
+  // ── ATS score slot — memoized, reads from store independently ─────────────
+  const atsSlot = <ATSWrapper />
+
+  if (loading && !hasResume) {
     return (
       <div className="editor-loading">
         <div className="spinner" />
@@ -142,166 +141,42 @@ export default function EditorPage() {
     )
   }
 
-  if (error && !resume) {
+  if (error && !hasResume) {
     return (
       <div className="editor-error">
         <p>{error}</p>
-        <button className="btn-primary" onClick={() => navigate('/')}>← Back</button>
+        <button className="btn-primary" onClick={() => window.location.href = '/'}>← Back</button>
       </div>
     )
   }
 
-  if (!resume) return null
+  if (!hasResume) return null
 
   return (
     <ErrorBoundary>
       <div className="editor-page">
-      <header className="editor-topbar">
-        <div className="topbar-left">
-          <button id="btn-back" className="topbar-back" onClick={() => navigate('/')}>
-            ← Back
-          </button>
-          <input
-            id="resume-title-field"
-            className="topbar-title-input"
-            type="text"
-            value={resume.title || ''}
-            onChange={e => updateTitle(e.target.value)}
-            onBlur={saveResume}
-            placeholder="Resume title"
-          />
+
+        {/*
+          EditorTopbar is a React.memo component with narrow store selectors.
+          It does NOT re-render when resume content (experiences, skills, etc.) changes.
+          It only re-renders on: title, template, font, size, save status, undo/redo count.
+        */}
+        <EditorTopbar
+          printRef={printRef}
+          zoom={zoom}
+          setZoom={setZoom}
+          onDownloadPdf={handleDownloadPdf}
+          pdfLoading={pdfLoading}
+          onPrint={handlePrint}
+          centerSlot={atsSlot}
+        />
+
+        <div className="editor-body">
+          <main className="editor-right full-canvas">
+            <PreviewPanel printRef={printRef} zoom={zoom} />
+          </main>
         </div>
-
-        <div className="topbar-center">
-          <ATSScore data={resume.data} />
-        </div>
-
-        <div className="topbar-right">
-          <select
-            id="template-select"
-            className="topbar-select"
-            value={resume.data?.template || 'executive-navy'}
-            onChange={e => {
-              updateTemplate(e.target.value)
-            }}
-            style={{
-              background: 'var(--surface-2)',
-              color: 'var(--text-1)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '6px 12px',
-              fontSize: '13px',
-              marginRight: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="executive-navy">Template: Executive Navy</option>
-            <option value="minimalist-accent">Template: Minimalist Accent</option>
-            <option value="elegant-diamond">Template: Elegant Diamond</option>
-          </select>
-
-          <select
-            id="font-select"
-            className="topbar-select"
-            value={resume.data?.font || 'Inter'}
-            onChange={e => {
-              updateFont(e.target.value)
-            }}
-            style={{
-              background: 'var(--surface-2)',
-              color: 'var(--text-1)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '6px 12px',
-              fontSize: '13px',
-              marginRight: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="Mantika Sans">Font: Mantika Sans</option>
-            <option value="Inter">Font: Inter</option>
-            <option value="Outfit">Font: Outfit</option>
-            <option value="Plus Jakarta Sans">Font: Plus Jakarta Sans</option>
-            <option value="Montserrat">Font: Montserrat</option>
-            <option value="Playfair Display">Font: Playfair Display</option>
-            <option value="Merriweather">Font: Merriweather</option>
-          </select>
-
-          <select
-            id="font-size-select"
-            className="topbar-select"
-            value={resume.data?.fontSize || 'medium'}
-            onChange={e => {
-              updateFontSize(e.target.value)
-            }}
-            style={{
-              background: 'var(--surface-2)',
-              color: 'var(--text-1)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '6px 12px',
-              fontSize: '13px',
-              marginRight: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="small">Size: Small</option>
-            <option value="medium">Size: Medium</option>
-            <option value="large">Size: Large</option>
-          </select>
-
-          <button
-            id="btn-undo"
-            className="topbar-btn"
-            onClick={undo}
-            disabled={undoHistory.length === 0}
-            style={{
-              opacity: undoHistory.length === 0 ? 0.4 : 1,
-              cursor: undoHistory.length === 0 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            ⎌ Undo
-          </button>
-          
-          <button
-            id="btn-redo"
-            className="topbar-btn"
-            onClick={redo}
-            disabled={redoHistory.length === 0}
-            style={{
-              opacity: redoHistory.length === 0 ? 0.4 : 1,
-              cursor: redoHistory.length === 0 ? 'not-allowed' : 'pointer',
-              marginRight: '8px'
-            }}
-          >
-            ↷ Redo
-          </button>
-
-          <span className="save-status" style={{ marginRight: '8px' }}>
-            {savedStatus}
-          </span>
-
-          <button id="btn-print" className="topbar-btn" onClick={handlePrint}>
-            Print
-          </button>
-          
-          <button
-            id="btn-download-pdf"
-            className="topbar-btn topbar-btn-primary"
-            onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-          >
-            {pdfLoading ? '⟳ Generating…' : '↓ Download PDF'}
-          </button>
-        </div>
-      </header>
-
-      <div className="editor-body">
-        <main className="editor-right full-canvas">
-          <PreviewPanel printRef={printRef} />
-        </main>
       </div>
-    </div>
     </ErrorBoundary>
   )
 }

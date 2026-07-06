@@ -117,81 +117,96 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
 
   const [fontReadyTrigger, setFontReadyTrigger] = useState(0)
 
+  // NOTE: Fonts coordination is handled by PreviewPanel via the onLayoutCalculated callback.
+  // We use fontReadyTrigger only to re-run layout after fonts are confirmed loaded.
   useEffect(() => {
+    // Subscribe only once on mount
     document.fonts.ready.then(() => {
       setFontReadyTrigger(prev => prev + 1)
     })
   }, [])
 
+  // Debounce timer ref to avoid layout thrashing on every keystroke
+  const layoutDebounceRef = useRef(null)
+
   useLayoutEffect(() => {
     if (!isMaster || !containerRef.current) return
 
-    const PAGE_H = 1051 // available content height per page
-    const elements = Array.from(containerRef.current.querySelectorAll('[data-page-block="true"]'))
-    
-    const containerRect = containerRef.current.getBoundingClientRect()
-    if (containerRect.width === 0) return // not rendered yet
+    // Schedule measurement after a short idle period to batch rapid keystrokes
+    clearTimeout(layoutDebounceRef.current)
+    layoutDebounceRef.current = setTimeout(() => {
+      if (!containerRef.current) return
 
-    const scaleFactor = containerRect.width / 794
-    const newSpacers = {}
+      const PAGE_H = 1051 // available content height per page (1123 - 36*2)
+      const elements = Array.from(containerRef.current.querySelectorAll('[data-page-block="true"]'))
 
-    let currentY = 0
-    if (elements.length > 0) {
-      const firstRect = elements[0].getBoundingClientRect()
-      currentY = (firstRect.top - containerRect.top) / scaleFactor - (spacersRef.current[elements[0].getAttribute('data-block-id')] || 0)
-    }
+      const containerRect = containerRef.current.getBoundingClientRect()
+      if (containerRect.width === 0) return // not rendered yet
 
-    elements.forEach((el) => {
-      const blockId = el.getAttribute('data-block-id')
-      if (!blockId) return
+      const scaleFactor = containerRect.width / 794
+      const newSpacers = {}
 
-      const rect = el.getBoundingClientRect()
-      const currentSpacer = spacersRef.current[blockId] || 0
-      const height = rect.height / scaleFactor
-
-      // Get original unspaced top position by subtracting the current spacer
-      const measuredStartY = (rect.top - containerRect.top) / scaleFactor - currentSpacer
-      
-      // Keep track of moving currentY down if natural layout margins push the element further
-      if (measuredStartY > currentY) {
-        currentY = measuredStartY
+      let currentY = 0
+      if (elements.length > 0) {
+        const firstRect = elements[0].getBoundingClientRect()
+        currentY = (firstRect.top - containerRect.top) / scaleFactor - (spacersRef.current[elements[0].getAttribute('data-block-id')] || 0)
       }
 
-      const isHeader = el.classList.contains('en-section-header')
-      let spacerHeight = 0
+      elements.forEach((el) => {
+        const blockId = el.getAttribute('data-block-id')
+        if (!blockId) return
 
-      const offsetInPage = currentY % PAGE_H
-      if (isHeader) {
-        // Prevent orphaned headers near the page break
-        if (offsetInPage > PAGE_H - 80) {
+        const rect = el.getBoundingClientRect()
+        const currentSpacer = spacersRef.current[blockId] || 0
+        const height = rect.height / scaleFactor
+
+        // Original unspaced top position (subtract current spacer offset)
+        const measuredStartY = (rect.top - containerRect.top) / scaleFactor - currentSpacer
+
+        if (measuredStartY > currentY) {
+          currentY = measuredStartY
+        }
+
+        const isHeader = el.classList.contains('en-section-header')
+        let spacerHeight = 0
+
+        const offsetInPage = currentY % PAGE_H
+        if (isHeader) {
+          // Keep section headers away from page bottom (guardian zone: 80px)
+          if (offsetInPage > PAGE_H - 80) {
+            spacerHeight = PAGE_H - offsetInPage
+          }
+        } else if (
+          Math.floor(currentY / PAGE_H) !== Math.floor((currentY + height - 1) / PAGE_H) &&
+          height < PAGE_H
+        ) {
+          // Push content blocks that would split across a page break to the next page
           spacerHeight = PAGE_H - offsetInPage
         }
-      } else if (Math.floor(currentY / PAGE_H) !== Math.floor((currentY + height - 1) / PAGE_H) && height < PAGE_H) {
-        // Prevent splitting content blocks across page breaks if they can fit on a single page
-        spacerHeight = PAGE_H - offsetInPage
-      }
 
-      if (spacerHeight > 0) {
-        newSpacers[blockId] = Math.ceil(spacerHeight)
-        currentY += spacerHeight
-      }
+        if (spacerHeight > 0) {
+          newSpacers[blockId] = Math.ceil(spacerHeight)
+          currentY += spacerHeight
+        }
 
-      currentY += height
-    })
-
-    if (JSON.stringify(newSpacers) !== JSON.stringify(spacersRef.current)) {
-      setLocalSpacers(newSpacers)
-      if (setSpacers) {
-        setSpacers(newSpacers)
-      }
-    }
-
-    if (onLayoutCalculated) {
-      requestAnimationFrame(() => {
-        onLayoutCalculated()
+        currentY += height
       })
-    }
-  }, [data, isMaster, setSpacers, fontReadyTrigger, onLayoutCalculated])
+
+      if (JSON.stringify(newSpacers) !== JSON.stringify(spacersRef.current)) {
+        setLocalSpacers(newSpacers)
+        if (setSpacers) setSpacers(newSpacers)
+      }
+
+      // Signal layout done — onLayoutCalculated is guarded with a ref in PreviewPanel
+      if (onLayoutCalculated) {
+        requestAnimationFrame(onLayoutCalculated)
+      }
+    }, 50) // 50ms debounce — smooth on typing, near-instant on first load
+
+    return () => clearTimeout(layoutDebounceRef.current)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, isMaster, setSpacers, fontReadyTrigger])
+  // Note: onLayoutCalculated intentionally omitted — it's a stable useCallback ref in PreviewPanel
 
   const {
     updatePersonalInfo,
