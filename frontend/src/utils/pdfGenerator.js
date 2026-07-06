@@ -103,13 +103,23 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
 
   // ── Step 5: Slice the tall canvas into A4-height pages ──────────────────
   const MARGIN_H_PX = 36
-  const CONTENT_H_PX = PAGE_H_PX - (MARGIN_H_PX * 2) // 1051px
+  const PAGE_1_H_PX = 1087
+  const PAGE_N_H_PX = 1051
+  
   const pageHeightScaled = PAGE_H_PX * SCALE
   const pageWidthScaled  = PAGE_W_PX * SCALE
-  const contentHeightScaled = CONTENT_H_PX * SCALE
-  const marginHeightScaled = MARGIN_H_PX * SCALE
 
-  const totalPages = Math.ceil(captureCanvas.height / contentHeightScaled)
+  // Calculate total pages based on the variable heights
+  let remainingCanvasHeight = captureCanvas.height
+  let totalPages = 0
+  if (remainingCanvasHeight > 0) {
+    totalPages++
+    remainingCanvasHeight -= PAGE_1_H_PX * SCALE
+    if (remainingCanvasHeight > 0) {
+      totalPages += Math.ceil(remainingCanvasHeight / (PAGE_N_H_PX * SCALE))
+    }
+  }
+  totalPages = Math.max(totalPages, 1)
 
   const pdf = new jsPDF({
     orientation: 'portrait',
@@ -128,17 +138,27 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, pageWidthScaled, pageHeightScaled)
 
-    // Draw the slice from the full canvas onto this page canvas leaving margins
-    const srcY = pageIdx * contentHeightScaled
-    const remainingHeight = captureCanvas.height - srcY
-    const drawHeight = Math.min(contentHeightScaled, remainingHeight)
+    let srcY = 0
+    let drawHeight = 0
+    let destY = 0
+
+    if (pageIdx === 0) {
+      srcY = 0
+      drawHeight = Math.min(PAGE_1_H_PX * SCALE, captureCanvas.height)
+      destY = 0
+    } else {
+      srcY = (PAGE_1_H_PX + (pageIdx - 1) * PAGE_N_H_PX) * SCALE
+      const remaining = captureCanvas.height - srcY
+      drawHeight = Math.min(PAGE_N_H_PX * SCALE, remaining)
+      destY = MARGIN_H_PX * SCALE
+    }
 
     if (drawHeight > 0) {
       ctx.drawImage(
         captureCanvas,
         0, srcY,                          // source x, y
         pageWidthScaled, drawHeight,      // source width, height
-        0, marginHeightScaled,            // dest x, y (leaving top margin)
+        0, destY,                         // dest x, y (leaving top margin)
         pageWidthScaled, drawHeight       // dest width, height
       )
     }
@@ -153,4 +173,5 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
   }
 
   pdf.save(filename)
+
 }

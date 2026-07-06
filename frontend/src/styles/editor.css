@@ -481,17 +481,19 @@
 .preview-paper-wrapper {
   position: relative;
   display: flex;
-  justify-content: center;
-  gap: 30px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   width: 100%;
-  min-height: 1123px;
-  padding-left: 80px; /* offset for floating toolbar */
+  padding: 8px 0 20px;
 }
 
+
 .floating-toolbar {
-  position: sticky;
-  top: 40px;
-  align-self: flex-start;
+  position: absolute;
+  left: 20px;
+  top: 80px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -503,6 +505,8 @@
   z-index: 100;
   width: 48px;
 }
+
+
 
 .toolbar-btn {
   width: 28px;

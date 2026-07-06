@@ -37,20 +37,33 @@ export default function PreviewPanel({ printRef, zoom = 1 }) {
   const scaledHeight = 1123 * scale
 
   // Computed page layout values
-  const numPages = useMemo(
-    () => (contentHeight > 0 ? Math.max(Math.ceil(contentHeight / PAGE_H), 1) : 1),
-    [contentHeight]
-  )
-  const totalUnscaledHeight = numPages * PAGE_H
+  const numPages = useMemo(() => {
+    if (contentHeight <= 0) return 1
+    const PAGE_1_H = 1087
+    const PAGE_N_H = 1051
+    if (contentHeight <= PAGE_1_H) return 1
+    return 1 + Math.ceil((contentHeight - PAGE_1_H) / PAGE_N_H)
+  }, [contentHeight])
+
+  const totalUnscaledHeight = useMemo(() => {
+    const PAGE_1_H = 1087
+    const PAGE_N_H = 1051
+    return PAGE_1_H + (numPages - 1) * PAGE_N_H
+  }, [numPages])
+
   const activePageIdx = Math.min(currentPageIdx, numPages - 1)
 
   const pageNumbers = useMemo(() => {
     const arr = []
+    const PAGE_1_H = 1087
+    const PAGE_N_H = 1051
     for (let i = 0; i < numPages; i++) {
-      arr.push({ page: i + 1, topVal: (i + 1) * PAGE_H - 25 })
+      const bottomOfPage = i === 0 ? PAGE_1_H : PAGE_1_H + i * PAGE_N_H
+      arr.push({ page: i + 1, topVal: bottomOfPage - 25 })
     }
     return arr
   }, [numPages])
+
 
   // ── Scale on window resize ───────────────────────────────────────────────
   // Uses useLayoutEffect so scale is correct before first paint (no setTimeout flicker)
@@ -109,23 +122,14 @@ export default function PreviewPanel({ printRef, zoom = 1 }) {
   const isReady = previewReady && layoutCalculated && contentHeight > 0
 
   return (
-    <div className="preview-panel">
+    <div className="preview-panel" style={{ position: 'relative' }}>
+      <FloatingToolbar />
       <div className="preview-scroll" ref={scrollRef}>
-        <div
-          className="preview-paper-wrapper"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            padding: '12px 0 24px',
-            alignItems: 'center',
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          <FloatingToolbar />
+        <div className="preview-paper-wrapper">
+
 
           {/* Pagination bar — always reserve its space to avoid layout shift */}
+
           <div
             className="preview-pagination-bar"
             style={{ visibility: isReady && numPages > 1 ? 'visible' : 'hidden' }}
@@ -193,10 +197,10 @@ export default function PreviewPanel({ printRef, zoom = 1 }) {
               <div
                 style={{
                   position: 'absolute',
-                  top: '36px',
+                  top: activePageIdx === 0 ? 0 : '36px',
                   left: 0,
                   width: `${PAGE_W}px`,
-                  height: `${PAGE_H}px`,
+                  height: activePageIdx === 0 ? '1087px' : `${PAGE_H}px`,
                   overflow: 'hidden',
                 }}
               >
@@ -204,12 +208,13 @@ export default function PreviewPanel({ printRef, zoom = 1 }) {
                   style={{
                     width: `${PAGE_W}px`,
                     height: `${totalUnscaledHeight}px`,
-                    transform: `translate3d(0, ${-activePageIdx * PAGE_H}px, 0)`,
+                    transform: `translate3d(0, ${-(activePageIdx === 0 ? 0 : 1087 + (activePageIdx - 1) * PAGE_H)}px, 0)`,
                     position: 'absolute',
                     top: 0,
                     left: 0,
                   }}
                 >
+
                   <ExecutiveNavyTemplate data={resume.data} spacers={spacers} />
                 </div>
               </div>
@@ -235,7 +240,7 @@ export default function PreviewPanel({ printRef, zoom = 1 }) {
             </div>
           </div>
 
-          {/* ── Hidden continuous master — ALWAYS rendered for layout measurement ── */}
+          {/* ── PDF capture master — renders offscreen WITH spacers applied ── */}
           <div
             ref={printRef}
             className="print-only-continuous"
@@ -249,12 +254,11 @@ export default function PreviewPanel({ printRef, zoom = 1 }) {
               zIndex: -9999,
             }}
           >
+
             <ExecutiveNavyTemplate
               data={resume.data}
               spacers={spacers}
-              setSpacers={stableSetSpacers}
-              isMaster
-              onLayoutCalculated={stableOnLayoutCalculated}
+              isMaster={false}
             />
 
             {/* Page number overlays for PDF capture */}
@@ -278,6 +282,29 @@ export default function PreviewPanel({ printRef, zoom = 1 }) {
               </div>
             ))}
           </div>
+
+          {/* ── Layout measurement master — ALWAYS rendered offscreen WITHOUT spacers ── */}
+          <div
+            className="layout-measurement-master"
+            style={{
+              position: 'fixed',
+              top: '-9999px',
+              left: '-9999px',
+              width: `${PAGE_W}px`,
+              height: 'auto',
+              background: '#ffffff',
+              zIndex: -9999,
+            }}
+          >
+            <ExecutiveNavyTemplate
+              data={resume.data}
+              spacers={{}}
+              setSpacers={stableSetSpacers}
+              isMaster={true}
+              onLayoutCalculated={stableOnLayoutCalculated}
+            />
+          </div>
+
         </div>
       </div>
     </div>

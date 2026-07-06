@@ -108,12 +108,10 @@ const SectionTitle = ({ children, type, template, spacers }) => (
 )
 
 export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}, setSpacers, isMaster = false, onLayoutCalculated }) {
-  const [localSpacers, setLocalSpacers] = useState({})
-  const spacers = isMaster ? localSpacers : propsSpacers
-
-  const spacersRef = useRef(spacers)
-  spacersRef.current = spacers
+  const lastCalculatedSpacersRef = useRef({})
+  const spacers = isMaster ? {} : propsSpacers
   const containerRef = useRef(null)
+
 
   const [fontReadyTrigger, setFontReadyTrigger] = useState(0)
 
@@ -132,80 +130,160 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
   useLayoutEffect(() => {
     if (!isMaster || !containerRef.current) return
 
-    // Schedule measurement after a short idle period to batch rapid keystrokes
     clearTimeout(layoutDebounceRef.current)
     layoutDebounceRef.current = setTimeout(() => {
       if (!containerRef.current) return
 
-      const PAGE_H = 1051 // available content height per page (1123 - 36*2)
+      const PAGE_H = 1051 // A4 content height in px
       const elements = Array.from(containerRef.current.querySelectorAll('[data-page-block="true"]'))
 
       const containerRect = containerRef.current.getBoundingClientRect()
       if (containerRect.width === 0) return // not rendered yet
 
       const scaleFactor = containerRect.width / 794
-      const newSpacers = {}
 
-      let currentY = 0
-      if (elements.length > 0) {
-        const firstRect = elements[0].getBoundingClientRect()
-        currentY = (firstRect.top - containerRect.top) / scaleFactor - (spacersRef.current[elements[0].getAttribute('data-block-id')] || 0)
+      // Step 1: Map elements to block objects and calculate unspacedStartY
+      const blocks = elements.map((el) => {
+        const blockId = el.getAttribute('data-block-id')
+        const rect = el.getBoundingClientRect()
+        const height = rect.height / scaleFactor
+        const unspacedStartY = (rect.top - containerRect.top) / scaleFactor
+
+        return {
+          blockId,
+          height,
+          unspacedStartY,
+          spacerHeight: 0,
+          isSectionHeader: el.classList.contains('en-section-header'),
+          isExpHeader: el.classList.contains('en-exp-header-block'),
+          isBullet: el.classList.contains('bullet-wrapper'),
+        }
+      })
+
+
+      // Step 2: Group bullets into their experience headers
+      for (let i = 0; i < blocks.length; i++) {
+        const b = blocks[i]
+        if (b.isExpHeader) {
+          b.bullets = []
+          const expId = b.blockId.replace('exp-hdr-', '')
+          for (let j = i + 1; j < blocks.length; j++) {
+            const nextBlock = blocks[j]
+            if (nextBlock.blockId.startsWith(`exp-bullet-${expId}-`)) {
+              b.bullets.push(nextBlock)
+            } else if (nextBlock.isExpHeader || nextBlock.isSectionHeader) {
+              break
+            }
+          }
+        }
       }
 
-      elements.forEach((el) => {
-        const blockId = el.getAttribute('data-block-id')
-        if (!blockId) return
-
-        const rect = el.getBoundingClientRect()
-        const currentSpacer = spacersRef.current[blockId] || 0
-        const height = rect.height / scaleFactor
-
-        // Original unspaced top position (subtract current spacer offset)
-        const measuredStartY = (rect.top - containerRect.top) / scaleFactor - currentSpacer
-
-        if (measuredStartY > currentY) {
-          currentY = measuredStartY
+      // Helper to find the page index and offset for a given Y coordinate
+      const getPageInfo = (y) => {
+        const PAGE_1_H = 1087 // Page 1 height (no top margin)
+        const PAGE_N_H = 1051 // Subsequent pages height (has top margin)
+        
+        if (y < PAGE_1_H) {
+          return { pageIdx: 0, offset: y, remaining: PAGE_1_H - y }
+        } else {
+          const restY = y - PAGE_1_H
+          const pageIdx = 1 + Math.floor(restY / PAGE_N_H)
+          const offset = restY % PAGE_N_H
+          return { pageIdx, offset, remaining: PAGE_N_H - offset }
         }
+      }
 
-        const isHeader = el.classList.contains('en-section-header')
+      // Step 3: Run the simulation sequentially
+      let accumulatedSpacers = 0
+      for (let i = 0; i < blocks.length; i++) {
+        const b = blocks[i]
+
+        // Simulated start position is the natural position plus all spacers added so far!
+        const simulatedStartY = b.unspacedStartY + accumulatedSpacers
+        const startInfo = getPageInfo(simulatedStartY)
+
         let spacerHeight = 0
 
-        const offsetInPage = currentY % PAGE_H
-        if (isHeader) {
-          // Keep section headers away from page bottom (guardian zone: 80px)
-          if (offsetInPage > PAGE_H - 80) {
-            spacerHeight = PAGE_H - offsetInPage
+        if (b.isSectionHeader) {
+          // Section Title: keep together with the first entry of that section
+          let groupHeight = b.height
+          if (i + 1 < blocks.length) {
+            const nextBlock = blocks[i + 1]
+            let targetBlock = nextBlock
+            if (nextBlock.isExpHeader && nextBlock.bullets && nextBlock.bullets.length > 0) {
+              targetBlock = nextBlock.bullets[0]
+            }
+            groupHeight = (targetBlock.unspacedStartY + targetBlock.height) - b.unspacedStartY
           }
-        } else if (
-          Math.floor(currentY / PAGE_H) !== Math.floor((currentY + height - 1) / PAGE_H) &&
-          height < PAGE_H
-        ) {
-          // Push content blocks that would split across a page break to the next page
-          spacerHeight = PAGE_H - offsetInPage
+
+          const endInfo = getPageInfo(simulatedStartY + groupHeight - 0.1)
+          if (startInfo.pageIdx !== endInfo.pageIdx && groupHeight < 1051) {
+            spacerHeight = startInfo.remaining
+          }
+        } else if (b.isExpHeader) {
+          // Experience Header: keep together with all bullets if possible,
+          // or at least with the first bullet if the whole experience is too tall.
+          let totalHeight = b.height
+          let minHeight = b.height
+          if (b.bullets && b.bullets.length > 0) {
+            const lastBullet = b.bullets[b.bullets.length - 1]
+            const firstBullet = b.bullets[0]
+            totalHeight = (lastBullet.unspacedStartY + lastBullet.height) - b.unspacedStartY
+            minHeight = (firstBullet.unspacedStartY + firstBullet.height) - b.unspacedStartY
+          }
+
+          const totalEndInfo = getPageInfo(simulatedStartY + totalHeight - 0.1)
+          const minEndInfo = getPageInfo(simulatedStartY + minHeight - 0.1)
+
+          if (totalHeight < 1051) {
+            if (startInfo.pageIdx !== totalEndInfo.pageIdx) {
+              spacerHeight = startInfo.remaining
+            }
+          } else {
+            if (startInfo.pageIdx !== minEndInfo.pageIdx) {
+              spacerHeight = startInfo.remaining
+            }
+          }
+        } else {
+          // Standard block or individual bullet: avoid splitting internally
+          const endInfo = getPageInfo(simulatedStartY + b.height - 0.1)
+          if (startInfo.pageIdx !== endInfo.pageIdx && b.height < 1051) {
+            spacerHeight = startInfo.remaining
+          }
         }
 
         if (spacerHeight > 0) {
-          newSpacers[blockId] = Math.ceil(spacerHeight)
-          currentY += spacerHeight
+          b.spacerHeight = spacerHeight
+          accumulatedSpacers += spacerHeight
         }
+      }
 
-        currentY += height
+
+
+      // Step 4: Extract calculated spacers
+      const newSpacers = {}
+      blocks.forEach((b) => {
+        if (b.spacerHeight > 0) {
+          newSpacers[b.blockId] = Math.ceil(b.spacerHeight)
+        }
       })
 
-      if (JSON.stringify(newSpacers) !== JSON.stringify(spacersRef.current)) {
-        setLocalSpacers(newSpacers)
+      if (JSON.stringify(newSpacers) !== JSON.stringify(lastCalculatedSpacersRef.current)) {
+        lastCalculatedSpacersRef.current = newSpacers
         if (setSpacers) setSpacers(newSpacers)
       }
 
-      // Signal layout done — onLayoutCalculated is guarded with a ref in PreviewPanel
+
+      // Signal layout done
       if (onLayoutCalculated) {
         requestAnimationFrame(onLayoutCalculated)
       }
-    }, 50) // 50ms debounce — smooth on typing, near-instant on first load
+    }, 50)
 
     return () => clearTimeout(layoutDebounceRef.current)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, isMaster, setSpacers, fontReadyTrigger])
+
   // Note: onLayoutCalculated intentionally omitted — it's a stable useCallback ref in PreviewPanel
 
   const {
@@ -230,7 +308,8 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     hiddenSections: rawHiddenSections,
     font = 'Inter',
     template = 'executive-navy',
-    fontSize = 'medium'
+    fontSize = 'medium',
+    showMonogram = false
   } = data || {}
 
   const personalInfo = rawPersonalInfo || {}
@@ -374,8 +453,17 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
 
   return (
     <div ref={containerRef} className={`en-resume template-${template} size-${fontSize}`} style={{ fontFamily: font }}>
-        <header className="en-header">
-          <div className="en-header-inner">
+        <header className="en-header" style={{ display: 'flex', alignItems: 'center' }}>
+          {template === 'elegant-diamond' && showMonogram && (
+            <div className="en-header-monogram" style={{ marginRight: '20px' }}>
+              <div className="monogram-diamond">
+                <span className="monogram-text">
+                  {((personalInfo.firstName || '').charAt(0) + (personalInfo.lastName || '').charAt(0)).toUpperCase() || 'ID'}
+                </span>
+              </div>
+            </div>
+          )}
+          <div className="en-header-inner" style={{ flexGrow: 1 }}>
             <h1 className="en-name">
               <EditableText value={personalInfo.firstName} onChange={setPI('firstName')} placeholder="First Name" singleLine />
               {' '}
@@ -386,6 +474,7 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
             </p>
           </div>
         </header>
+
 
         {!hiddenSections.includes('summary') && (
           <React.Fragment>

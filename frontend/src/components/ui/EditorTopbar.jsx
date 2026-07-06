@@ -28,13 +28,14 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
   const template      = useResumeStore(s => s.resume?.data?.template ?? 'executive-navy')
   const font          = useResumeStore(s => s.resume?.data?.font ?? 'Mantika Sans')
   const fontSize      = useResumeStore(s => s.resume?.data?.fontSize ?? 'medium')
+  const showMonogram  = useResumeStore(s => s.resume?.data?.showMonogram ?? false)
   const saving        = useResumeStore(s => s.saving)
   const lastSaved     = useResumeStore(s => s.lastSaved)
   const undoLen       = useResumeStore(s => s.undoHistory.length)
   const redoLen       = useResumeStore(s => s.redoHistory.length)
 
   const {
-    updateTitle, updateTemplate, updateFont, updateFontSize, undo, redo,
+    updateTitle, updateTemplate, updateFont, updateFontSize, updateData, undo, redo,
   } = useResumeStore.getState()
 
   // ── Relative "saved X ago" status ─────────────────────────────────────────
@@ -94,6 +95,19 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
       </div>
 
       <div className="topbar-right">
+        {/* Monogram Toggle (Elegant Diamond only) */}
+        {template === 'elegant-diamond' && (
+          <label style={{ display: 'flex', alignItems: 'center', color: 'var(--text-1)', fontSize: '13px', marginRight: '12px', cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={showMonogram}
+              onChange={e => updateData({ showMonogram: e.target.checked })}
+              style={{ marginRight: '6px', cursor: 'pointer' }}
+            />
+            ◈ Monogram
+          </label>
+        )}
+
         <select
           id="template-select"
           className="topbar-select"
@@ -134,20 +148,44 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
           <option value="large">Size: Large</option>
         </select>
 
-        <select
-          id="zoom-select"
-          className="topbar-select"
-          value={zoom}
-          onChange={e => setZoom(Number(e.target.value))}
-          style={SELECT_STYLE}
-          title="Adjust preview zoom"
+        {/* Zoom Presets & Slider */}
+        <div style={{ display: 'flex', alignItems: 'center', marginRight: '8px', gap: '6px' }}>
+          <input
+            type="range"
+            min="0.5"
+            max="1.5"
+            step="0.05"
+            value={zoom}
+            onChange={e => setZoom(Number(e.target.value))}
+            style={{ width: '70px', cursor: 'pointer' }}
+            title="Adjust Zoom"
+          />
+          <span style={{ fontSize: '12px', color: 'var(--text-2)', minWidth: '36px', textAlign: 'right' }}>
+            {Math.round(zoom * 100)}%
+          </span>
+        </div>
+
+        <button
+          className="topbar-btn"
+          style={{ padding: '6px 8px', fontSize: '11px', marginRight: '4px' }}
+          onClick={() => setZoom(1.0)}
+          title="Zoom to Fit Width"
         >
-          <option value={0.75}>Zoom: 75%</option>
-          <option value={0.9}>Zoom: 90%</option>
-          <option value={1}>Zoom: 100%</option>
-          <option value={1.1}>Zoom: 110%</option>
-          <option value={1.25}>Zoom: 125%</option>
-        </select>
+          ↔ Width
+        </button>
+        <button
+          className="topbar-btn"
+          style={{ padding: '6px 8px', fontSize: '11px', marginRight: '8px' }}
+          onClick={() => setZoom(0.85)}
+          title="Zoom to Fit Page height"
+        >
+          ↕ Page
+        </button>
+
+        {/* Shortcuts indicator */}
+        <span style={{ fontSize: '11px', color: 'var(--text-3)', marginRight: '8px' }} title="Undo: Ctrl+Z / Redo: Ctrl+Y">
+          ⌨ Keys active
+        </span>
 
         <button
           id="btn-undo"
@@ -193,3 +231,4 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
 })
 
 export default EditorTopbar
+
