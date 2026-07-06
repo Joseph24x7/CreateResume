@@ -5,72 +5,53 @@ const newUuid = () => crypto.randomUUID()
 
 export const defaultData = () => ({
   personalInfo: {
-    firstName: 'Joseph Praveen',
-    lastName: 'Kumar S',
-    title: 'AVP - Application Development',
-    email: 'joseph.praveen@example.com',
-    phone: '+91 98765 43210',
-    location: 'Chennai, India',
-    linkedin: 'linkedin.com/in/josephpraveen',
-    github: 'github.com/josephpraveen',
-    website: 'josephpraveen.dev',
-    leetcode: 'leetcode.com/josephpraveen',
+    firstName: '',
+    lastName: '',
+    title: '',
+    email: '',
+    phone: '',
+    location: '',
+    linkedin: '',
+    github: '',
+    website: '',
+    leetcode: '',
   },
-  summary: 'Senior Software Developer and AVP with 11+ years of experience in Java Enterprise development, microservices, cloud applications, and frontend frameworks. Skilled in leading teams and designing high-throughput, low-latency financial systems.',
+  summary: '',
   skillCategories: [
-    { id: newUuid(), category: 'Languages', skills: 'Java 21 | SQL | JavaScript | HTML/CSS' },
-    { id: newUuid(), category: 'Frameworks', skills: 'Spring Boot 4 | Spring Cloud | Hibernate | React' },
-    { id: newUuid(), category: 'Tools & Infra', skills: 'Docker | Kubernetes | AWS | Git | Maven' }
+    { id: newUuid(), category: '', skills: '' }
   ],
   experiences: [
     {
       id: newUuid(),
-      role: 'AVP - Application Development',
-      company: 'Major Financial Institution',
-      startDate: '06/2021',
-      endDate: 'Present',
-      location: 'Chennai, India',
-      project: 'Custody Tax Reclaims Platform',
-      achievements: [
-        'Led a team of 8 developers in migrating a legacy monolithic custody platform to Spring Boot microservices.',
-        'Designed and implemented a real-time event-driven transaction processing system handling 1M+ daily transactions.',
-        'Reduced processing latencies by 45% using Project Loom virtual threads and optimized JPA database queries.'
-      ]
-    },
-    {
-      id: newUuid(),
-      role: 'Senior Software Engineer',
-      company: 'Tech Solutions Inc.',
-      startDate: '08/2016',
-      endDate: '05/2021',
-      location: 'Chennai, India',
-      project: 'Core Banking Integration',
-      achievements: [
-        'Developed reusable REST APIs and SOAP integrations connecting third-party payment gateways.',
-        'Mentored 4 junior engineers and implemented standard CI/CD pipelines reducing deployment times by 50%.'
-      ]
+      role: '',
+      company: '',
+      startDate: '',
+      endDate: '',
+      location: '',
+      project: '',
+      achievements: ['']
     }
   ],
   achievements: [
-    { id: newUuid(), text: 'Spot Award for Outstanding Delivery of Custody Tax Reclaims in Q3 2023.' },
-    { id: newUuid(), text: 'Successfully migrated 12 legacy applications to cloud-native platforms ahead of schedule.' }
+    { id: newUuid(), text: '' }
   ],
   educations: [
     {
       id: newUuid(),
-      degree: 'Bachelor of Engineering in Computer Science',
-      institution: 'Sathyabama University',
-      startDate: '08/2011',
-      endDate: '04/2015',
-      location: 'Chennai, India'
+      degree: '',
+      institution: '',
+      startDate: '',
+      endDate: '',
+      location: ''
     }
   ],
   languages: [
-    { id: newUuid(), language: 'English', proficiency: 'Full Professional Proficiency' },
-    { id: newUuid(), language: 'Tamil', proficiency: 'Native or Bilingual Proficiency' }
+    { id: newUuid(), language: '', proficiency: '' }
   ],
   hiddenSections: [],
-  font: 'Inter',
+  font: 'Mantika Sans',
+  template: 'executive-navy',
+  fontSize: 'medium',
 })
 
 const useResumeStore = create((set, get) => ({
@@ -81,74 +62,173 @@ const useResumeStore = create((set, get) => ({
   lastSaved: null,
   error: null,
   activeSection: 'personal',
+  undoHistory: [],
+  redoHistory: [],
+  lastHistoryPushTime: 0,
 
-  toggleSection: (sectionId) =>
+  updateResumeData: (newData) => {
     set(state => {
       if (!state.resume) return {}
-      const data = state.resume.data || {}
-      const hidden = data.hiddenSections || []
-      const newHidden = hidden.includes(sectionId)
-        ? hidden.filter(id => id !== sectionId)
-        : [...hidden, sectionId]
+      
+      const now = Date.now()
+      const history = state.undoHistory || []
+      const currentDataStr = JSON.stringify(state.resume.data)
+      
+      let newHistory = history
+      // Push current state to history if different from last history item AND either:
+      // 1. History is empty
+      // 2. More than 1200ms has passed since last push (debouncing typing sessions)
+      if (history.length === 0) {
+        newHistory = [JSON.parse(currentDataStr)]
+      } else {
+        const lastHistoryStr = JSON.stringify(history[history.length - 1])
+        if (currentDataStr !== lastHistoryStr) {
+          const timeSinceLastPush = now - state.lastHistoryPushTime
+          if (timeSinceLastPush > 1200) {
+            newHistory = [...history, JSON.parse(currentDataStr)]
+            if (newHistory.length > 50) newHistory.shift()
+          }
+        }
+      }
+
+      const nextHistoryState = {
+        resume: {
+          ...state.resume,
+          data: newData
+        },
+        undoHistory: newHistory,
+        redoHistory: [] // Clear redo history on new edit
+      }
+      
+      if (newHistory !== history) {
+        nextHistoryState.lastHistoryPushTime = now
+      }
+      
+      return nextHistoryState
+    })
+  },
+
+  undo: () => {
+    set(state => {
+      const history = [...state.undoHistory]
+      if (history.length === 0) return {}
+      const previousData = history.pop()
+      const currentData = JSON.parse(JSON.stringify(state.resume.data))
       return {
         resume: {
           ...state.resume,
-          data: { ...data, hiddenSections: newHidden }
-        }
+          data: previousData
+        },
+        undoHistory: history,
+        redoHistory: [...(state.redoHistory || []), currentData]
       }
-    }),
+    })
+  },
+
+  redo: () => {
+    set(state => {
+      const redo = [...(state.redoHistory || [])]
+      if (redo.length === 0) return {}
+      const nextData = redo.pop()
+      const currentData = JSON.parse(JSON.stringify(state.resume.data))
+      return {
+        resume: {
+          ...state.resume,
+          data: nextData
+        },
+        undoHistory: [...state.undoHistory, currentData],
+        redoHistory: redo
+      }
+    })
+  },
+
+  toggleSection: (sectionId) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    const data = resume.data || {}
+    const hidden = data.hiddenSections || []
+    const newHidden = hidden.includes(sectionId)
+      ? hidden.filter(id => id !== sectionId)
+      : [...hidden, sectionId]
+    updateResumeData({ ...data, hiddenSections: newHidden })
+  },
 
   setActiveSection: (section) => set({ activeSection: section }),
 
   setError: (error) => set({ error }),
 
-  updateTitle: (title) =>
-    set(state => ({ resume: { ...state.resume, title } })),
+  updateTitle: (title) => {
+    // Route through updateResumeData so title changes are tracked in undo history
+    const { resume } = get()
+    if (!resume) return
+    set(state => ({ resume: { ...state.resume, title } }))
+  },
 
-  updateData: (patch) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, ...patch } },
-    })),
+  updateData: (patch) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, ...patch })
+  },
 
-  updatePersonalInfo: (personalInfo) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, personalInfo } },
-    })),
+  updatePersonalInfo: (personalInfo) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, personalInfo })
+  },
 
-  updateSummary: (summary) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, summary } },
-    })),
+  updateSummary: (summary) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, summary })
+  },
 
-  updateSkillCategories: (skillCategories) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, skillCategories } },
-    })),
+  updateSkillCategories: (skillCategories) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, skillCategories })
+  },
 
-  updateExperiences: (experiences) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, experiences } },
-    })),
+  updateExperiences: (experiences) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, experiences })
+  },
 
-  updateAchievements: (achievements) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, achievements } },
-    })),
+  updateAchievements: (achievements) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, achievements })
+  },
 
-  updateEducations: (educations) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, educations } },
-    })),
+  updateEducations: (educations) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, educations })
+  },
 
-  updateLanguages: (languages) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, languages } },
-    })),
+  updateLanguages: (languages) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, languages })
+  },
 
-  updateFont: (font) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, font } },
-    })),
+  updateFont: (font) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, font })
+  },
+
+  updateTemplate: (template) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, template })
+  },
+
+  updateFontSize: (fontSize) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, fontSize })
+  },
 
   fetchResumeList: async () => {
     set({ loading: true, error: null })
@@ -161,7 +241,7 @@ const useResumeStore = create((set, get) => ({
   },
 
   loadResume: async (id) => {
-    set({ loading: true, error: null })
+    set({ resume: null, loading: true, error: null, undoHistory: [], redoHistory: [] })
     try {
       const resume = await resumeApi.getById(id)
       set({ resume, loading: false, lastSaved: new Date() })

@@ -14,9 +14,17 @@ import java.util.List;
 public class PdfExportService {
 
     private final TemplateEngine templateEngine;
+    private final String commonCss;
 
     public PdfExportService(TemplateEngine templateEngine) {
         this.templateEngine = templateEngine;
+        try {
+            var resource = new org.springframework.core.io.ClassPathResource("static/resume-common.css");
+            var bytes = java.nio.file.Files.readAllBytes(resource.getFile().toPath());
+            this.commonCss = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load shared resume CSS", e);
+        }
     }
 
     public byte[] generatePdf(ResumeDto.Full resume) {
@@ -24,15 +32,18 @@ public class PdfExportService {
         ctx.setVariable("resume", resume);
 
         ResumeData.Data data = resume.data();
-        ctx.setVariable("personalInfo", data.personalInfo());
-        ctx.setVariable("summary", data.summary());
-        ctx.setVariable("skillCategories", data.skillCategories());
-        ctx.setVariable("experiences", data.experiences());
+        ctx.setVariable("personalInfo", data.personalInfo() != null ? data.personalInfo()
+                : new ResumeData.PersonalInfo("", "", "", "", "", "", "", "", "", ""));
+        ctx.setVariable("summary", data.summary() != null ? data.summary() : "");
+        ctx.setVariable("skillCategories", data.skillCategories() != null ? data.skillCategories() : List.of());
+        ctx.setVariable("experiences", data.experiences() != null ? data.experiences() : List.of());
         ctx.setVariable("achievements", filterNonEmpty(data.achievements()));
-        ctx.setVariable("educations", data.educations());
-        ctx.setVariable("languages", data.languages());
+        ctx.setVariable("educations", data.educations() != null ? data.educations() : List.of());
+        ctx.setVariable("languages", data.languages() != null ? data.languages() : List.of());
 
         String html = templateEngine.process("resume-pdf", ctx);
+        // Inject shared CSS (fonts, base styling) into the head of the generated HTML
+        html = html.replace("</head>", "<style>" + commonCss + "</style></head>");
 
         try (var bos = new ByteArrayOutputStream()) {
             var renderer = new ITextRenderer();

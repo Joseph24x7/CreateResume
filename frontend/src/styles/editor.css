@@ -92,7 +92,8 @@
   padding: 7px 16px;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.2s;
+  /* Scope transitions to hover-only properties — 'all' causes blink on every re-render */
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, opacity 0.15s;
 }
 
 .topbar-btn:hover {
@@ -480,17 +481,19 @@
 .preview-paper-wrapper {
   position: relative;
   display: flex;
-  justify-content: center;
-  gap: 30px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   width: 100%;
-  min-height: 1123px;
-  padding-left: 80px; /* offset for floating toolbar */
+  padding: 8px 0 20px;
 }
 
+
 .floating-toolbar {
-  position: sticky;
-  top: 40px;
-  align-self: flex-start;
+  position: absolute;
+  left: 20px;
+  top: 80px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -502,6 +505,8 @@
   z-index: 100;
   width: 48px;
 }
+
+
 
 .toolbar-btn {
   width: 28px;
@@ -658,4 +663,146 @@
 .block-control-btn.delete:hover {
   background: rgba(248, 113, 113, 0.2);
   color: var(--danger);
+}
+
+/* Dynamic Page Break Lines for Preview */
+.preview-page-break-line {
+  position: absolute;
+  left: 0;
+  width: 794px;
+  height: 20px;
+  background: #f1f3f9;
+  border-top: 1px dashed var(--border-2);
+  border-bottom: 1px dashed var(--border-2);
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-page-break-label {
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: -1px; /* Center it exactly on the dashed border */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Premium Page Navigation Controls */
+.preview-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-2);
+  padding: 6px 16px;
+  border-radius: 30px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+  z-index: 100;
+  width: max-content;
+}
+
+.pagination-btn {
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(108, 99, 255, 0.3);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pagination-text {
+  font-size: 11.5px;
+  color: var(--text-1);
+  letter-spacing: 0.5px;
+}
+
+.pagination-text strong {
+  color: var(--teal);
+}
+
+/* Premium Layout Loading Screen */
+.preview-panel-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  min-height: 400px;
+  gap: 16px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.preview-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Skeleton shimmer for preview while document loads ── */
+.preview-page-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.preview-page-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(225, 230, 240, 0.6) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

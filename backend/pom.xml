@@ -15,7 +15,7 @@
     <artifactId>mynovoresume</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>MyNovoResume</name>cls
+    <name>MyNovoResume</name>
 
     <properties>
         <java.version>21</java.version>
