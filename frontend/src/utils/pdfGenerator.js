@@ -68,6 +68,8 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
 
   let captureCanvas
   try {
+    resumeEl.classList.add('pdf-capture')
+    
     // ── Step 3: Capture the ENTIRE resume as one tall canvas ───────────────
     captureCanvas = await html2canvas(resumeEl, {
       scale: SCALE,
@@ -81,6 +83,8 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
       scrollY: 0,
     })
   } finally {
+    resumeEl.classList.remove('pdf-capture')
+    
     // ── Step 4: Restore everything immediately ─────────────────────────────
     hiddenEls.forEach(({ el, display }) => { el.style.display = display })
     editableEls.forEach(el => {
@@ -98,9 +102,14 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
   }
 
   // ── Step 5: Slice the tall canvas into A4-height pages ──────────────────
+  const MARGIN_H_PX = 36
+  const CONTENT_H_PX = PAGE_H_PX - (MARGIN_H_PX * 2) // 1051px
   const pageHeightScaled = PAGE_H_PX * SCALE
   const pageWidthScaled  = PAGE_W_PX * SCALE
-  const totalPages = Math.ceil(captureCanvas.height / pageHeightScaled)
+  const contentHeightScaled = CONTENT_H_PX * SCALE
+  const marginHeightScaled = MARGIN_H_PX * SCALE
+
+  const totalPages = Math.ceil(captureCanvas.height / contentHeightScaled)
 
   const pdf = new jsPDF({
     orientation: 'portrait',
@@ -119,17 +128,17 @@ export async function generatePdfFromPreview(previewPaperEl, filename = 'resume.
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, pageWidthScaled, pageHeightScaled)
 
-    // Draw the slice from the full canvas onto this page canvas
-    const srcY = pageIdx * pageHeightScaled
+    // Draw the slice from the full canvas onto this page canvas leaving margins
+    const srcY = pageIdx * contentHeightScaled
     const remainingHeight = captureCanvas.height - srcY
-    const drawHeight = Math.min(pageHeightScaled, remainingHeight)
+    const drawHeight = Math.min(contentHeightScaled, remainingHeight)
 
     if (drawHeight > 0) {
       ctx.drawImage(
         captureCanvas,
         0, srcY,                          // source x, y
         pageWidthScaled, drawHeight,      // source width, height
-        0, 0,                             // dest x, y
+        0, marginHeightScaled,            // dest x, y (leaving top margin)
         pageWidthScaled, drawHeight       // dest width, height
       )
     }

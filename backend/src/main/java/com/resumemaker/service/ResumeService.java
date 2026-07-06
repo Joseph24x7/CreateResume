@@ -89,7 +89,9 @@ public class ResumeService {
                 List.of(new ResumeData.EducationEntry(UUID.randomUUID().toString(), "", "", "", "", "")),
                 List.of(new ResumeData.LanguageEntry(UUID.randomUUID().toString(), "", "")),
                 List.of(),
-                "Inter"
+                "Inter",
+                "executive-navy",
+                "medium"
         );
     }
 
@@ -213,7 +215,9 @@ public class ResumeService {
                         new ResumeData.LanguageEntry(UUID.randomUUID().toString(), "Tamil", "Native or Bilingual Proficiency")
                 ),
                 List.of(),
-                "Inter"
+                "Inter",
+                "executive-navy",
+                "medium"
         );
     }
 

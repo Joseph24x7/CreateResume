@@ -49,7 +49,9 @@ export const defaultData = () => ({
     { id: newUuid(), language: '', proficiency: '' }
   ],
   hiddenSections: [],
-  font: 'Inter',
+  font: 'Mantika Sans',
+  template: 'executive-navy',
+  fontSize: 'medium',
 })
 
 const useResumeStore = create((set, get) => ({
@@ -60,22 +62,96 @@ const useResumeStore = create((set, get) => ({
   lastSaved: null,
   error: null,
   activeSection: 'personal',
+  undoHistory: [],
+  redoHistory: [],
+  lastHistoryPushTime: 0,
 
-  toggleSection: (sectionId) =>
+  updateResumeData: (newData) => {
     set(state => {
       if (!state.resume) return {}
-      const data = state.resume.data || {}
-      const hidden = data.hiddenSections || []
-      const newHidden = hidden.includes(sectionId)
-        ? hidden.filter(id => id !== sectionId)
-        : [...hidden, sectionId]
+      
+      const now = Date.now()
+      const history = state.undoHistory || []
+      const currentDataStr = JSON.stringify(state.resume.data)
+      
+      let newHistory = history
+      // Push current state to history if different from last history item AND either:
+      // 1. History is empty
+      // 2. More than 1200ms has passed since last push (debouncing typing sessions)
+      if (history.length === 0) {
+        newHistory = [JSON.parse(currentDataStr)]
+      } else {
+        const lastHistoryStr = JSON.stringify(history[history.length - 1])
+        if (currentDataStr !== lastHistoryStr) {
+          const timeSinceLastPush = now - state.lastHistoryPushTime
+          if (timeSinceLastPush > 1200) {
+            newHistory = [...history, JSON.parse(currentDataStr)]
+            if (newHistory.length > 50) newHistory.shift()
+          }
+        }
+      }
+
+      const nextHistoryState = {
+        resume: {
+          ...state.resume,
+          data: newData
+        },
+        undoHistory: newHistory,
+        redoHistory: [] // Clear redo history on new edit
+      }
+      
+      if (newHistory !== history) {
+        nextHistoryState.lastHistoryPushTime = now
+      }
+      
+      return nextHistoryState
+    })
+  },
+
+  undo: () => {
+    set(state => {
+      const history = [...state.undoHistory]
+      if (history.length === 0) return {}
+      const previousData = history.pop()
+      const currentData = JSON.parse(JSON.stringify(state.resume.data))
       return {
         resume: {
           ...state.resume,
-          data: { ...data, hiddenSections: newHidden }
-        }
+          data: previousData
+        },
+        undoHistory: history,
+        redoHistory: [...(state.redoHistory || []), currentData]
       }
-    }),
+    })
+  },
+
+  redo: () => {
+    set(state => {
+      const redo = [...(state.redoHistory || [])]
+      if (redo.length === 0) return {}
+      const nextData = redo.pop()
+      const currentData = JSON.parse(JSON.stringify(state.resume.data))
+      return {
+        resume: {
+          ...state.resume,
+          data: nextData
+        },
+        undoHistory: [...state.undoHistory, currentData],
+        redoHistory: redo
+      }
+    })
+  },
+
+  toggleSection: (sectionId) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    const data = resume.data || {}
+    const hidden = data.hiddenSections || []
+    const newHidden = hidden.includes(sectionId)
+      ? hidden.filter(id => id !== sectionId)
+      : [...hidden, sectionId]
+    updateResumeData({ ...data, hiddenSections: newHidden })
+  },
 
   setActiveSection: (section) => set({ activeSection: section }),
 
@@ -84,50 +160,71 @@ const useResumeStore = create((set, get) => ({
   updateTitle: (title) =>
     set(state => ({ resume: { ...state.resume, title } })),
 
-  updateData: (patch) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, ...patch } },
-    })),
+  updateData: (patch) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, ...patch })
+  },
 
-  updatePersonalInfo: (personalInfo) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, personalInfo } },
-    })),
+  updatePersonalInfo: (personalInfo) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, personalInfo })
+  },
 
-  updateSummary: (summary) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, summary } },
-    })),
+  updateSummary: (summary) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, summary })
+  },
 
-  updateSkillCategories: (skillCategories) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, skillCategories } },
-    })),
+  updateSkillCategories: (skillCategories) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, skillCategories })
+  },
 
-  updateExperiences: (experiences) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, experiences } },
-    })),
+  updateExperiences: (experiences) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, experiences })
+  },
 
-  updateAchievements: (achievements) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, achievements } },
-    })),
+  updateAchievements: (achievements) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, achievements })
+  },
 
-  updateEducations: (educations) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, educations } },
-    })),
+  updateEducations: (educations) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, educations })
+  },
 
-  updateLanguages: (languages) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, languages } },
-    })),
+  updateLanguages: (languages) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, languages })
+  },
 
-  updateFont: (font) =>
-    set(state => ({
-      resume: { ...state.resume, data: { ...state.resume.data, font } },
-    })),
+  updateFont: (font) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, font })
+  },
+
+  updateTemplate: (template) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, template })
+  },
+
+  updateFontSize: (fontSize) => {
+    const { resume, updateResumeData } = get()
+    if (!resume) return
+    updateResumeData({ ...resume.data, fontSize })
+  },
 
   fetchResumeList: async () => {
     set({ loading: true, error: null })
@@ -140,7 +237,7 @@ const useResumeStore = create((set, get) => ({
   },
 
   loadResume: async (id) => {
-    set({ loading: true, error: null })
+    set({ resume: null, loading: true, error: null, undoHistory: [] })
     try {
       const resume = await resumeApi.getById(id)
       set({ resume, loading: false, lastSaved: new Date() })

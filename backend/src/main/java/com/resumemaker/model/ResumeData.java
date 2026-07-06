@@ -52,6 +52,8 @@ public class ResumeData {
             List<EducationEntry> educations,
             List<LanguageEntry> languages,
             List<String> hiddenSections,
-            String font
+            String font,
+            String template,
+            String fontSize
     ) {}
 }

@@ -25,17 +25,18 @@
   padding: 24px;
   scrollbar-width: thin;
   scrollbar-color: var(--border-2) transparent;
-  display: flex;
-  justify-content: center;
+  display: block;
 }
 
 .preview-scroll::-webkit-scrollbar { width: 4px; }
 .preview-scroll::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
 
 .preview-paper-wrapper {
-  width: 100%;
+  margin: 0 auto;
+  width: max-content;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .preview-paper {
@@ -72,7 +73,7 @@
 
 .en-resume {
   font-family: Arial, Helvetica, sans-serif;
-  color: #1a1a2e;
+  color: #000000;
   background: #ffffff;
   width: 794px;
   /* No fixed height — content flows naturally, PDF slices at A4 boundaries */
@@ -112,7 +113,7 @@
 
 .en-header {
   background: #1a2744;
-  padding: 22px 28px 16px;
+  padding: 12px 28px 16px;
 }
 
 .en-header-inner {}
@@ -163,15 +164,30 @@
   align-items: center;
   gap: 6px;
   font-size: 9.5px;
-  color: #374151;
+  color: #000000;
 }
 
 .en-icon {
-  font-size: 10px;
   width: 14px;
-  text-align: center;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   color: #1a2744;
+}
+
+.en-svg-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+
+/* Ensure outline SVG shapes are not filled */
+svg[stroke="currentColor"].en-svg-icon {
+  fill: none !important;
 }
 
 .en-section {
@@ -198,7 +214,14 @@
   border-radius: 1px;
 }
 
-.en-skills-grid {
+.en-skills-two-col {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.en-skills-col {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -207,21 +230,26 @@
 .en-skill-row {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 8px;
 }
 
 .en-skill-category {
   font-size: 9.5px;
   font-weight: 700;
   color: #1a1a2e;
-  min-width: 160px;
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
   flex-shrink: 0;
+  margin-right: 8px;
 }
 
 .en-skill-values {
   font-size: 9.5px;
-  color: #374151;
+  color: #000000;
   line-height: 1.5;
+  flex: 1;
+  word-wrap: break-word;
 }
 
 .en-experience {
@@ -245,14 +273,14 @@
   display: flex;
   justify-content: space-between;
   font-size: 9px;
-  color: #6b7280;
+  color: #000000;
   font-style: italic;
   margin-bottom: 2px;
 }
 
 .en-exp-project {
   font-size: 9px;
-  color: #6b7280;
+  color: #000000;
   font-style: italic;
   margin-bottom: 3px;
 }
@@ -260,7 +288,7 @@
 .en-exp-ach-label {
   font-size: 9px;
   font-style: italic;
-  color: #4b5563;
+  color: #000000;
   margin-bottom: 3px;
 }
 
@@ -272,6 +300,7 @@
 .en-exp-bullets li {
   font-size: 9.5px;
   line-height: 1.6;
+  color: #000000;
   margin-bottom: 2px;
   position: relative;
   padding-left: 10px;
@@ -295,7 +324,7 @@
 .en-achievement-cell {
   font-size: 9.5px;
   line-height: 1.55;
-  color: #374151;
+  color: #000000;
 }
 
 .en-education {
@@ -316,7 +345,7 @@
 
 .en-edu-meta {
   font-size: 9px;
-  color: #6b7280;
+  color: #000000;
   font-style: italic;
   display: flex;
   justify-content: space-between;
@@ -340,7 +369,7 @@
 
 .en-lang-proficiency {
   font-size: 9px;
-  color: #6b7280;
+  color: #000000;
   font-style: italic;
 }
 
@@ -496,6 +525,289 @@
   background: rgba(108, 99, 255, 0.12);
   box-shadow: 0 0 0 2px var(--accent);
   border-radius: 2px;
+}
+
+/* ── TEMPLATE MODIFIERS ── */
+
+/* 1. Minimalist Accent Template (Image 3/4 style) */
+.template-minimalist-accent .en-header {
+  background: transparent;
+  padding: 30px 28px 10px;
+}
+
+.template-minimalist-accent .en-name {
+  color: #111111;
+  font-size: 32px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.template-minimalist-accent .en-job-title {
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.template-minimalist-accent .en-summary-band {
+  background: #111111;
+  border-radius: 4px;
+  padding: 14px 24px;
+  margin: 12px 28px 4px;
+}
+
+.template-minimalist-accent .en-summary-text {
+  color: #f8fafc;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.template-minimalist-accent .en-contact-bar {
+  border-bottom: none;
+  padding: 12px 28px 16px;
+}
+
+.template-minimalist-accent .en-contact-item {
+  color: #000000;
+  font-size: 9.5px;
+  font-weight: 500;
+}
+
+.template-minimalist-accent .en-icon {
+  color: #111111;
+  font-weight: 700;
+}
+
+.template-minimalist-accent .en-section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.template-minimalist-accent .en-section-title {
+  color: #111111;
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 0;
+}
+
+.template-minimalist-accent .en-section-rule {
+  flex-grow: 1;
+  height: 2px;
+  background: #111111;
+  margin-left: 12px;
+  border-radius: 0;
+}
+
+.template-minimalist-accent .en-exp-role,
+.template-minimalist-accent .en-edu-degree {
+  color: #111111;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.template-minimalist-accent .en-exp-company,
+.template-minimalist-accent .en-edu-institution {
+  color: #1f2937;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.template-minimalist-accent .en-exp-dates,
+.template-minimalist-accent .en-exp-location,
+.template-minimalist-accent .en-edu-meta {
+  color: #000000;
+  font-size: 9px;
+}
+
+.template-minimalist-accent .en-exp-bullets li {
+  color: #000000;
+  font-size: 9.5px;
+  line-height: 1.55;
+  list-style-type: disc;
+}
+
+.template-minimalist-accent .canvas-block-wrapper:hover {
+  box-shadow: -3px 0 0 0 #111111;
+}
+
+/* 2. Elegant Diamond Template (Image 5/6 style) */
+.template-elegant-diamond .en-header {
+  background: transparent;
+  padding: 30px 28px 10px;
+}
+
+.template-elegant-diamond .en-name {
+  color: #0f172a;
+  font-size: 32px;
+  font-weight: 700;
+  font-family: 'Lora', 'Georgia', serif;
+  letter-spacing: 0.5px;
+}
+
+.template-elegant-diamond .en-job-title {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  font-style: italic;
+  font-family: 'Lora', 'Georgia', serif;
+}
+
+.template-elegant-diamond .en-summary-band {
+  background: transparent;
+  padding: 6px 28px 10px;
+  margin: 0;
+}
+
+.template-elegant-diamond .en-summary-text {
+  color: #000000;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.template-elegant-diamond .en-contact-bar {
+  border-bottom: 1.5px solid #e2e8f0;
+  padding: 12px 28px 16px;
+}
+
+.template-elegant-diamond .en-contact-item {
+  color: #000000;
+  font-size: 9.5px;
+}
+
+.template-elegant-diamond .en-icon {
+  color: #475569;
+  font-size: 9px;
+}
+
+.template-elegant-diamond .en-section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.template-elegant-diamond .en-section-title {
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-bottom: 0;
+}
+
+.template-elegant-diamond .en-section-rule {
+  flex-grow: 1;
+  height: 1.2px;
+  background: #cbd5e1;
+  margin-left: 12px;
+  position: relative;
+}
+
+.template-elegant-diamond .en-section-rule::after {
+  content: '◆';
+  position: absolute;
+  right: 0;
+  top: -5.5px;
+  font-size: 8px;
+  color: #94a3b8;
+}
+
+.template-elegant-diamond .en-exp-role,
+.template-elegant-diamond .en-edu-degree {
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.template-elegant-diamond .en-exp-company,
+.template-elegant-diamond .en-edu-institution {
+  color: #334155;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.template-elegant-diamond .en-exp-dates,
+.template-elegant-diamond .en-exp-location,
+.template-elegant-diamond .en-edu-meta {
+  color: #000000;
+  font-size: 9px;
+}
+
+.template-elegant-diamond .en-exp-bullets li {
+  color: #000000;
+  font-size: 9.5px;
+  line-height: 1.6;
+  list-style-type: circle;
+}
+
+.template-elegant-diamond .canvas-block-wrapper:hover {
+  box-shadow: -3px 0 0 0 #475569;
+}
+
+/* ── FONT SIZE MODIFIERS ── */
+
+/* 1. Small Font Size */
+.en-resume.size-small {
+  font-size: 8.5px;
+}
+.en-resume.size-small .en-name { font-size: 22px; }
+.en-resume.size-small .en-job-title { font-size: 11px; }
+.en-resume.size-small .en-summary-text { font-size: 8.5px; }
+.en-resume.size-small .en-contact-item { font-size: 8.5px; }
+.en-resume.size-small .en-section-title { font-size: 9.5px; }
+.en-resume.size-small .en-skill-category { font-size: 8.5px; width: 70px; min-width: 70px; max-width: 70px; }
+.en-resume.size-small .en-skill-values { font-size: 8.5px; }
+.en-resume.size-small .en-exp-role { font-size: 10px; }
+.en-resume.size-small .en-exp-company { font-size: 9px; }
+.en-resume.size-small .en-exp-bullets li { font-size: 8.5px; }
+.en-resume.size-small .en-achievement-cell { font-size: 8.5px; }
+.en-resume.size-small .en-edu-degree { font-size: 10px; }
+.en-resume.size-small .en-edu-institution { font-size: 9px; }
+.en-resume.size-small .en-lang-name { font-size: 9px; }
+.en-resume.size-small .en-lang-proficiency { font-size: 8px; }
+
+/* 2. Medium Font Size (Default overrides for safety) */
+.en-resume.size-medium {
+  font-size: 9.5px;
+}
+
+/* 3. Large Font Size */
+.en-resume.size-large {
+  font-size: 11.5px;
+}
+.en-resume.size-large .en-name { font-size: 32px; }
+.en-resume.size-large .en-job-title { font-size: 15px; }
+.en-resume.size-large .en-summary-text { font-size: 11px; }
+.en-resume.size-large .en-contact-item { font-size: 11px; }
+.en-resume.size-large .en-section-title { font-size: 12px; }
+.en-resume.size-large .en-skill-category { font-size: 11px; width: 100px; min-width: 100px; max-width: 100px; }
+.en-resume.size-large .en-skill-values { font-size: 11px; }
+.en-resume.size-large .en-exp-role { font-size: 12px; }
+.en-resume.size-large .en-exp-company { font-size: 11px; }
+.en-resume.size-large .en-exp-bullets li { font-size: 11px; }
+.en-resume.size-large .en-achievement-cell { font-size: 11px; }
+.en-resume.size-large .en-edu-degree { font-size: 12px; }
+.en-resume.size-large .en-edu-institution { font-size: 11px; }
+.en-resume.size-large .en-lang-name { font-size: 11px; }
+.en-resume.size-large .en-lang-proficiency { font-size: 9.5px; }
+
+/* ── COLLAPSE EMPTY ELEMENTS IN PDF ── */
+
+/* Hide empty editable text in PDF capture */
+.pdf-capture .editable-text.is-empty {
+  display: none !important;
+}
+
+/* Hide wrappers if they contain an empty editable-text in PDF capture */
+.pdf-capture li:has(.editable-text.is-empty),
+.pdf-capture .bullet-wrapper:has(.editable-text.is-empty),
+.pdf-capture .en-skill-row:has(.editable-text.is-empty),
+.pdf-capture .en-achievement-cell:has(.editable-text.is-empty),
+.pdf-capture .en-experience:has(.editable-text.is-empty),
+.pdf-capture .en-education:has(.editable-text.is-empty),
+.pdf-capture .en-language-item:has(.editable-text.is-empty) {
+  display: none !important;
 }
 
 
