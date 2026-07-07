@@ -147,6 +147,7 @@
   font-size: 9.5px;
   color: #e8f0f8;
   line-height: 1.65;
+  text-align: justify;
 }
 
 .en-contact-bar {
@@ -241,9 +242,9 @@ svg[stroke="currentColor"].en-svg-icon {
   font-size: 9.5px;
   font-weight: 700;
   color: #1a1a2e;
-  width: 80px;
-  min-width: 80px;
-  max-width: 80px;
+  width: 125px;
+  min-width: 125px;
+  max-width: 125px;
   flex-shrink: 0;
   margin-right: 8px;
 }
@@ -287,6 +288,7 @@ svg[stroke="currentColor"].en-svg-icon {
   color: #000000;
   font-style: italic;
   margin-bottom: 3px;
+  text-align: justify;
 }
 
 .en-exp-ach-label {
@@ -308,6 +310,7 @@ svg[stroke="currentColor"].en-svg-icon {
   margin-bottom: 2px;
   position: relative;
   padding-left: 10px;
+  text-align: justify;
 }
 
 .en-exp-bullets li::before {
@@ -784,9 +787,9 @@ svg[stroke="currentColor"].en-svg-icon {
   font-size: 9.5px;
   font-weight: 700;
   color: #1b2340;
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
+  width: 125px;
+  min-width: 125px;
+  max-width: 125px;
   flex-shrink: 0;
 }
 
@@ -939,7 +942,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .en-resume.size-large .en-summary-text { font-size: 11px; }
 .en-resume.size-large .en-contact-item { font-size: 11px; }
 .en-resume.size-large .en-section-title { font-size: 12px; }
-.en-resume.size-large .en-skill-category { font-size: 11px; width: 100px; min-width: 100px; max-width: 100px; }
+.en-resume.size-large .en-skill-category { font-size: 11px; width: 145px; min-width: 145px; max-width: 145px; }
 .en-resume.size-large .en-skill-values { font-size: 11px; }
 .en-resume.size-large .en-exp-role { font-size: 12px; }
 .en-resume.size-large .en-exp-company { font-size: 11px; }
@@ -968,4 +971,16 @@ svg[stroke="currentColor"].en-svg-icon {
   display: none !important;
 }
 
-
+/* ── BOLD SECTIONS USER PREFERENCE ── */
+.bold-sections .en-summary-text,
+.bold-sections .en-skill-values,
+.bold-sections .en-exp-bullets li,
+.bold-sections .en-exp-project,
+.bold-sections .en-edu-degree,
+.bold-sections .en-edu-institution,
+.bold-sections .en-edu-meta,
+.bold-sections .en-lang-name,
+.bold-sections .en-lang-proficiency,
+.bold-sections .en-achievement-cell {
+  font-weight: 700 !important;
+}

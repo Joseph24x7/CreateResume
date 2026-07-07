@@ -29,10 +29,12 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
   const font          = useResumeStore(s => s.resume?.data?.font ?? 'Mantika Sans')
   const fontSize      = useResumeStore(s => s.resume?.data?.fontSize ?? 'medium')
   const showMonogram  = useResumeStore(s => s.resume?.data?.showMonogram ?? false)
+  const boldSections  = useResumeStore(s => s.resume?.data?.boldSections ?? false)
   const saving        = useResumeStore(s => s.saving)
   const lastSaved     = useResumeStore(s => s.lastSaved)
   const undoLen       = useResumeStore(s => s.undoHistory.length)
   const redoLen       = useResumeStore(s => s.redoHistory.length)
+
 
   const {
     updateTitle, updateTemplate, updateFont, updateFontSize, updateData, undo, redo,
@@ -95,6 +97,17 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
       </div>
 
       <div className="topbar-right">
+        {/* Bold Sections Toggle */}
+        <label style={{ display: 'flex', alignItems: 'center', color: 'var(--text-1)', fontSize: '13px', marginRight: '12px', cursor: 'pointer', userSelect: 'none' }}>
+          <input
+            type="checkbox"
+            checked={boldSections}
+            onChange={e => updateData({ boldSections: e.target.checked })}
+            style={{ marginRight: '6px', cursor: 'pointer' }}
+          />
+          <b>B</b> Bold Body
+        </label>
+
         {/* Monogram Toggle (Elegant Diamond only) */}
         {template === 'elegant-diamond' && (
           <label style={{ display: 'flex', alignItems: 'center', color: 'var(--text-1)', fontSize: '13px', marginRight: '12px', cursor: 'pointer', userSelect: 'none' }}>
@@ -134,7 +147,11 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
           <option value="Montserrat">Font: Montserrat</option>
           <option value="Playfair Display">Font: Playfair Display</option>
           <option value="Merriweather">Font: Merriweather</option>
+          <option value="Halyard Text">Font: Halyard Text</option>
+          <option value="Minion 3 Display">Font: Minion 3</option>
+          <option value="Spinoza Pro">Font: Spinoza Pro</option>
         </select>
+
 
         <select
           id="font-size-select"

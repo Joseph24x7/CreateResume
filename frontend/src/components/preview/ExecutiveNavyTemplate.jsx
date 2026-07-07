@@ -309,8 +309,23 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     font = 'Inter',
     template = 'executive-navy',
     fontSize = 'medium',
-    showMonogram = false
+    showMonogram = false,
+    boldSections = false
   } = data || {}
+
+  const getFontFamily = (fontName) => {
+    if (fontName === 'Halyard Text') {
+      return '"Halyard Text Regular", "Halyard Text", sans-serif'
+    }
+    if (fontName === 'Minion 3 Display') {
+      return '"Minion 3 Display Bold", "Minion 3 Display", "Minion 3", "Minion", serif'
+    }
+    if (fontName === 'Spinoza Pro') {
+      return '"Spinoza Pro Regular", "Spinoza Pro", serif'
+    }
+    return fontName
+  }
+
 
   const personalInfo = rawPersonalInfo || {}
   const skillCategories = rawSkillCategories || []
@@ -452,7 +467,8 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
   }
 
   return (
-    <div ref={containerRef} className={`en-resume template-${template} size-${fontSize}`} style={{ fontFamily: font }}>
+    <div ref={containerRef} className={`en-resume template-${template} size-${fontSize} ${boldSections ? 'bold-sections' : ''}`} style={{ fontFamily: getFontFamily(font) }}>
+
         <header className="en-header" style={{ display: 'flex', alignItems: 'center' }}>
           {template === 'elegant-diamond' && showMonogram && (
             <div className="en-header-monogram" style={{ marginRight: '20px' }}>
