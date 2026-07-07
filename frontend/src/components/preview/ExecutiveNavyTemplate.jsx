@@ -309,8 +309,7 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     font = 'Inter',
     template = 'executive-navy',
     fontSize = 'medium',
-    showMonogram = false,
-    boldSections = false
+    showMonogram = false
   } = data || {}
 
   const getFontFamily = (fontName) => {
@@ -467,7 +466,8 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
   }
 
   return (
-    <div ref={containerRef} className={`en-resume template-${template} size-${fontSize} ${boldSections ? 'bold-sections' : ''}`} style={{ fontFamily: getFontFamily(font) }}>
+    <div ref={containerRef} className={`en-resume template-${template} size-${fontSize}`} style={{ fontFamily: getFontFamily(font) }}>
+
 
         <header className="en-header" style={{ display: 'flex', alignItems: 'center' }}>
           {template === 'elegant-diamond' && showMonogram && (
@@ -541,69 +541,74 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
         {!hiddenSections.includes('skills') && (
           <section className="en-section">
             <SectionTitle type="skills" template={template} spacers={spacers}>Primary Skills</SectionTitle>
-            <div className="en-skills-two-col">
-              <div className="en-skills-col">
-                {skillCategories.map((cat, idx) => {
-                  if (idx % 2 !== 0) return null
-                  return (
-                    <React.Fragment key={cat.id}>
-                      <PageSpacer id={`skill-${cat.id}`} spacers={spacers} />
-                      <div data-page-block="true" data-block-id={`skill-${cat.id}`} className="en-skill-row canvas-block-wrapper">
-                        <BlockControls
-                          onMoveUp={idx > 0 ? () => moveCat(idx, -1) : null}
-                          onMoveDown={idx < skillCategories.length - 1 ? () => moveCat(idx, 1) : null}
-                          onDelete={() => removeCat(cat.id)}
-                        />
-                        <EditableText
-                          className="en-skill-category"
-                          value={cat.category}
-                          onChange={(val) => updateCat(cat.id, 'category', val)}
-                          placeholder="Category"
-                          singleLine
-                        />
-                        <EditableText
-                          className="en-skill-values"
-                          value={cat.skills}
-                          onChange={(val) => updateCat(cat.id, 'skills', val)}
-                          placeholder="Skills (comma or pipe separated)"
-                          singleLine
-                        />
-                      </div>
-                    </React.Fragment>
-                  )
-                })}
-              </div>
-              <div className="en-skills-col">
-                {skillCategories.map((cat, idx) => {
-                  if (idx % 2 === 0) return null
-                  return (
-                    <React.Fragment key={cat.id}>
-                      <PageSpacer id={`skill-${cat.id}`} spacers={spacers} />
-                      <div data-page-block="true" data-block-id={`skill-${cat.id}`} className="en-skill-row canvas-block-wrapper">
-                        <BlockControls
-                          onMoveUp={idx > 0 ? () => moveCat(idx, -1) : null}
-                          onMoveDown={idx < skillCategories.length - 1 ? () => moveCat(idx, 1) : null}
-                          onDelete={() => removeCat(cat.id)}
-                        />
-                        <EditableText
-                          className="en-skill-category"
-                          value={cat.category}
-                          onChange={(val) => updateCat(cat.id, 'category', val)}
-                          placeholder="Category"
-                          singleLine
-                        />
-                        <EditableText
-                          className="en-skill-values"
-                          value={cat.skills}
-                          onChange={(val) => updateCat(cat.id, 'skills', val)}
-                          placeholder="Skills (comma or pipe separated)"
-                          singleLine
-                        />
-                      </div>
-                    </React.Fragment>
-                  )
-                })}
-              </div>
+            <div className="en-skills-grid">
+              {Array.from({ length: Math.ceil(skillCategories.length / 2) }).map((_, rowIdx) => {
+                const idx1 = rowIdx * 2
+                const idx2 = rowIdx * 2 + 1
+                const cat1 = skillCategories[idx1]
+                const cat2 = skillCategories[idx2]
+
+                return (
+                  <div key={rowIdx} className="en-skills-row">
+                    <div className="en-skills-col">
+                      {cat1 && (
+                        <React.Fragment>
+                          <PageSpacer id={`skill-${cat1.id}`} spacers={spacers} />
+                          <div data-page-block="true" data-block-id={`skill-${cat1.id}`} className="en-skill-row canvas-block-wrapper">
+                            <BlockControls
+                              onMoveUp={idx1 > 0 ? () => moveCat(idx1, -1) : null}
+                              onMoveDown={idx1 < skillCategories.length - 1 ? () => moveCat(idx1, 1) : null}
+                              onDelete={() => removeCat(cat1.id)}
+                            />
+                            <EditableText
+                              className="en-skill-category"
+                              value={cat1.category}
+                              onChange={(val) => updateCat(cat1.id, 'category', val)}
+                              placeholder="Category"
+                              singleLine
+                            />
+                            <EditableText
+                              className="en-skill-values"
+                              value={cat1.skills}
+                              onChange={(val) => updateCat(cat1.id, 'skills', val)}
+                              placeholder="Skills"
+                              singleLine
+                            />
+                          </div>
+                        </React.Fragment>
+                      )}
+                    </div>
+                    <div className="en-skills-col">
+                      {cat2 && (
+                        <React.Fragment>
+                          <PageSpacer id={`skill-${cat2.id}`} spacers={spacers} />
+                          <div data-page-block="true" data-block-id={`skill-${cat2.id}`} className="en-skill-row canvas-block-wrapper">
+                            <BlockControls
+                              onMoveUp={idx2 > 0 ? () => moveCat(idx2, -1) : null}
+                              onMoveDown={idx2 < skillCategories.length - 1 ? () => moveCat(idx2, 1) : null}
+                              onDelete={() => removeCat(cat2.id)}
+                            />
+                            <EditableText
+                              className="en-skill-category"
+                              value={cat2.category}
+                              onChange={(val) => updateCat(cat2.id, 'category', val)}
+                              placeholder="Category"
+                              singleLine
+                            />
+                            <EditableText
+                              className="en-skill-values"
+                              value={cat2.skills}
+                              onChange={(val) => updateCat(cat2.id, 'skills', val)}
+                              placeholder="Skills"
+                              singleLine
+                            />
+                          </div>
+                        </React.Fragment>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </section>
         )}

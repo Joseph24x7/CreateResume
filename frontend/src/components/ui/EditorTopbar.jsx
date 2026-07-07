@@ -29,7 +29,7 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
   const font          = useResumeStore(s => s.resume?.data?.font ?? 'Mantika Sans')
   const fontSize      = useResumeStore(s => s.resume?.data?.fontSize ?? 'medium')
   const showMonogram  = useResumeStore(s => s.resume?.data?.showMonogram ?? false)
-  const boldSections  = useResumeStore(s => s.resume?.data?.boldSections ?? false)
+
   const saving        = useResumeStore(s => s.saving)
   const lastSaved     = useResumeStore(s => s.lastSaved)
   const undoLen       = useResumeStore(s => s.undoHistory.length)
@@ -97,16 +97,6 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
       </div>
 
       <div className="topbar-right">
-        {/* Bold Sections Toggle */}
-        <label style={{ display: 'flex', alignItems: 'center', color: 'var(--text-1)', fontSize: '13px', marginRight: '12px', cursor: 'pointer', userSelect: 'none' }}>
-          <input
-            type="checkbox"
-            checked={boldSections}
-            onChange={e => updateData({ boldSections: e.target.checked })}
-            style={{ marginRight: '6px', cursor: 'pointer' }}
-          />
-          <b>B</b> Bold Body
-        </label>
 
         {/* Monogram Toggle (Elegant Diamond only) */}
         {template === 'elegant-diamond' && (

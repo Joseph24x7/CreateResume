@@ -219,7 +219,13 @@ svg[stroke="currentColor"].en-svg-icon {
   border-radius: 1px;
 }
 
-.en-skills-two-col {
+.en-skills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.en-skills-row {
   display: flex;
   justify-content: space-between;
   gap: 32px;
@@ -227,10 +233,9 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .en-skills-col {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  min-width: 0;
 }
+
 
 .en-skill-row {
   display: flex;
@@ -770,11 +775,12 @@ svg[stroke="currentColor"].en-svg-icon {
   color: #304d89;
 }
 
-.template-elegant-diamond .en-skills-two-col {
+.template-elegant-diamond .en-skills-row {
   display: flex;
   justify-content: space-between;
   gap: 28px;
 }
+
 
 .template-elegant-diamond .en-skill-row {
   display: flex;
