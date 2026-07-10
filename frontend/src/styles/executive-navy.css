@@ -947,13 +947,13 @@ svg[stroke="currentColor"].en-svg-icon {
 /* Dark header band — full width, compact */
 .template-modern-slate .en-header {
   background: #1e293b;
-  padding: 32px 36px 20px;
+  padding: 22px 36px 14px;
   border-bottom: 3px solid #0ea5e9;
 }
 
 .template-modern-slate .en-name {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 28px;
+  font-size: 23px;
   font-weight: 700;
   color: #f1f5f9;
   letter-spacing: 1px;
@@ -964,7 +964,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-modern-slate .en-job-title {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 300;
   color: #94a3b8;
   letter-spacing: 2px;
@@ -1044,13 +1044,14 @@ svg[stroke="currentColor"].en-svg-icon {
   display: none;
 }
 
-/* Skills — innovative flowing pills layout for massive space optimization */
+/* Skills — elegant flowing paragraph with dot separators for maximum space efficiency */
 .template-modern-slate .en-skills-grid {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 6px 8px;
+  gap: 6px 16px;
   margin-top: 4px;
+  line-height: 1.6;
 }
 
 .template-modern-slate .en-skills-row {
@@ -1063,22 +1064,23 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-modern-slate .en-skill-row {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 4px;
-  background: #f1f5f9;
-  border-left: 2px solid #0ea5e9;
-  border-top: 1px solid #e2e8f0;
-  border-right: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
-  border-radius: 4px;
-  padding: 3px 8px 3px 6px;
+  position: relative;
+}
+
+.template-modern-slate .en-skill-row:not(:last-child)::after {
+  content: '•';
+  margin-left: 12px;
+  color: #0ea5e9;
+  font-weight: 700;
 }
 
 .template-modern-slate .en-skill-category {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8.5px;
+  font-size: 9.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: #1e293b;
   width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
@@ -1092,11 +1094,10 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-modern-slate .en-skill-values {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8.5px;
+  font-size: 9.5px;
   font-weight: 400;
   color: #475569;
-  line-height: 1.2;
-  flex-shrink: 0;
+  line-height: 1.4;
 }
 
 /* Experience — clean hierarchy */
