@@ -306,13 +306,16 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     educations: rawEducations,
     languages: rawLanguages,
     hiddenSections: rawHiddenSections,
-    font = 'Inter',
+    font = 'Merriweather Sans',
     template = 'executive-navy',
     fontSize = 'medium',
     showMonogram = false
   } = data || {}
 
   const getFontFamily = (fontName) => {
+    if (fontName === 'Merriweather Sans') {
+      return '"Merriweather Sans", Arial, Helvetica, sans-serif'
+    }
     if (fontName === 'Halyard Text') {
       return '"Halyard Text Regular", "Halyard Text", sans-serif'
     }

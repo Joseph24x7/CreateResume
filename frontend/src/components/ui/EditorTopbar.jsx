@@ -26,7 +26,7 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
   const resumeId      = useResumeStore(s => s.resume?.id)
   const resumeTitle   = useResumeStore(s => s.resume?.title ?? '')
   const template      = useResumeStore(s => s.resume?.data?.template ?? 'executive-navy')
-  const font          = useResumeStore(s => s.resume?.data?.font ?? 'Mantika Sans')
+  const font          = useResumeStore(s => s.resume?.data?.font ?? 'Merriweather Sans')
   const fontSize      = useResumeStore(s => s.resume?.data?.fontSize ?? 'medium')
   const showMonogram  = useResumeStore(s => s.resume?.data?.showMonogram ?? false)
 
@@ -130,6 +130,7 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
           onChange={e => updateFont(e.target.value)}
           style={SELECT_STYLE}
         >
+          <option value="Merriweather Sans">Font: Merriweather Sans</option>
           <option value="Mantika Sans">Font: Mantika Sans</option>
           <option value="Inter">Font: Inter</option>
           <option value="Outfit">Font: Outfit</option>

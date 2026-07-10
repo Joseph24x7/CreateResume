@@ -73,7 +73,7 @@
 }
 
 .en-resume {
-  font-family: Arial, Helvetica, sans-serif; /* overridden per-element by inline style={fontFamily} */
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   color: #000000;
   background: #ffffff;
   width: 794px;
@@ -123,9 +123,9 @@
 .en-header-inner {}
 
 .en-name {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 26px;
-  font-weight: 700;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 30px;
+  font-weight: 400;
   color: #ffffff;
   letter-spacing: 0.3px;
   margin-bottom: 4px;
@@ -133,7 +133,8 @@
 }
 
 .en-job-title {
-  font-size: 13px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 14px;
   color: #a8c4e0;
   font-weight: 400;
 }
@@ -144,7 +145,9 @@
 }
 
 .en-summary-text {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   color: #e8f0f8;
   line-height: 1.65;
   text-align: justify;
@@ -168,7 +171,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   color: #000000;
 }
 
@@ -205,7 +210,8 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-section-title {
-  font-size: 10.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 13px;
   font-weight: 700;
   color: #1a2744;
   text-transform: uppercase;
@@ -244,7 +250,8 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-skill-category {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
   font-weight: 700;
   color: #1a1a2e;
   width: 125px;
@@ -255,7 +262,9 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-skill-values {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   color: #000000;
   line-height: 1.5;
   flex: 1;
@@ -267,13 +276,15 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-exp-role {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 11px;
   font-weight: 700;
   color: #1a1a2e;
 }
 
 .en-exp-company {
-  font-size: 10.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
   font-weight: 700;
   color: #1a1a2e;
   margin-bottom: 2px;
@@ -282,9 +293,11 @@ svg[stroke="currentColor"].en-svg-icon {
 .en-exp-meta {
   display: flex;
   justify-content: space-between;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 9px;
-  color: #000000;
+  font-weight: 400;
   font-style: italic;
+  color: #000000;
   margin-bottom: 2px;
 }
 
@@ -309,7 +322,9 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-exp-bullets li {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   line-height: 1.6;
   color: #000000;
   margin-bottom: 2px;
@@ -334,7 +349,9 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-achievement-cell {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   line-height: 1.55;
   color: #000000;
 }
@@ -344,21 +361,26 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-edu-degree {
-  font-size: 10.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
   font-weight: 700;
   color: #1a1a2e;
 }
 
 .en-edu-institution {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 10px;
+  font-weight: 400;
   color: #1a1a2e;
   margin-bottom: 2px;
 }
 
 .en-edu-meta {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 9px;
-  color: #000000;
+  font-weight: 400;
   font-style: italic;
+  color: #000000;
   display: flex;
   justify-content: space-between;
 }
@@ -374,15 +396,18 @@ svg[stroke="currentColor"].en-svg-icon {
 .en-language-item {}
 
 .en-lang-name {
-  font-size: 9.5px;
-  font-weight: 600;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
   color: #1a1a2e;
 }
 
 .en-lang-proficiency {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 9px;
-  color: #000000;
+  font-weight: 400;
   font-style: italic;
+  color: #000000;
 }
 
 /* Bullet list & item controls */
