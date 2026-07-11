@@ -48,28 +48,59 @@
 }
 
 @media print {
+  /* Suppress default browser header/footer and set page size */
+  @page {
+    size: A4 portrait;
+    margin: 0 !important;
+  }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
-  .editor-page, .editor-topbar, .editor-left, .preview-panel, .preview-label, .preview-scroll, .preview-paper-wrapper {
-    all: unset !important;
+  /* Hide print-only-continuous from screen, but make it clean, full-size, and visible on print */
+  .print-only-continuous {
+    position: static !important;
+    width: 794px !important;
+    height: auto !important;
     display: block !important;
-  }
-
-  .preview-paper {
-    transform: none !important;
+    background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    box-shadow: none !important;
-    width: 100% !important;
-    border-radius: 0 !important;
-    background: #fff !important;
+    z-index: auto !important;
   }
 
-  body > * { display: none !important; }
-  .preview-paper { display: block !important; }
+  /* Hide standard screen elements when printing */
+  .editor-page,
+  .editor-topbar,
+  .editor-left,
+  .preview-panel,
+  .preview-label,
+  .preview-scroll,
+  .preview-pagination-bar,
+  .no-print,
+  .block-controls,
+  .bullet-delete-btn,
+  .en-page-break-marker,
+  .preview-page-break-line {
+    display: none !important;
+  }
+
+  /* Page break rules for elements */
+  .en-experience,
+  .en-education,
+  .en-skills-row-wrapper,
+  .en-skills-row,
+  .en-skill-row,
+  .en-achievements-row,
+  .en-achievement-cell,
+  .en-languages-grid,
+  .en-section-header {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
 }
 
 .en-resume {
@@ -935,373 +966,6 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .canvas-block-wrapper:hover {
   box-shadow: -3px 0 0 0 #304d89;
-}
-
-/* ── 4. MODERN SLATE TEMPLATE ── */
-
-/* Core layout — single column with a distinctive top band */
-.template-modern-slate .en-resume {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-}
-
-/* Dark header band — full width, compact */
-.template-modern-slate .en-header {
-  background: #1e293b;
-  padding: 22px 36px 14px;
-  border-bottom: 3px solid #64748b;
-}
-
-.template-modern-slate .en-name {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 23px;
-  font-weight: 700;
-  color: #f1f5f9;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  line-height: 1.15;
-  margin-bottom: 4px;
-}
-
-.template-modern-slate .en-job-title {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 10.5px;
-  font-weight: 300;
-  color: #94a3b8;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-/* Summary — clean white background, no colored band */
-.template-modern-slate .en-summary-band {
-  background: #f8fafc;
-  padding: 16px 36px;
-  margin: 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.template-modern-slate .en-summary-text {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
-  font-weight: 400;
-  color: #334155;
-  line-height: 1.7;
-  text-align: justify;
-}
-
-/* Contact bar — horizontal, subtle background */
-.template-modern-slate .en-contact-bar {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 10px 36px 8px;
-  gap: 0;
-}
-
-.template-modern-slate .en-contact-item {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8.5px;
-  font-weight: 400;
-  color: #475569;
-  gap: 5px;
-}
-
-.template-modern-slate .en-icon {
-  color: #64748b;
-  width: 13px;
-  height: 13px;
-}
-
-.template-modern-slate .en-svg-icon {
-  width: 11px;
-  height: 11px;
-}
-
-/* Sections — generous horizontal padding */
-.template-modern-slate .en-section {
-  padding: 0 36px;
-  margin-top: 14px;
-}
-
-/* Section headers — left accent bar instead of horizontal rule */
-.template-modern-slate .en-section-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  padding-left: 10px;
-  border-left: 2.5px solid #64748b;
-}
-
-.template-modern-slate .en-section-title {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  color: #1e293b;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 0;
-}
-
-.template-modern-slate .en-section-rule {
-  display: none;
-}
-
-/* Skills — elegant card blocks using 2-column grid layout */
-.template-modern-slate .en-skills-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.template-modern-slate .en-skills-row {
-  display: flex;
-  gap: 14px;
-}
-
-.template-modern-slate .en-skills-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.template-modern-slate .en-skill-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  background: #f8fafc; /* premium card bg */
-  border: 1.5px solid #e2e8f0;
-  border-left: 3px solid #64748b; /* grey accent line */
-  border-radius: 4px;
-  padding: 6px 12px;
-  gap: 2px;
-  transition: all 0.15s ease-in-out;
-}
-
-.template-modern-slate .en-skill-row:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.template-modern-slate .en-skill-category {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  color: #1e293b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  margin-right: 0 !important;
-}
-
-.template-modern-slate .en-skill-values {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9px;
-  font-weight: 400;
-  color: #475569;
-  line-height: 1.4;
-}
-
-/* Experience — premium vertical timeline styling */
-.template-modern-slate .en-experience {
-  position: relative;
-  padding-left: 18px;
-  padding-bottom: 12px;
-  margin-bottom: 0;
-  border-left: 1.5px solid #e2e8f0; /* vertical timeline line */
-}
-
-.template-modern-slate .en-experience:last-child {
-  border-left: 1.5px solid transparent;
-}
-
-.template-modern-slate .en-experience::before {
-  content: '';
-  position: absolute;
-  left: -5.5px; /* center on the 1.5px border */
-  top: 3px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #64748b; /* grey accent dot */
-  z-index: 2;
-  transition: background 0.15s;
-}
-
-.template-modern-slate .en-experience:hover::before {
-  background: #64748b; /* highlights on hover */
-}
-
-.template-modern-slate .en-exp-role {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.template-modern-slate .en-exp-company {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 2px;
-}
-
-.template-modern-slate .en-exp-meta {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8.5px;
-  font-weight: 400;
-  font-style: italic;
-  color: #64748b;
-  margin-bottom: 2px;
-}
-
-.template-modern-slate .en-exp-project {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8.5px;
-  font-weight: 400;
-  font-style: italic;
-  color: #64748b;
-  margin-bottom: 3px;
-}
-
-.template-modern-slate .en-exp-ach-label {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8px;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 3px;
-}
-
-.template-modern-slate .en-exp-bullets {
-  margin-left: 0;
-  padding-left: 0;
-  list-style: none;
-}
-
-.template-modern-slate .en-exp-bullets li {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
-  font-weight: 400;
-  line-height: 1.6;
-  color: #334155;
-  margin-bottom: 2px;
-  position: relative;
-  padding-left: 14px;
-  text-align: justify;
-}
-
-.template-modern-slate .en-exp-bullets li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 6px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #94a3b8;
-}
-
-/* Achievements — premium card/tag design */
-.template-modern-slate .en-achievement-cell {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #334155;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
-  border-left: 3px solid #64748b; /* grey accent line */
-  border-radius: 4px;
-  padding: 6px 12px;
-}
-
-/* Education — timeline styling matching experience */
-.template-modern-slate .en-education {
-  position: relative;
-  padding-left: 18px;
-  padding-bottom: 12px;
-  margin-bottom: 0;
-  border-left: 1.5px solid #e2e8f0;
-}
-
-.template-modern-slate .en-education:last-child {
-  border-left: 1.5px solid transparent;
-}
-
-.template-modern-slate .en-education::before {
-  content: '';
-  position: absolute;
-  left: -5.5px;
-  top: 3px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #64748b;
-  z-index: 2;
-  transition: background 0.15s;
-}
-
-.template-modern-slate .en-education:hover::before {
-  background: #64748b;
-}
-
-.template-modern-slate .en-edu-degree {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.template-modern-slate .en-edu-institution {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
-  font-weight: 400;
-  color: #334155;
-  margin-bottom: 2px;
-}
-
-.template-modern-slate .en-edu-meta {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8.5px;
-  font-weight: 400;
-  font-style: italic;
-  color: #64748b;
-}
-
-/* Languages */
-.template-modern-slate .en-lang-name {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.template-modern-slate .en-lang-proficiency {
-  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 8.5px;
-  font-weight: 400;
-  font-style: italic;
-  color: #64748b;
-}
-
-/* Block hover accent */
-.template-modern-slate .canvas-block-wrapper:hover {
-  box-shadow: -3px 0 0 0 #64748b;
-}
-
-/* Page 2 continuation header */
-.template-modern-slate .en-header-subtle {
-  border-bottom: 2.5px solid #64748b;
-  background: #f8fafc;
-}
-
-.template-modern-slate .en-name-subtle {
-  color: #1e293b;
 }
 
 /* ── FONT SIZE MODIFIERS ── */

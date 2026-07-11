@@ -1,63 +1,63 @@
 package com.resumemaker.service;
 
-import com.resumemaker.model.ResumeData;
-import com.resumemaker.model.ResumeDto;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-import org.xhtmlrenderer.pdf.ITextRenderer;
-
-import java.io.ByteArrayOutputStream;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.UUID;
 
 @Service
 public class PdfExportService {
 
-    private final TemplateEngine templateEngine;
-    private final String commonCss;
+    public byte[] generatePdf(String html) {
+        String tempDir = System.getProperty("java.io.tmpdir");
+        String uniqueId = UUID.randomUUID().toString();
+        File htmlFile = new File(tempDir, "resume_" + uniqueId + ".html");
+        File pdfFile = new File(tempDir, "resume_" + uniqueId + ".pdf");
 
-    public PdfExportService(TemplateEngine templateEngine) {
-        this.templateEngine = templateEngine;
         try {
-            var resource = new org.springframework.core.io.ClassPathResource("static/resume-common.css");
-            var bytes = java.nio.file.Files.readAllBytes(resource.getFile().toPath());
-            this.commonCss = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load shared resume CSS", e);
+            // Write HTML content to temporary file
+            Files.writeString(htmlFile.toPath(), html);
+
+            // Locate Chrome executable on Windows
+            String chromePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+            if (!new File(chromePath).exists()) {
+                chromePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
+            }
+            if (!new File(chromePath).exists()) {
+                throw new RuntimeException("Google Chrome executable not found at typical paths.");
+            }
+
+            // Print HTML to PDF using Headless Chrome
+            ProcessBuilder pb = new ProcessBuilder(
+                chromePath,
+                "--headless",
+                "--disable-gpu",
+                "--no-sandbox",
+                "--print-to-pdf=" + pdfFile.getAbsolutePath(),
+                "--no-margins",
+                htmlFile.getAbsolutePath()
+            );
+
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new RuntimeException("Headless Chrome process exited with code: " + exitCode);
+            }
+
+            if (!pdfFile.exists()) {
+                throw new RuntimeException("Headless Chrome did not output the PDF file.");
+            }
+
+            return Files.readAllBytes(pdfFile.toPath());
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Headless Chrome PDF rendering failed", e);
+        } finally {
+            // Cleanup temp files
+            if (htmlFile.exists()) htmlFile.delete();
+            if (pdfFile.exists()) pdfFile.delete();
         }
-    }
-
-    public byte[] generatePdf(ResumeDto.Full resume) {
-        Context ctx = new Context();
-        ctx.setVariable("resume", resume);
-
-        ResumeData.Data data = resume.data();
-        ctx.setVariable("personalInfo", data.personalInfo() != null ? data.personalInfo()
-                : new ResumeData.PersonalInfo("", "", "", "", "", "", "", "", "", ""));
-        ctx.setVariable("summary", data.summary() != null ? data.summary() : "");
-        ctx.setVariable("skillCategories", data.skillCategories() != null ? data.skillCategories() : List.of());
-        ctx.setVariable("experiences", data.experiences() != null ? data.experiences() : List.of());
-        ctx.setVariable("achievements", filterNonEmpty(data.achievements()));
-        ctx.setVariable("educations", data.educations() != null ? data.educations() : List.of());
-        ctx.setVariable("languages", data.languages() != null ? data.languages() : List.of());
-
-        String html = templateEngine.process("resume-pdf", ctx);
-        // Inject shared CSS (fonts, base styling) into the head of the generated HTML
-        html = html.replace("</head>", "<style>" + commonCss + "</style></head>");
-
-        try (var bos = new ByteArrayOutputStream()) {
-            var renderer = new ITextRenderer();
-            renderer.setDocumentFromString(html);
-            renderer.layout();
-            renderer.createPDF(bos);
-            return bos.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException("PDF generation failed", e);
-        }
-    }
-
-    private List<ResumeData.AchievementEntry> filterNonEmpty(List<ResumeData.AchievementEntry> list) {
-        if (list == null) return List.of();
-        return list.stream().filter(a -> a.text() != null && !a.text().isBlank()).toList();
     }
 }
+
