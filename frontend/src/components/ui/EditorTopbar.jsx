@@ -26,13 +26,15 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
   const resumeId      = useResumeStore(s => s.resume?.id)
   const resumeTitle   = useResumeStore(s => s.resume?.title ?? '')
   const template      = useResumeStore(s => s.resume?.data?.template ?? 'executive-navy')
-  const font          = useResumeStore(s => s.resume?.data?.font ?? 'Mantika Sans')
+  const font          = useResumeStore(s => s.resume?.data?.font ?? 'Merriweather Sans')
   const fontSize      = useResumeStore(s => s.resume?.data?.fontSize ?? 'medium')
   const showMonogram  = useResumeStore(s => s.resume?.data?.showMonogram ?? false)
+
   const saving        = useResumeStore(s => s.saving)
   const lastSaved     = useResumeStore(s => s.lastSaved)
   const undoLen       = useResumeStore(s => s.undoHistory.length)
   const redoLen       = useResumeStore(s => s.redoHistory.length)
+
 
   const {
     updateTitle, updateTemplate, updateFont, updateFontSize, updateData, undo, redo,
@@ -95,6 +97,7 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
       </div>
 
       <div className="topbar-right">
+
         {/* Monogram Toggle (Elegant Diamond only) */}
         {template === 'elegant-diamond' && (
           <label style={{ display: 'flex', alignItems: 'center', color: 'var(--text-1)', fontSize: '13px', marginRight: '12px', cursor: 'pointer', userSelect: 'none' }}>
@@ -127,14 +130,15 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
           onChange={e => updateFont(e.target.value)}
           style={SELECT_STYLE}
         >
+          <option value="Merriweather Sans">Font: Merriweather Sans</option>
           <option value="Mantika Sans">Font: Mantika Sans</option>
           <option value="Inter">Font: Inter</option>
           <option value="Outfit">Font: Outfit</option>
-          <option value="Plus Jakarta Sans">Font: Plus Jakarta Sans</option>
-          <option value="Montserrat">Font: Montserrat</option>
-          <option value="Playfair Display">Font: Playfair Display</option>
-          <option value="Merriweather">Font: Merriweather</option>
+          <option value="Halyard Text">Font: Halyard Text</option>
+          <option value="Minion 3 Display">Font: Minion 3</option>
+          <option value="Spinoza Pro">Font: Spinoza Pro</option>
         </select>
+
 
         <select
           id="font-size-select"

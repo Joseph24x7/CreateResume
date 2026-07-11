@@ -48,32 +48,63 @@
 }
 
 @media print {
+  /* Suppress default browser header/footer and set page size */
+  @page {
+    size: A4 portrait;
+    margin: 0 !important;
+  }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
-  .editor-page, .editor-topbar, .editor-left, .preview-panel, .preview-label, .preview-scroll, .preview-paper-wrapper {
-    all: unset !important;
+  /* Hide print-only-continuous from screen, but make it clean, full-size, and visible on print */
+  .print-only-continuous {
+    position: static !important;
+    width: 794px !important;
+    height: auto !important;
     display: block !important;
-  }
-
-  .preview-paper {
-    transform: none !important;
+    background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    box-shadow: none !important;
-    width: 100% !important;
-    border-radius: 0 !important;
-    background: #fff !important;
+    z-index: auto !important;
   }
 
-  body > * { display: none !important; }
-  .preview-paper { display: block !important; }
+  /* Hide standard screen elements when printing */
+  .editor-page,
+  .editor-topbar,
+  .editor-left,
+  .preview-panel,
+  .preview-label,
+  .preview-scroll,
+  .preview-pagination-bar,
+  .no-print,
+  .block-controls,
+  .bullet-delete-btn,
+  .en-page-break-marker,
+  .preview-page-break-line {
+    display: none !important;
+  }
+
+  /* Page break rules for elements */
+  .en-experience,
+  .en-education,
+  .en-skills-row-wrapper,
+  .en-skills-row,
+  .en-skill-row,
+  .en-achievements-row,
+  .en-achievement-cell,
+  .en-languages-grid,
+  .en-section-header {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
 }
 
 .en-resume {
-  font-family: Arial, Helvetica, sans-serif; /* overridden per-element by inline style={fontFamily} */
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   color: #000000;
   background: #ffffff;
   width: 794px;
@@ -117,15 +148,15 @@
 
 .en-header {
   background: #1a2744;
-  padding: 12px 28px 16px;
+  padding: 12px 28px 10px;
 }
 
 .en-header-inner {}
 
 .en-name {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 26px;
-  font-weight: 700;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 30px;
+  font-weight: 400;
   color: #ffffff;
   letter-spacing: 0.3px;
   margin-bottom: 4px;
@@ -133,26 +164,30 @@
 }
 
 .en-job-title {
-  font-size: 13px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 14px;
   color: #a8c4e0;
   font-weight: 400;
 }
 
 .en-summary-band {
   background: #1e3057;
-  padding: 12px 28px;
+  padding: 8px 28px 12px;
 }
 
 .en-summary-text {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   color: #e8f0f8;
   line-height: 1.65;
+  text-align: justify;
 }
 
 .en-contact-bar {
   display: flex;
   gap: 0;
-  padding: 10px 28px;
+  padding: 10px 28px 6px;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -167,7 +202,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   color: #000000;
 }
 
@@ -196,7 +233,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .en-section {
   padding: 0 28px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .en-section-header {
@@ -204,7 +241,8 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-section-title {
-  font-size: 10.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 13px;
   font-weight: 700;
   color: #1a2744;
   text-transform: uppercase;
@@ -218,7 +256,13 @@ svg[stroke="currentColor"].en-svg-icon {
   border-radius: 1px;
 }
 
-.en-skills-two-col {
+.en-skills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.en-skills-row {
   display: flex;
   justify-content: space-between;
   gap: 32px;
@@ -226,10 +270,9 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .en-skills-col {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  min-width: 0;
 }
+
 
 .en-skill-row {
   display: flex;
@@ -238,18 +281,21 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-skill-category {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
   font-weight: 700;
   color: #1a1a2e;
-  width: 80px;
-  min-width: 80px;
-  max-width: 80px;
+  width: 125px;
+  min-width: 125px;
+  max-width: 125px;
   flex-shrink: 0;
   margin-right: 8px;
 }
 
 .en-skill-values {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   color: #000000;
   line-height: 1.5;
   flex: 1;
@@ -261,13 +307,15 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-exp-role {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 11px;
   font-weight: 700;
   color: #1a1a2e;
 }
 
 .en-exp-company {
-  font-size: 10.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
   font-weight: 700;
   color: #1a1a2e;
   margin-bottom: 2px;
@@ -276,9 +324,11 @@ svg[stroke="currentColor"].en-svg-icon {
 .en-exp-meta {
   display: flex;
   justify-content: space-between;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 9px;
-  color: #000000;
+  font-weight: 400;
   font-style: italic;
+  color: #000000;
   margin-bottom: 2px;
 }
 
@@ -287,6 +337,7 @@ svg[stroke="currentColor"].en-svg-icon {
   color: #000000;
   font-style: italic;
   margin-bottom: 3px;
+  text-align: justify;
 }
 
 .en-exp-ach-label {
@@ -302,12 +353,15 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-exp-bullets li {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   line-height: 1.6;
   color: #000000;
   margin-bottom: 2px;
   position: relative;
   padding-left: 10px;
+  text-align: justify;
 }
 
 .en-exp-bullets li::before {
@@ -326,7 +380,9 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-achievement-cell {
-  font-size: 9.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
   line-height: 1.55;
   color: #000000;
 }
@@ -336,21 +392,26 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .en-edu-degree {
-  font-size: 10.5px;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
   font-weight: 700;
   color: #1a1a2e;
 }
 
 .en-edu-institution {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 10px;
+  font-weight: 400;
   color: #1a1a2e;
   margin-bottom: 2px;
 }
 
 .en-edu-meta {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 9px;
-  color: #000000;
+  font-weight: 400;
   font-style: italic;
+  color: #000000;
   display: flex;
   justify-content: space-between;
 }
@@ -366,15 +427,18 @@ svg[stroke="currentColor"].en-svg-icon {
 .en-language-item {}
 
 .en-lang-name {
-  font-size: 9.5px;
-  font-weight: 600;
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
   color: #1a1a2e;
 }
 
 .en-lang-proficiency {
+  font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 9px;
-  color: #000000;
+  font-weight: 400;
   font-style: italic;
+  color: #000000;
 }
 
 /* Bullet list & item controls */
@@ -536,7 +600,7 @@ svg[stroke="currentColor"].en-svg-icon {
 /* 1. Minimalist Accent Template (Image 3/4 style) */
 .template-minimalist-accent .en-header {
   background: transparent;
-  padding: 30px 28px 10px;
+  padding: 30px 28px 6px;
 }
 
 .template-minimalist-accent .en-name {
@@ -559,7 +623,7 @@ svg[stroke="currentColor"].en-svg-icon {
   background: #111111;
   border-radius: 4px;
   padding: 14px 24px;
-  margin: 12px 28px 4px;
+  margin: 8px 28px 4px;
 }
 
 .template-minimalist-accent .en-summary-text {
@@ -570,7 +634,11 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-minimalist-accent .en-contact-bar {
   border-bottom: none;
-  padding: 12px 28px 16px;
+  padding: 12px 28px 10px;
+}
+
+.template-minimalist-accent .en-section {
+  margin-top: 12px;
 }
 
 .template-minimalist-accent .en-contact-item {
@@ -648,7 +716,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-header {
   background: transparent;
-  padding: 28px 28px 12px;
+  padding: 28px 28px 6px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -672,7 +740,7 @@ svg[stroke="currentColor"].en-svg-icon {
   font-style: italic;
   font-family: 'Lora', 'Georgia', serif;
   letter-spacing: 0.5px;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .template-elegant-diamond .en-summary-band {
@@ -691,7 +759,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .template-elegant-diamond .en-contact-bar {
   border-top: 1px solid #c8d3e6;
   border-bottom: 1px solid #c8d3e6;
-  padding: 12px 28px;
+  padding: 12px 28px 8px;
   background: #f8fafc;
   display: flex;
   gap: 16px;
@@ -725,7 +793,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-section {
   padding: 0 28px;
-  margin-top: 20px;
+  margin-top: 14px;
 }
 
 .template-elegant-diamond .en-section-header {
@@ -763,11 +831,12 @@ svg[stroke="currentColor"].en-svg-icon {
   color: #304d89;
 }
 
-.template-elegant-diamond .en-skills-two-col {
+.template-elegant-diamond .en-skills-row {
   display: flex;
   justify-content: space-between;
   gap: 28px;
 }
+
 
 .template-elegant-diamond .en-skill-row {
   display: flex;
@@ -780,9 +849,9 @@ svg[stroke="currentColor"].en-svg-icon {
   font-size: 9.5px;
   font-weight: 700;
   color: #1b2340;
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
+  width: 125px;
+  min-width: 125px;
+  max-width: 125px;
   flex-shrink: 0;
 }
 
@@ -935,7 +1004,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .en-resume.size-large .en-summary-text { font-size: 11px; }
 .en-resume.size-large .en-contact-item { font-size: 11px; }
 .en-resume.size-large .en-section-title { font-size: 12px; }
-.en-resume.size-large .en-skill-category { font-size: 11px; width: 100px; min-width: 100px; max-width: 100px; }
+.en-resume.size-large .en-skill-category { font-size: 11px; width: 145px; min-width: 145px; max-width: 145px; }
 .en-resume.size-large .en-skill-values { font-size: 11px; }
 .en-resume.size-large .en-exp-role { font-size: 12px; }
 .en-resume.size-large .en-exp-company { font-size: 11px; }
@@ -964,4 +1033,16 @@ svg[stroke="currentColor"].en-svg-icon {
   display: none !important;
 }
 
-
+/* ── BOLD SECTIONS USER PREFERENCE ── */
+.bold-sections .en-summary-text,
+.bold-sections .en-skill-values,
+.bold-sections .en-exp-bullets li,
+.bold-sections .en-exp-project,
+.bold-sections .en-edu-degree,
+.bold-sections .en-edu-institution,
+.bold-sections .en-edu-meta,
+.bold-sections .en-lang-name,
+.bold-sections .en-lang-proficiency,
+.bold-sections .en-achievement-cell {
+  font-weight: 700 !important;
+}

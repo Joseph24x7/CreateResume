@@ -8,8 +8,8 @@ export const resumeApi = {
   create: (payload) => api.post('/resumes', payload).then(r => r.data),
   update: (id, payload) => api.put(`/resumes/${id}`, payload).then(r => r.data),
   delete: (id) => api.delete(`/resumes/${id}`),
-  downloadPdf: async (id, filename) => {
-    const response = await api.post(`/resumes/${id}/export/pdf`, {}, { responseType: 'blob' })
+  downloadPdf: async (id, html, filename) => {
+    const response = await api.post(`/resumes/${id}/export/pdf`, { html }, { responseType: 'blob' })
     const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
     const link = document.createElement('a')
     link.href = url

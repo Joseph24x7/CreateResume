@@ -48,10 +48,12 @@ public class ResumeController {
         resumeService.delete(id);
     }
 
+    public record ExportPdfRequest(String html) {}
+
     @PostMapping("/{id}/export/pdf")
-    public ResponseEntity<byte[]> exportPdf(@PathVariable UUID id) {
+    public ResponseEntity<byte[]> exportPdf(@PathVariable UUID id, @RequestBody ExportPdfRequest req) {
         var resume = resumeService.findById(id);
-        byte[] pdf = pdfExportService.generatePdf(resume);
+        byte[] pdf = pdfExportService.generatePdf(req.html());
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment",
@@ -59,3 +61,4 @@ public class ResumeController {
         return ResponseEntity.ok().headers(headers).body(pdf);
     }
 }
+

@@ -5,7 +5,6 @@ import useResumeStore from '../store/resumeStore'
 import PreviewPanel from '../components/preview/PreviewPanel'
 import ATSScore from '../components/ui/ATSScore'
 import EditorTopbar from '../components/ui/EditorTopbar'
-import { generatePdfFromPreview } from '../utils/pdfGenerator'
 import '../styles/editor.css'
 
 class ErrorBoundary extends React.Component {
@@ -53,6 +52,60 @@ class ErrorBoundary extends React.Component {
     }
     return this.props.children
   }
+}
+
+const fetchAsDataUri = async (url) => {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const blob = await res.blob()
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result)
+      reader.readAsDataURL(blob)
+    })
+  } catch {
+    return null
+  }
+}
+
+const getActiveStyles = async () => {
+  let cssText = ''
+  const fontUrls = new Map() // url string -> data URI
+
+  try {
+    for (const sheet of document.styleSheets) {
+      try {
+        if (!sheet.cssRules) continue
+      } catch { continue }
+
+      for (const rule of sheet.cssRules) {
+        cssText += rule.cssText + '\n'
+      }
+    }
+  } catch (e) {
+    console.error('Failed to read stylesheets:', e)
+  }
+
+  // Find all url() references to font files (woff2, woff, ttf, otf)
+  const urlRegex = /url\(["']?([^"')]+\.(?:woff2?|ttf|otf))["']?\)/gi
+  const matches = [...cssText.matchAll(urlRegex)]
+
+  for (const match of matches) {
+    const originalUrl = match[1]
+    if (originalUrl.startsWith('data:')) continue
+    if (!fontUrls.has(originalUrl)) {
+      const dataUri = await fetchAsDataUri(originalUrl)
+      if (dataUri) fontUrls.set(originalUrl, dataUri)
+    }
+  }
+
+  // Replace all font URLs with their data URIs
+  for (const [originalUrl, dataUri] of fontUrls) {
+    cssText = cssText.replaceAll(originalUrl, dataUri)
+  }
+
+  return cssText
 }
 
 /**
@@ -119,9 +172,64 @@ export default function EditorPage() {
     if (!printRef.current) return
     setPdfLoading(true)
     try {
-      const resumeTitle = useResumeStore.getState().resume?.title
-      const filename = (resumeTitle || 'resume').replace(/[^a-zA-Z0-9\-_ ]/g, '_') + '.pdf'
-      await generatePdfFromPreview(printRef.current, filename)
+      const cssText = await getActiveStyles()
+      const printEl = printRef.current
+
+      // Measure content and calculate pages exactly like the preview does
+      const resumeEl = printEl.querySelector('.en-resume')
+      const contentHeight = resumeEl ? resumeEl.scrollHeight : printEl.scrollHeight
+      const PAGE_1_H = 1087
+      const PAGE_N_H = 1051
+      const numPages = contentHeight <= PAGE_1_H ? 1 : 1 + Math.ceil((contentHeight - PAGE_1_H) / PAGE_N_H)
+
+      // Clone the print element to avoid mutating the live DOM
+      const clone = printEl.cloneNode(true)
+      clone.style.cssText = 'position:static;width:794px;height:auto;background:#fff;margin:0;padding:0;z-index:auto;'
+      const fullContent = clone.innerHTML
+
+      // Fetch Google Fonts CSS and embed it inline
+      let googleFontsCss = ''
+      try {
+        const gfRes = await fetch('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&family=Roboto:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Merriweather+Sans:ital,wght@0,300;0,400;0,700;0,800;1,300;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap')
+        if (gfRes.ok) googleFontsCss = await gfRes.text()
+      } catch { /* continue without */ }
+
+      // Build individual page divs — each page clips a viewport window over the full content
+      let pagesHtml = ''
+      for (let i = 0; i < numPages; i++) {
+        const clipH = i === 0 ? PAGE_1_H : PAGE_N_H
+        const topOffset = i === 0 ? 0 : PAGE_1_H + (i - 1) * PAGE_N_H
+        const topPad = i === 0 ? 0 : 36  // subsequent pages have top margin
+        const pageBreak = i < numPages - 1 ? 'page-break-after: always;' : ''
+
+        pagesHtml += `
+<div style="width:794px; height:1123px; position:relative; overflow:hidden; ${pageBreak} box-sizing:border-box;">
+  <div style="position:absolute; top:${topPad}px; left:0; width:794px; height:${clipH}px; overflow:hidden;">
+    <div style="position:absolute; top:${-topOffset}px; left:0; width:794px;">
+      ${fullContent}
+    </div>
+  </div>
+</div>`
+      }
+
+      const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4 portrait; margin: 0 !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { margin: 0; padding: 0; background: white; }
+    ${googleFontsCss}
+    ${cssText}
+  </style>
+</head>
+<body>
+  ${pagesHtml}
+</body>
+</html>`
+
+      await useResumeStore.getState().downloadPdf(fullHtml)
     } catch (err) {
       console.error('PDF generation failed:', err)
     } finally {

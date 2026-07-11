@@ -276,10 +276,10 @@ const useResumeStore = create((set, get) => ({
     set(state => ({ resumeList: state.resumeList.filter(r => r.id !== id) }))
   },
 
-  downloadPdf: async () => {
+  downloadPdf: async (html) => {
     const { resume } = get()
     if (!resume) return
-    await resumeApi.downloadPdf(resume.id, `${resume.title}.pdf`)
+    await resumeApi.downloadPdf(resume.id, html, `${resume.title}.pdf`)
   },
 }))
 
