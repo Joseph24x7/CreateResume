@@ -948,7 +948,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .template-modern-slate .en-header {
   background: #1e293b;
   padding: 22px 36px 14px;
-  border-bottom: 3px solid #0ea5e9;
+  border-bottom: 3px solid #64748b;
 }
 
 .template-modern-slate .en-name {
@@ -1005,7 +1005,7 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .template-modern-slate .en-icon {
-  color: #0ea5e9;
+  color: #64748b;
   width: 13px;
   height: 13px;
 }
@@ -1027,7 +1027,7 @@ svg[stroke="currentColor"].en-svg-icon {
   align-items: center;
   margin-bottom: 10px;
   padding-left: 10px;
-  border-left: 2.5px solid #0ea5e9;
+  border-left: 2.5px solid #64748b;
 }
 
 .template-modern-slate .en-section-title {
@@ -1044,65 +1044,93 @@ svg[stroke="currentColor"].en-svg-icon {
   display: none;
 }
 
-/* Skills — elegant flowing paragraph with dot separators for maximum space efficiency */
+/* Skills — elegant card blocks using 2-column grid layout */
 .template-modern-slate .en-skills-grid {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin-top: 4px;
-  line-height: 1.6;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .template-modern-slate .en-skills-row {
-  display: contents;
+  display: flex;
+  gap: 14px;
 }
 
 .template-modern-slate .en-skills-col {
-  display: contents;
+  flex: 1;
+  min-width: 0;
 }
 
 .template-modern-slate .en-skill-row {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #f8fafc; /* premium card bg */
+  border: 1.5px solid #e2e8f0;
+  border-left: 3px solid #64748b; /* grey accent line */
+  border-radius: 4px;
+  padding: 6px 12px;
+  gap: 2px;
+  transition: all 0.15s ease-in-out;
 }
 
-.template-modern-slate .en-skill-row:not(:last-child)::after {
-  content: '•';
-  margin-left: 12px;
-  color: #0ea5e9;
-  font-weight: 700;
+.template-modern-slate .en-skill-row:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .template-modern-slate .en-skill-category {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
   margin-right: 0 !important;
-  flex-shrink: 0;
-}
-
-.template-modern-slate .en-skill-category::after {
-  content: ':';
 }
 
 .template-modern-slate .en-skill-values {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 400;
   color: #475569;
   line-height: 1.4;
 }
 
-/* Experience — clean hierarchy */
+/* Experience — premium vertical timeline styling */
 .template-modern-slate .en-experience {
-  margin-bottom: 16px;
+  position: relative;
+  padding-left: 18px;
+  padding-bottom: 12px;
+  margin-bottom: 0;
+  border-left: 1.5px solid #e2e8f0; /* vertical timeline line */
+}
+
+.template-modern-slate .en-experience:last-child {
+  border-left: 1.5px solid transparent;
+}
+
+.template-modern-slate .en-experience::before {
+  content: '';
+  position: absolute;
+  left: -5.5px; /* center on the 1.5px border */
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #64748b; /* grey accent dot */
+  z-index: 2;
+  transition: background 0.15s;
+}
+
+.template-modern-slate .en-experience:hover::before {
+  background: #64748b; /* highlights on hover */
 }
 
 .template-modern-slate .en-exp-role {
@@ -1142,7 +1170,7 @@ svg[stroke="currentColor"].en-svg-icon {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 8px;
   font-weight: 600;
-  color: #0ea5e9;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 3px;
@@ -1174,21 +1202,52 @@ svg[stroke="currentColor"].en-svg-icon {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #0ea5e9;
+  background: #94a3b8;
 }
 
-/* Achievements */
+/* Achievements — premium card/tag design */
 .template-modern-slate .en-achievement-cell {
   font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif;
   font-size: 9.5px;
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.5;
   color: #334155;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-left: 3px solid #64748b; /* grey accent line */
+  border-radius: 4px;
+  padding: 6px 12px;
 }
 
-/* Education */
+/* Education — timeline styling matching experience */
 .template-modern-slate .en-education {
-  margin-bottom: 12px;
+  position: relative;
+  padding-left: 18px;
+  padding-bottom: 12px;
+  margin-bottom: 0;
+  border-left: 1.5px solid #e2e8f0;
+}
+
+.template-modern-slate .en-education:last-child {
+  border-left: 1.5px solid transparent;
+}
+
+.template-modern-slate .en-education::before {
+  content: '';
+  position: absolute;
+  left: -5.5px;
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #64748b;
+  z-index: 2;
+  transition: background 0.15s;
+}
+
+.template-modern-slate .en-education:hover::before {
+  background: #64748b;
 }
 
 .template-modern-slate .en-edu-degree {
@@ -1232,12 +1291,12 @@ svg[stroke="currentColor"].en-svg-icon {
 
 /* Block hover accent */
 .template-modern-slate .canvas-block-wrapper:hover {
-  box-shadow: -3px 0 0 0 #0ea5e9;
+  box-shadow: -3px 0 0 0 #64748b;
 }
 
 /* Page 2 continuation header */
 .template-modern-slate .en-header-subtle {
-  border-bottom: 2.5px solid #0ea5e9;
+  border-bottom: 2.5px solid #64748b;
   background: #f8fafc;
 }
 
