@@ -1,15 +1,20 @@
 package com.resumemaker.config;
 
-import org.h2.tools.Server;
+import org.h2.server.web.JakartaWebServlet;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import java.sql.SQLException;
 
 @Configuration
 public class H2ConsoleConfig {
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
-    public Server h2WebServer() throws SQLException {
-        return Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8082");
+    @Bean
+    public ServletRegistrationBean<JakartaWebServlet> h2ConsoleServletRegistration() {
+        ServletRegistrationBean<JakartaWebServlet> registration = new ServletRegistrationBean<>(new JakartaWebServlet());
+        registration.addUrlMappings("/h2-console/*");
+        registration.addInitParameter("webAllowOthers", "true");
+        registration.addInitParameter("trace", "false");
+        registration.setLoadOnStartup(1);
+        return registration;
     }
 }
