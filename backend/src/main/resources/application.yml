@@ -18,13 +18,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+    defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: false
-  thymeleaf:
-    mode: XML
-    suffix: .html
-    cache: false
 
 server:
   port: 8080

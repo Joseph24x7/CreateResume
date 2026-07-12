@@ -9,6 +9,7 @@
 # IDE / System
 /.idea/
 /*.iml
+/out/
 .DS_Store
 
 # Local H2 Database
