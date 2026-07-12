@@ -28,19 +28,7 @@ public class PdfExportService {
                 throw new RuntimeException("Google Chrome executable not found at typical paths.");
             }
 
-            // Print HTML to PDF using Headless Chrome
-            ProcessBuilder pb = new ProcessBuilder(
-                chromePath,
-                "--headless",
-                "--disable-gpu",
-                "--no-sandbox",
-                "--print-to-pdf=" + pdfFile.getAbsolutePath(),
-                "--no-margins",
-                htmlFile.getAbsolutePath()
-            );
-
-            Process process = pb.start();
-            int exitCode = process.waitFor();
+            int exitCode = runChromeProcess(chromePath, htmlFile, pdfFile);
             if (exitCode != 0) {
                 throw new RuntimeException("Headless Chrome process exited with code: " + exitCode);
             }
@@ -52,11 +40,37 @@ public class PdfExportService {
             return Files.readAllBytes(pdfFile.toPath());
 
         } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new RuntimeException("Headless Chrome PDF rendering failed", e);
         } finally {
-            // Cleanup temp files
-            if (htmlFile.exists()) htmlFile.delete();
-            if (pdfFile.exists()) pdfFile.delete();
+            cleanupFile(htmlFile);
+            cleanupFile(pdfFile);
+        }
+    }
+
+    private int runChromeProcess(String chromePath, File htmlFile, File pdfFile) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(
+            chromePath,
+            "--headless",
+            "--disable-gpu",
+            "--no-sandbox",
+            "--print-to-pdf=" + pdfFile.getAbsolutePath(),
+            "--no-margins",
+            htmlFile.getAbsolutePath()
+        );
+        Process process = pb.start();
+        return process.waitFor();
+    }
+
+    private void cleanupFile(File file) {
+        if (file.exists()) {
+            try {
+                Files.deleteIfExists(file.toPath());
+            } catch (IOException e) {
+                // Ignore cleanup exception or log if needed
+            }
         }
     }
 }
