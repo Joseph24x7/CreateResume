@@ -109,13 +109,13 @@ const SectionTitle = ({ children, type, template, spacers }) => (
 
 const ContinuationHeader = ({ type, template }) => {
   const titles = {
-    skills: 'Primary Skills (Continued)',
-    experience: 'Employment History (Continued)',
-    achievements: 'Achievements (Continued)',
-    education: 'Education (Continued)',
-    languages: 'Languages (Continued)'
+    skills: 'Primary Skills',
+    experience: 'Employment History',
+    achievements: 'Achievements',
+    education: 'Education',
+    languages: 'Languages'
   }
-  const title = titles[type] || 'Continued'
+  const title = titles[type] || ''
   return (
     <div className="en-section-header en-continuation-header" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
       <h2 className="en-section-title">
