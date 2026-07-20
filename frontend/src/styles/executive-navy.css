@@ -1046,3 +1046,14 @@ svg[stroke="currentColor"].en-svg-icon {
 .bold-sections .en-achievement-cell {
   font-weight: 700 !important;
 }
+
+/* ── CONTINUATION HEADER ADJUSTMENTS ── */
+.en-exp-bullets li.en-continuation-item::before {
+  display: none !important;
+  content: none !important;
+}
+.en-exp-bullets li.en-continuation-item {
+  padding-left: 0 !important;
+  margin-bottom: 8px !important;
+}
+

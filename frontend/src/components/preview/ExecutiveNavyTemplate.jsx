@@ -107,6 +107,26 @@ const SectionTitle = ({ children, type, template, spacers }) => (
   </>
 )
 
+const ContinuationHeader = ({ type, template }) => {
+  const titles = {
+    skills: 'Primary Skills (Continued)',
+    experience: 'Employment History (Continued)',
+    achievements: 'Achievements (Continued)',
+    education: 'Education (Continued)',
+    languages: 'Languages (Continued)'
+  }
+  const title = titles[type] || 'Continued'
+  return (
+    <div className="en-section-header en-continuation-header" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+      <h2 className="en-section-title">
+        <SectionIcon type={type} template={template} />
+        <span>{title}</span>
+      </h2>
+      <div className="en-section-rule" />
+    </div>
+  )
+}
+
 export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}, setSpacers, isMaster = false, onLayoutCalculated }) {
   const lastCalculatedSpacersRef = useRef({})
   const spacers = isMaster ? {} : propsSpacers
@@ -184,7 +204,7 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
         const PAGE_N_H = 1051 // Subsequent pages height (has top margin)
         
         if (y < PAGE_1_H) {
-          return { pageIdx: 0, offset: y, remaining: PAGE_1_H - y }
+        return { pageIdx: 0, offset: y, remaining: PAGE_1_H - y }
         } else {
           const restY = y - PAGE_1_H
           const pageIdx = 1 + Math.floor(restY / PAGE_N_H)
@@ -195,17 +215,27 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
 
       // Step 3: Run the simulation sequentially
       let accumulatedSpacers = 0
+      const sectionHeaderPages = {} // section -> pageIdx
+      const sectionPageHeadersRendered = {} // "section-page" -> boolean
+
+      const getSectionOfBlock = (blockId) => {
+        if (!blockId) return ''
+        if (blockId.startsWith('skill-') || blockId === 'header-skills') return 'skills'
+        if (blockId.startsWith('exp-') || blockId === 'header-experience') return 'experience'
+        if (blockId.startsWith('ach-') || blockId === 'header-achievements') return 'achievements'
+        if (blockId.startsWith('edu-') || blockId === 'header-education') return 'education'
+        if (blockId.startsWith('lang-') || blockId === 'header-languages') return 'languages'
+        return ''
+      }
+
       for (let i = 0; i < blocks.length; i++) {
         const b = blocks[i]
-
-        // Simulated start position is the natural position plus all spacers added so far!
-        const simulatedStartY = b.unspacedStartY + accumulatedSpacers
-        const startInfo = getPageInfo(simulatedStartY)
-
-        let spacerHeight = 0
+        const section = getSectionOfBlock(b.blockId)
 
         if (b.isSectionHeader) {
-          // Section Title: keep together with the first entry of that section
+          const simulatedStartY = b.unspacedStartY + accumulatedSpacers
+          const startInfo = getPageInfo(simulatedStartY)
+
           let groupHeight = b.height
           if (i + 1 < blocks.length) {
             const nextBlock = blocks[i + 1]
@@ -217,54 +247,100 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
           }
 
           const endInfo = getPageInfo(simulatedStartY + groupHeight - 0.1)
+          let spacerHeight = 0
           if (startInfo.pageIdx !== endInfo.pageIdx && groupHeight < 1051) {
             spacerHeight = startInfo.remaining
           }
-        } else if (b.isExpHeader) {
-          // Experience Header: keep together with all bullets if possible,
-          // or at least with the first bullet if the whole experience is too tall.
-          let totalHeight = b.height
-          let minHeight = b.height
-          if (b.bullets && b.bullets.length > 0) {
-            const lastBullet = b.bullets[b.bullets.length - 1]
-            const firstBullet = b.bullets[0]
-            totalHeight = (lastBullet.unspacedStartY + lastBullet.height) - b.unspacedStartY
-            minHeight = (firstBullet.unspacedStartY + firstBullet.height) - b.unspacedStartY
+
+          if (spacerHeight > 0) {
+            b.spacerHeight = spacerHeight
+            accumulatedSpacers += spacerHeight
           }
 
-          const totalEndInfo = getPageInfo(simulatedStartY + totalHeight - 0.1)
-          const minEndInfo = getPageInfo(simulatedStartY + minHeight - 0.1)
+          const finalStartY = b.unspacedStartY + accumulatedSpacers
+          const finalStartInfo = getPageInfo(finalStartY)
+          b.pageIdx = finalStartInfo.pageIdx
+          sectionHeaderPages[section] = b.pageIdx
+        } else {
+          let simulatedStartY = b.unspacedStartY + accumulatedSpacers
+          let startInfo = getPageInfo(simulatedStartY)
 
-          if (totalHeight < 1051) {
-            if (startInfo.pageIdx !== totalEndInfo.pageIdx) {
-              spacerHeight = startInfo.remaining
+          // Check if we need to show a continuation header before this block
+          const headerPage = sectionHeaderPages[section]
+          let needsContinuationHeader = false
+          if (headerPage !== undefined && startInfo.pageIdx > headerPage) {
+            const key = `${section}-${startInfo.pageIdx}`
+            if (!sectionPageHeadersRendered[key]) {
+              needsContinuationHeader = true
+            }
+          }
+
+          // If we need a continuation header, it adds height!
+          const extraHeight = needsContinuationHeader ? 32 : 0
+
+          let spacerHeight = 0
+          if (b.isExpHeader) {
+            let totalHeight = b.height + extraHeight
+            let minHeight = b.height + extraHeight
+            if (b.bullets && b.bullets.length > 0) {
+              const lastBullet = b.bullets[b.bullets.length - 1]
+              const firstBullet = b.bullets[0]
+              totalHeight = (lastBullet.unspacedStartY + lastBullet.height) - b.unspacedStartY + extraHeight
+              minHeight = (firstBullet.unspacedStartY + firstBullet.height) - b.unspacedStartY + extraHeight
+            }
+
+            const totalEndInfo = getPageInfo(simulatedStartY + totalHeight - 0.1)
+            const minEndInfo = getPageInfo(simulatedStartY + minHeight - 0.1)
+
+            if (totalHeight < 1051) {
+              if (startInfo.pageIdx !== totalEndInfo.pageIdx) {
+                spacerHeight = startInfo.remaining
+              }
+            } else {
+              if (startInfo.pageIdx !== minEndInfo.pageIdx) {
+                spacerHeight = startInfo.remaining
+              }
             }
           } else {
-            if (startInfo.pageIdx !== minEndInfo.pageIdx) {
+            const totalHeight = b.height + extraHeight
+            const endInfo = getPageInfo(simulatedStartY + totalHeight - 0.1)
+            if (startInfo.pageIdx !== endInfo.pageIdx && totalHeight < 1051) {
               spacerHeight = startInfo.remaining
             }
           }
-        } else {
-          // Standard block or individual bullet: avoid splitting internally
-          const endInfo = getPageInfo(simulatedStartY + b.height - 0.1)
-          if (startInfo.pageIdx !== endInfo.pageIdx && b.height < 1051) {
-            spacerHeight = startInfo.remaining
+
+          if (spacerHeight > 0) {
+            b.spacerHeight = spacerHeight
+            accumulatedSpacers += spacerHeight
+            simulatedStartY = b.unspacedStartY + accumulatedSpacers
+            startInfo = getPageInfo(simulatedStartY)
+
+            // Re-evaluate continuation header on the new page
+            needsContinuationHeader = false
+            const key = `${section}-${startInfo.pageIdx}`
+            if (headerPage !== undefined && startInfo.pageIdx > headerPage && !sectionPageHeadersRendered[key]) {
+              needsContinuationHeader = true
+            }
+          }
+
+          b.pageIdx = startInfo.pageIdx
+          if (needsContinuationHeader) {
+            const key = `${section}-${startInfo.pageIdx}`
+            sectionPageHeadersRendered[key] = true
+            b.needsContinuationHeader = true
+            accumulatedSpacers += 32
           }
         }
-
-        if (spacerHeight > 0) {
-          b.spacerHeight = spacerHeight
-          accumulatedSpacers += spacerHeight
-        }
       }
-
-
 
       // Step 4: Extract calculated spacers
       const newSpacers = {}
       blocks.forEach((b) => {
         if (b.spacerHeight > 0) {
           newSpacers[b.blockId] = Math.ceil(b.spacerHeight)
+        }
+        if (b.needsContinuationHeader) {
+          newSpacers[b.blockId + '-continue'] = true
         }
       })
 
@@ -551,9 +627,16 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
                 const cat1 = skillCategories[idx1]
                 const cat2 = skillCategories[idx2]
 
+                const showContinue = (cat1 && spacers[`skill-${cat1.id}-continue`]) || (cat2 && spacers[`skill-${cat2.id}-continue`])
                 return (
-                  <div key={rowIdx} className="en-skills-row">
-                    <div className="en-skills-col">
+                  <React.Fragment key={rowIdx}>
+                    {showContinue && (
+                      <div style={{ width: '100%' }}>
+                        <ContinuationHeader type="skills" template={template} />
+                      </div>
+                    )}
+                    <div className="en-skills-row">
+                      <div className="en-skills-col">
                       {cat1 && (
                         <React.Fragment>
                           <PageSpacer id={`skill-${cat1.id}`} spacers={spacers} />
@@ -610,6 +693,7 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
                       )}
                     </div>
                   </div>
+                </React.Fragment>
                 )
               })}
             </div>
@@ -622,6 +706,9 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
             {experiences.map((exp, idx) => (
               <div key={exp.id} className="en-experience">
                 <PageSpacer id={`exp-hdr-${exp.id}`} spacers={spacers} />
+                {spacers[`exp-hdr-${exp.id}-continue`] && (
+                  <ContinuationHeader type="experience" template={template} />
+                )}
                 <div 
                   data-page-block="true" 
                   data-block-id={`exp-hdr-${exp.id}`} 
@@ -659,6 +746,11 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
                   {(exp.achievements || ['']).map((ach, bIdx) => (
                     <React.Fragment key={bIdx}>
                       <PageSpacer id={`exp-bullet-${exp.id}-${bIdx}`} spacers={spacers} />
+                      {spacers[`exp-bullet-${exp.id}-${bIdx}-continue`] && (
+                        <li className="en-continuation-item" style={{ listStyleType: 'none', paddingLeft: 0, position: 'static' }}>
+                          <ContinuationHeader type="experience" template={template} />
+                        </li>
+                      )}
                       <li 
                         key={bIdx}
                         data-page-block="true"
@@ -703,6 +795,9 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
               {achievements.map((ach, idx) => (
                 <React.Fragment key={ach.id}>
                   <PageSpacer id={`ach-${ach.id}`} spacers={spacers} />
+                  {spacers[`ach-${ach.id}-continue`] && (
+                    <ContinuationHeader type="achievements" template={template} />
+                  )}
                   <div data-page-block="true" data-block-id={`ach-${ach.id}`} className="en-achievement-cell canvas-block-wrapper">
                     <BlockControls
                       onMoveUp={idx > 0 ? () => moveAch(idx, -1) : null}
@@ -727,6 +822,9 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
             {educations.map((edu, idx) => (
               <React.Fragment key={edu.id}>
                 <PageSpacer id={`edu-${edu.id}`} spacers={spacers} />
+                {spacers[`edu-${edu.id}-continue`] && (
+                  <ContinuationHeader type="education" template={template} />
+                )}
                 <div data-page-block="true" data-block-id={`edu-${edu.id}`} className="en-education canvas-block-wrapper">
                   <BlockControls
                     onMoveUp={idx > 0 ? () => moveEdu(idx, -1) : null}
@@ -762,6 +860,9 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
               {languages.map((lang, idx) => (
                 <React.Fragment key={lang.id}>
                   <PageSpacer id={`lang-${lang.id}`} spacers={spacers} />
+                  {spacers[`lang-${lang.id}-continue`] && (
+                    <ContinuationHeader type="languages" template={template} />
+                  )}
                   <div data-page-block="true" data-block-id={`lang-${lang.id}`} className="en-language-item canvas-block-wrapper">
                     <BlockControls
                       onMoveUp={idx > 0 ? () => moveLang(idx, -1) : null}
