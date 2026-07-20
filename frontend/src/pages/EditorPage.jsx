@@ -5,6 +5,12 @@ import useResumeStore from '../store/resumeStore'
 import PreviewPanel from '../components/preview/PreviewPanel'
 import ATSScore from '../components/ui/ATSScore'
 import EditorTopbar from '../components/ui/EditorTopbar'
+import CoverLetterWorkspace from '../components/workspace/CoverLetterWorkspace'
+import ATSCheckerWorkspace from '../components/workspace/ATSCheckerWorkspace'
+import PortfolioWorkspace from '../components/workspace/PortfolioWorkspace'
+import InterviewWorkspace from '../components/workspace/InterviewWorkspace'
+import JobTrackerWorkspace from '../components/workspace/JobTrackerWorkspace'
+import OfferComparisonWorkspace from '../components/workspace/OfferComparisonWorkspace'
 import '../styles/editor.css'
 
 class ErrorBoundary extends React.Component {
@@ -123,6 +129,9 @@ export default function EditorPage() {
   const printRef = useRef(null)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [zoom, setZoom] = useState(1)
+  const [activeTab, setActiveTab] = useState('editor')
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('gemini_api_key') || '')
 
   // EditorPage only reads the minimum it needs for lifecycle management
   const loading = useResumeStore(s => s.loading)
@@ -280,11 +289,126 @@ export default function EditorPage() {
         />
 
         <div className="editor-body">
-          <main className="editor-right full-canvas">
-            <PreviewPanel printRef={printRef} zoom={zoom} />
-          </main>
+          {/* LEFT WORKSPACE SIDEBAR */}
+          <aside className="workspace-sidebar">
+            <button 
+              className={`sidebar-tab ${activeTab === 'editor' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('editor')}
+              title="Resume Builder"
+            >
+              <span className="tab-icon">📄</span>
+              <span className="tab-label">Resume</span>
+            </button>
+            <button 
+              className={`sidebar-tab ${activeTab === 'cover-letter' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('cover-letter')}
+              title="Cover Letter Builder"
+            >
+              <span className="tab-icon">✉️</span>
+              <span className="tab-label">Cover Letter</span>
+            </button>
+            <button 
+              className={`sidebar-tab ${activeTab === 'ats-checker' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('ats-checker')}
+              title="ATS Score Checker"
+            >
+              <span className="tab-icon">📊</span>
+              <span className="tab-label">ATS Score</span>
+            </button>
+            <button 
+              className={`sidebar-tab ${activeTab === 'portfolio' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('portfolio')}
+              title="Portfolio Converter"
+            >
+              <span className="tab-icon">🌐</span>
+              <span className="tab-label">Portfolio</span>
+            </button>
+            <button 
+              className={`sidebar-tab ${activeTab === 'interview' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('interview')}
+              title="AI Interview Prep"
+            >
+              <span className="tab-icon">💬</span>
+              <span className="tab-label">Interview</span>
+            </button>
+            <button 
+              className={`sidebar-tab ${activeTab === 'job-tracker' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('job-tracker')}
+              title="Job Tracker Dashboard"
+            >
+              <span className="tab-icon">📋</span>
+              <span className="tab-label">Tracker</span>
+            </button>
+            <button 
+              className={`sidebar-tab ${activeTab === 'offer-comparison' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('offer-comparison')}
+              title="Offer Letter Comparison"
+            >
+              <span className="tab-icon">⚖️</span>
+              <span className="tab-label">Offers</span>
+            </button>
+
+            {/* API Settings Gear at bottom */}
+            <div className="sidebar-footer">
+              <button 
+                className="sidebar-tab settings-tab" 
+                onClick={() => setShowSettingsModal(true)}
+                title="AI Settings"
+              >
+                <span className="tab-icon">⚙️</span>
+                <span className="tab-label">Settings</span>
+              </button>
+            </div>
+          </aside>
+
+          {/* MAIN WORKSPACE CONTENT */}
+          <div className="workspace-content">
+            {activeTab === 'editor' && (
+              <main className="editor-right full-canvas">
+                <PreviewPanel printRef={printRef} zoom={zoom} />
+              </main>
+            )}
+            {activeTab === 'cover-letter' && <CoverLetterWorkspace />}
+            {activeTab === 'ats-checker' && <ATSCheckerWorkspace />}
+            {activeTab === 'portfolio' && <PortfolioWorkspace />}
+            {activeTab === 'interview' && <InterviewWorkspace />}
+            {activeTab === 'job-tracker' && <JobTrackerWorkspace />}
+            {activeTab === 'offer-comparison' && <OfferComparisonWorkspace />}
+          </div>
         </div>
       </div>
+
+      {showSettingsModal && (
+        <div className="settings-modal-overlay">
+          <div className="settings-modal">
+            <div className="settings-modal-header">
+              <h3>AI Settings</h3>
+              <button className="close-btn" onClick={() => setShowSettingsModal(false)}>✕</button>
+            </div>
+            <div className="settings-modal-body">
+              <div className="form-group">
+                <label htmlFor="gemini-key-input">Gemini API Key</label>
+                <input
+                  id="gemini-key-input"
+                  type="password"
+                  placeholder="Enter your Gemini API key (e.g. AIzaSy...)"
+                  value={geminiKey}
+                  onChange={(e) => {
+                    setGeminiKey(e.target.value)
+                    localStorage.setItem('gemini_api_key', e.target.value)
+                  }}
+                />
+                <small className="help-text">
+                  Your key is saved locally in your browser and sent only to the backend to generate questions & cover letters. If left blank, a smart local mock simulator will be used.
+                </small>
+              </div>
+            </div>
+            <div className="settings-modal-footer">
+              <button className="btn-primary" onClick={() => setShowSettingsModal(false)}>Save & Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </ErrorBoundary>
   )
 }
