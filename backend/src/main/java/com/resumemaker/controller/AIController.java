@@ -91,11 +91,14 @@ public class AIController {
             return response;
         }
 
+        boolean hasJd = req.jobDescription() != null && !req.jobDescription().trim().isEmpty();
+        String jdSection = hasJd ? "\nTarget Job Description / Key Requirements:\n" + req.jobDescription().trim() + "\n" : "";
+
         String prompt = "Write a tailored, highly professional cover letter for a candidate applying for the role of " +
                 req.jobTitle() + " at " + req.company() + ".\n" +
-                "Candidate Resume Highlights:\n" + req.resumeText() + "\n" +
-                "Target Job Description:\n" + req.jobDescription() + "\n" +
-                "Structure it with clean paragraphs, formal headings, and professional sign-offs. Return only the cover letter body text.";
+                "Candidate Resume Highlights:\n" + req.resumeText() +
+                jdSection +
+                "\nStructure it with clean paragraphs, formal headings, and professional sign-offs. Return only the cover letter body text.";
 
         try {
             String letter = callGemini(geminiKey, prompt);
@@ -174,11 +177,18 @@ public class AIController {
     }
 
     private String getMockCoverLetter(CoverLetterRequest req) {
-        String company = (req.company() == null || req.company().isEmpty()) ? "[Company Name]" : req.company();
-        String title = (req.jobTitle() == null || req.jobTitle().isEmpty()) ? "Software Engineer" : req.jobTitle();
+        String company = (req.company() == null || req.company().trim().isEmpty()) ? "[Company Name]" : req.company().trim();
+        String title = (req.jobTitle() == null || req.jobTitle().trim().isEmpty()) ? "Software Engineer" : req.jobTitle().trim();
+        boolean hasJd = req.jobDescription() != null && !req.jobDescription().trim().isEmpty();
+
+        String jdParagraph = hasJd
+                ? "Having reviewed your key job requirements (" + (req.jobDescription().trim().length() > 80 ? req.jobDescription().trim().substring(0, 80) + "..." : req.jobDescription().trim()) + "), I am excited to bring my relevant background, technical strengths, and problem-solving mindset to execute on these priorities from day one.\n\n"
+                : "";
+
         return "Dear Hiring Manager,\n\n" +
                 "I am writing to express my strong interest in the " + title + " position at " + company + ". " +
-                "With my backgrounds and hands-on experiences outlined in my resume, I am confident in my ability to immediately add value to your engineering team.\n\n" +
+                "With my background and hands-on experience outlined in my resume, I am confident in my ability to immediately add value to your team.\n\n" +
+                jdParagraph +
                 "In my previous roles, I have consistently demonstrated a commitment to engineering excellence, writing clean code, and solving complex problems. " +
                 "I look forward to the opportunity to discuss how my skillset aligns with " + company + "'s current product goals.\n\n" +
                 "Thank you for your time and consideration.\n\n" +

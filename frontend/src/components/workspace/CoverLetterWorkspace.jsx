@@ -9,6 +9,7 @@ export default function CoverLetterWorkspace() {
   const [jobDescription, setJobDescription] = useState('')
   const [coverLetter, setCoverLetter] = useState('')
   const [loading, setLoading] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const handleGenerate = async () => {
@@ -52,14 +53,146 @@ export default function CoverLetterWorkspace() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleDownload = () => {
-    const element = document.createElement('a')
-    const file = new Blob([coverLetter], { type: 'text/plain' })
-    element.href = URL.createObjectURL(file)
-    element.download = `${company.replace(/\s+/g, '_')}_Cover_Letter.txt`
-    document.body.appendChild(element)
-    element.click()
-    document.body.removeChild(element)
+  const handleDownloadPdf = async () => {
+    if (!coverLetter) return
+    setPdfLoading(true)
+    try {
+      const pi = resume?.data?.personalInfo || {}
+      const candidateName = `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || 'Applicant'
+      const candidateTitle = pi.title || jobTitle || 'Professional'
+      const email = pi.email || ''
+      const phone = pi.phone || ''
+      const location = pi.location || ''
+      const linkedin = pi.linkedin || ''
+
+      const today = new Date().toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+
+      const contactItems = [email, phone, location, linkedin].filter(Boolean).join('  •  ')
+
+      const singlePageHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4 portrait; margin: 0 !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
+    body { margin: 0; padding: 0; background: #ffffff; font-family: 'Georgia', 'Merriweather', serif; color: #1e293b; }
+    .page-container {
+      width: 794px;
+      height: 1123px;
+      padding: 56px 64px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      background: #ffffff;
+    }
+    .header-name {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0 0 4px 0;
+    }
+    .header-title {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0284c7;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 0 0 16px 0;
+    }
+    .contact-bar {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      color: #475569;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #0284c7;
+      margin-bottom: 28px;
+    }
+    .meta-date {
+      font-size: 12px;
+      color: #475569;
+      margin-bottom: 20px;
+    }
+    .recipient-info {
+      font-size: 13px;
+      color: #1e293b;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .subject-line {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 24px;
+    }
+    .letter-content {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #334155;
+      white-space: pre-wrap;
+      flex-grow: 1;
+      text-align: justify;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <h1 class="header-name">${candidateName}</h1>
+    <div class="header-title">${candidateTitle}</div>
+    <div class="contact-bar">${contactItems}</div>
+
+    <div class="meta-date">${today}</div>
+
+    <div class="recipient-info">
+      <strong>Hiring Manager</strong><br/>
+      ${company || 'Target Organization'}
+    </div>
+
+    <div class="subject-line">Re: Application for ${jobTitle || 'Position'}</div>
+
+    <div class="letter-content">${coverLetter}</div>
+  </div>
+</body>
+</html>`
+
+      const res = await fetch('http://localhost:8080/api/v1/resumes/export-pdf-raw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          html: singlePageHtml,
+          filename: `${(company || 'Cover_Letter').replace(/\s+/g, '_')}_Cover_Letter`,
+        }),
+      })
+
+      if (res.ok) {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${(company || 'Cover_Letter').replace(/[^a-zA-Z0-9\-_]/g, '_')}_Cover_Letter.pdf`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      } else {
+        alert('Failed to generate PDF.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Error exporting PDF.')
+    } finally {
+      setPdfLoading(false)
+    }
   }
 
   return (
@@ -130,8 +263,13 @@ export default function CoverLetterWorkspace() {
         }
         .form-group textarea {
           resize: vertical;
-          min-height: 120px;
+          min-height: 110px;
           font-family: inherit;
+        }
+        .help-text {
+          font-size: 11px;
+          color: #64748b;
+          line-height: 1.4;
         }
         .btn-ws {
           background: #0284c7;
@@ -201,11 +339,13 @@ export default function CoverLetterWorkspace() {
       <div className="ws-panel-left">
         <div>
           <h3 className="ws-title">Cover Letter Builder</h3>
-          <p className="ws-desc">Tailor a professional cover letter matching your resume highlights with the target job details.</p>
+          <p className="ws-desc">
+            Tailor a professional cover letter using your active resume highlights.
+          </p>
         </div>
 
         <div className="form-group">
-          <label htmlFor="job-title-cl">Job Title</label>
+          <label htmlFor="job-title-cl">Job Title *</label>
           <input
             id="job-title-cl"
             type="text"
@@ -216,7 +356,7 @@ export default function CoverLetterWorkspace() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="company-cl">Company Name</label>
+          <label htmlFor="company-cl">Company Name *</label>
           <input
             id="company-cl"
             type="text"
@@ -227,16 +367,23 @@ export default function CoverLetterWorkspace() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="desc-cl">Job Description / Requirements</label>
+          <label htmlFor="desc-cl">Job Description / Requirements (Optional)</label>
           <textarea
             id="desc-cl"
-            placeholder="Paste the job description details here to tailor your cover letter..."
+            placeholder="Paste job posting requirements here to tailor specific skills in your letter..."
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
           />
+          <small className="help-text">
+            Optional: If provided, key requirements will be addressed in the letter. If left blank, we generate a letter based on Job Title & Company Name.
+          </small>
         </div>
 
-        <button className="btn-ws" onClick={handleGenerate} disabled={loading || !jobTitle || !company}>
+        <button
+          className="btn-ws"
+          onClick={handleGenerate}
+          disabled={loading || !jobTitle.trim() || !company.trim()}
+        >
           {loading ? 'Generating tailored letter...' : 'Generate Tailored Cover Letter ✦'}
         </button>
       </div>
@@ -245,8 +392,10 @@ export default function CoverLetterWorkspace() {
         {coverLetter ? (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#cbd5e1' }}>Tailored Cover Letter</span>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Editable below</span>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: '#cbd5e1' }}>
+                Tailored Cover Letter
+              </span>
+              <span style={{ fontSize: '12px', color: '#64748b' }}>Editable text below</span>
             </div>
             <textarea
               className="letter-display"
@@ -255,10 +404,14 @@ export default function CoverLetterWorkspace() {
             />
             <div className="letter-actions">
               <button className="btn-ws btn-sec" onClick={handleCopy}>
-                {copied ? 'Copied! ✓' : 'Copy to Clipboard'}
+                {copied ? 'Copied! ✓' : 'Copy Text'}
               </button>
-              <button className="btn-ws" onClick={handleDownload}>
-                Download as Text File (.txt)
+              <button
+                className="btn-ws"
+                onClick={handleDownloadPdf}
+                disabled={pdfLoading}
+              >
+                {pdfLoading ? 'Generating PDF...' : 'Download Single-Page PDF 📄'}
               </button>
             </div>
           </div>
