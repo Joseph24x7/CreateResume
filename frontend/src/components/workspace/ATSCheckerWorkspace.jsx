@@ -16,6 +16,26 @@ const STOP_WORDS = new Set([
   'his', 'she', 'her', 'i', 'my', 'me'
 ])
 
+const PROSE_NOISE_WORDS = new Set([
+  'using', 'based', 'support', 'applications', 'development', 'services',
+  'systems', 'implement', 'develop', 'frameworks', 'engineering', 'building',
+  'working', 'work', 'experience', 'responsibilities', 'qualifications',
+  'requirements', 'strong', 'proven', 'candidate', 'preferred', 'plus',
+  'year', 'years', 'team', 'teams', 'role', 'project', 'projects', 'solution',
+  'solutions', 'tool', 'tools', 'technology', 'technologies', 'software',
+  'code', 'high', 'fast', 'good', 'new', 'key', 'well', 'help', 'provide',
+  'ensure', 'include', 'includes', 'including', 'must', 'need', 'needed',
+  'want', 'looking', 'seeking', 'ability', 'knowledge', 'understanding',
+  'level', 'levels', 'part', 'parts', 'best', 'practices', 'process',
+  'processes', 'method', 'methods', 'approach', 'approaches', 'written',
+  'verbal', 'communication', 'skills', 'skill', 'degree', 'field', 'industry',
+  'domain', 'business', 'value', 'user', 'users', 'customer', 'customers',
+  'client', 'clients', 'management', 'manager', 'member', 'members', 'duty',
+  'duties', 'task', 'tasks', 'job', 'description', 'details', 'application',
+  'service', 'system', 'framework', 'engineer', 'developer', 'architecture',
+  'architect', 'design', 'designed', 'built', 'created', 'maintained'
+])
+
 const ACTION_VERBS = new Set([
   'architected', 'spearheaded', 'engineered', 'optimized', 'developed',
   'implemented', 'designed', 'constructed', 'accelerated', 'automated',
@@ -25,29 +45,79 @@ const ACTION_VERBS = new Set([
   'improved', 'solved', 'mentored', 'integrated'
 ])
 
+const TECH_TAXONOMY = new Set([
+  'microservices', 'java', 'backend', 'frontend', 'fullstack', 'python',
+  'javascript', 'typescript', 'c++', 'c#', 'golang', 'go', 'rust', 'ruby',
+  'php', 'swift', 'kotlin', 'scala', 'sql', 'nosql', 'react', 'angular',
+  'vue', 'next.js', 'node', 'nodejs', 'express', 'spring', 'spring boot',
+  'django', 'flask', 'fastapi', '.net', 'dotnet', 'graphql', 'rest api',
+  'restful', 'kafka', 'rabbitmq', 'aws', 'azure', 'gcp', 'docker',
+  'kubernetes', 'terraform', 'jenkins', 'ci/cd', 'git', 'github', 'gitlab',
+  'linux', 'bash', 'redis', 'mongodb', 'postgresql', 'mysql', 'oracle',
+  'elasticsearch', 'dynamodb', 'agile', 'scrum', 'jira', 'unit testing',
+  'integration testing', 'jest', 'junit', 'cypress', 'selenium', 'system design',
+  'object oriented', 'design patterns', 'cloud architecture', 'devops',
+  'machine learning', 'data science', 'ai', 'deep learning', 'nlp', 'security',
+  'oauth', 'jwt', 'html', 'css', 'tailwind', 'sass', 'bootstrap', 'webpack',
+  'vite', 'maven', 'gradle', 'npm', 'yarn', 'pnpm', 'red hat', 'openstack',
+  'monitoring', 'prometheus', 'grafana', 'ci cd', 'rest', 'api', 'apis',
+  'cloud', 'database', 'databases', 'orm', 'hibernate', 'jpa', 'jdbc',
+  'data structures', 'algorithms', 'oop', 'mvc', 'tdd', 'bdd', 'serverless',
+  'lambda', 's3', 'ec2', 'ecs', 'eks', 'gke', 'aks', 'helm', 'ansible',
+  'puppet', 'chef', 'vault', 'consul', 'istio', 'envoy', 'grpc', 'protobuf',
+  'swagger', 'openapi', 'websockets', 'pwa', 'spa', 'ssr', 'redux', 'mobx',
+  'zustand', 'recoil', 'rxjs', 'storybook', 'babel', 'es6', 'json', 'xml',
+  'yaml', 'apache', 'nginx', 'tomcat', 'jetty', 'netty', 'weblogic',
+  'memcached', 'solr', 'cassandra', 'hbase', 'neo4j', 'influxdb', 'couchdb',
+  'mariadb', 'sqlite', 'snowflake', 'bigquery', 'redshift', 'databricks',
+  'spark', 'hadoop', 'hive', 'flink', 'kafka streams', 'airflow', 'dbt',
+  'pandas', 'numpy', 'scikit-learn', 'tensorflow', 'pytorch', 'keras',
+  'opencv', 'spacy', 'nltk', 'bert', 'llm', 'rag', 'langchain', 'transformers',
+  'huggingface', 'onnx', 'cuda', 'tableau', 'power bi', 'looker', 'metabase',
+  'etl', 'elt', 'data warehouse', 'data lake', 'data pipeline',
+  'salesforce', 'hubspot', 'sap', 'workday', 'figma', 'ui', 'ux'
+])
+
 /**
- * Tokenization Algorithm: Converts text into a frequency map of normalized unigrams & n-grams.
+ * Filter function checking if a token is a legitimate technical or domain skill keyword.
+ */
+function isHighValueKeyword(token) {
+  if (!token || token.length < 3) return false
+  if (STOP_WORDS.has(token) || PROSE_NOISE_WORDS.has(token) || ACTION_VERBS.has(token)) {
+    return false
+  }
+  if (TECH_TAXONOMY.has(token)) return true
+  // If it's not a generic prose word and is an alphanumeric term, keep it
+  return /^[a-z0-9\+\#\.\-]+$/i.test(token)
+}
+
+/**
+ * Tokenization Algorithm: Converts text into a frequency map of high-value skill keywords & n-grams.
  */
 function tokenizeText(text) {
   if (!text) return { tfMap: new Map(), uniqueTokens: new Set() }
-  
-  const cleanText = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ')
+
+  const cleanText = text.toLowerCase().replace(/[^a-z0-9\+\#\.\-\s]/g, ' ')
   const words = cleanText.split(/\s+/).filter(w => w.length > 1 && !STOP_WORDS.has(w))
 
   const tfMap = new Map()
   const uniqueTokens = new Set()
 
-  // Unigrams
+  // Unigrams filter
   words.forEach(w => {
-    tfMap.set(w, (tfMap.get(w) || 0) + 1)
-    uniqueTokens.add(w)
+    if (isHighValueKeyword(w)) {
+      tfMap.set(w, (tfMap.get(w) || 0) + 1)
+      uniqueTokens.add(w)
+    }
   })
 
-  // Bi-grams (to capture phrases like 'spring boot', 'system design', 'machine learning')
+  // Bi-grams (to capture phrases like 'spring boot', 'system design', 'rest api')
   for (let i = 0; i < words.length - 1; i++) {
     const bigram = `${words[i]} ${words[i + 1]}`
-    tfMap.set(bigram, (tfMap.get(bigram) || 0) + 1)
-    uniqueTokens.add(bigram)
+    if (TECH_TAXONOMY.has(bigram) || (isHighValueKeyword(words[i]) && isHighValueKeyword(words[i + 1]))) {
+      tfMap.set(bigram, (tfMap.get(bigram) || 0) + 1.5) // Weighted higher for multi-word phrases
+      uniqueTokens.add(bigram)
+    }
   }
 
   return { tfMap, uniqueTokens }
@@ -233,38 +303,40 @@ export default function ATSCheckerWorkspace() {
       const cosSim = calculateCosineSimilarity(resumeTokenObj.tfMap, jdTokenObj.tfMap)
       const jaccardIdx = calculateJaccardIndex(resumeTokenObj.uniqueTokens, jdTokenObj.uniqueTokens)
 
-      // Weighted Keyword Similarity (70% Cosine Vector + 30% Jaccard Overlap)
-      const matchRate = Math.round((0.7 * cosSim + 0.3 * jaccardIdx) * 100 * 2.5) // scaled for practical NLP overlap
-      const cappedMatchRate = Math.min(100, Math.max(15, matchRate))
+      // Weighted Skill Keyword Similarity Rate
+      const rawMatch = (0.7 * cosSim + 0.3 * jaccardIdx) * 100
+      const scaledMatchRate = Math.min(100, Math.max(10, Math.round(rawMatch * 3.2)))
 
-      // Composite Score: 70% Structural Quality + 30% JD Keyword Alignment
-      finalScore = Math.min(100, Math.round(0.7 * structuralScore + 0.3 * cappedMatchRate))
+      // Composite Score: 60% Structural Quality + 40% Target JD Skill Keyword Alignment
+      finalScore = Math.min(100, Math.round(0.6 * structuralScore + 0.4 * scaledMatchRate))
 
-      // Extract present vs missing high-frequency JD keywords
+      // Extract present vs missing high-frequency skill keywords
       const present = []
       const missing = []
 
-      // Rank JD keywords by frequency
+      // Rank JD keywords by frequency and taxonomy relevance
       const sortedJdTokens = Array.from(jdTokenObj.tfMap.entries())
-        .filter(([t]) => t.length > 3)
-        .sort((a, b) => b[1] - a[1])
+        .sort((a, b) => {
+          const scoreA = (TECH_TAXONOMY.has(a[0]) ? 3 : 1) * a[1]
+          const scoreB = (TECH_TAXONOMY.has(b[0]) ? 3 : 1) * b[1]
+          return scoreB - scoreA
+        })
         .map(([t]) => t)
-        .slice(0, 15)
 
       sortedJdTokens.forEach(token => {
         if (resumeTokenObj.tfMap.has(token)) {
-          present.push(token)
+          if (!present.includes(token)) present.push(token)
         } else {
-          missing.push(token)
+          if (!missing.includes(token)) missing.push(token)
         }
       })
 
       keywordsMatch = {
-        matchRate: cappedMatchRate,
+        matchRate: scaledMatchRate,
         cosineSim: (cosSim * 100).toFixed(1),
         jaccardSim: (jaccardIdx * 100).toFixed(1),
-        present,
-        missing
+        present: present.slice(0, 15),
+        missing: missing.slice(0, 15)
       }
     }
 
@@ -467,19 +539,19 @@ export default function ATSCheckerWorkspace() {
         }
         .kw-badge {
           font-size: 11px;
-          font-weight: 500;
-          padding: 4px 8px;
-          border-radius: 4px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 6px;
         }
         .kw-badge.present {
-          background: rgba(16, 185, 129, 0.1);
+          background: rgba(16, 185, 129, 0.12);
           color: #10b981;
-          border: 1px solid rgba(16, 185, 129, 0.2);
+          border: 1px solid rgba(16, 185, 129, 0.3);
         }
         .kw-badge.missing {
-          background: rgba(239, 68, 68, 0.1);
+          background: rgba(239, 68, 68, 0.12);
           color: #ef4444;
-          border: 1px solid rgba(239, 68, 68, 0.2);
+          border: 1px solid rgba(239, 68, 68, 0.3);
         }
       `}</style>
 
@@ -490,7 +562,7 @@ export default function ATSCheckerWorkspace() {
           </div>
           <div className="score-label">
             <h3>ATS Compliance Audit</h3>
-            <span>NLP & Vector Similarity Algorithm Analysis.</span>
+            <span>Skill Taxonomy & Vector Overlap Analysis.</span>
           </div>
         </div>
 
@@ -551,9 +623,9 @@ export default function ATSCheckerWorkspace() {
         </div>
 
         <div className="section-card">
-          <h3 className="section-title">📊 Vector Keyword Match Engine</h3>
+          <h3 className="section-title">📊 Technical Skill Keyword Scanner</h3>
           <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 12px 0' }}>
-            Paste your target Job Description to compute Cosine Vector Similarity & Jaccard Token Overlap.
+            Paste your target Job Description to extract genuine technical competencies & domain skills.
           </p>
           <textarea
             className="jd-textarea"
@@ -566,7 +638,7 @@ export default function ATSCheckerWorkspace() {
             <div style={{ marginTop: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <span style={{ fontSize: '13px', fontWeight: '500', color: '#cbd5e1' }}>
-                  JD Keyword Match Score
+                  Technical Skill Match Score
                 </span>
                 <span style={{ fontSize: '16px', fontWeight: '700', color: '#0284c7' }}>
                   {analysis.keywordsMatch.matchRate}%
@@ -578,13 +650,15 @@ export default function ATSCheckerWorkspace() {
               </div>
 
               <div style={{ display: 'flex', gap: '16px', fontSize: '11px', color: '#64748b', marginBottom: '14px' }}>
-                <span>Vector Cosine Similarity: <strong style={{ color: '#cbd5e1' }}>{analysis.keywordsMatch.cosineSim}%</strong></span>
-                <span>Jaccard Index: <strong style={{ color: '#cbd5e1' }}>{analysis.keywordsMatch.jaccardSim}%</strong></span>
+                <span>Skill Vector Cosine: <strong style={{ color: '#cbd5e1' }}>{analysis.keywordsMatch.cosineSim}%</strong></span>
+                <span>Jaccard Overlap: <strong style={{ color: '#cbd5e1' }}>{analysis.keywordsMatch.jaccardSim}%</strong></span>
               </div>
 
               {analysis.keywordsMatch.present.length > 0 && (
                 <div style={{ marginBottom: '12px' }}>
-                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '500' }}>Matched Keywords</span>
+                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '500' }}>
+                    Matched Technical Skills
+                  </span>
                   <div className="kw-badge-grid">
                     {analysis.keywordsMatch.present.map((kw, i) => (
                       <span className="kw-badge present" key={i}>{kw}</span>
@@ -595,7 +669,9 @@ export default function ATSCheckerWorkspace() {
 
               {analysis.keywordsMatch.missing.length > 0 && (
                 <div>
-                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '500' }}>Missing High-Value JD Keywords</span>
+                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '500' }}>
+                    Missing High-Value JD Technical Skills
+                  </span>
                   <div className="kw-badge-grid">
                     {analysis.keywordsMatch.missing.map((kw, i) => (
                       <span className="kw-badge missing" key={i}>{kw}</span>
