@@ -1,688 +1,723 @@
-import { useState, useMemo } from 'react'
-import useResumeStore from '../../store/resumeStore'
-
-// ── NLP & ALGORITHM DATA STRUCTURES ──
-const STOP_WORDS = new Set([
-  'a', 'an', 'the', 'and', 'or', 'but', 'if', 'because', 'as', 'until', 'while',
-  'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through',
-  'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in',
-  'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here',
-  'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few',
-  'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own',
-  'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don',
-  'should', 'now', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have',
-  'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'it', 'its', 'this',
-  'that', 'these', 'those', 'we', 'our', 'you', 'your', 'they', 'their', 'he',
-  'his', 'she', 'her', 'i', 'my', 'me'
-])
-
-const PROSE_NOISE_WORDS = new Set([
-  'using', 'based', 'support', 'applications', 'development', 'services',
-  'systems', 'implement', 'develop', 'frameworks', 'engineering', 'building',
-  'working', 'work', 'experience', 'responsibilities', 'qualifications',
-  'requirements', 'strong', 'proven', 'candidate', 'preferred', 'plus',
-  'year', 'years', 'team', 'teams', 'role', 'project', 'projects', 'solution',
-  'solutions', 'tool', 'tools', 'technology', 'technologies', 'software',
-  'code', 'high', 'fast', 'good', 'new', 'key', 'well', 'help', 'provide',
-  'ensure', 'include', 'includes', 'including', 'must', 'need', 'needed',
-  'want', 'looking', 'seeking', 'ability', 'knowledge', 'understanding',
-  'level', 'levels', 'part', 'parts', 'best', 'practices', 'process',
-  'processes', 'method', 'methods', 'approach', 'approaches', 'written',
-  'verbal', 'communication', 'skills', 'skill', 'degree', 'field', 'industry',
-  'domain', 'business', 'value', 'user', 'users', 'customer', 'customers',
-  'client', 'clients', 'management', 'manager', 'member', 'members', 'duty',
-  'duties', 'task', 'tasks', 'job', 'description', 'details', 'application',
-  'service', 'system', 'framework', 'engineer', 'developer', 'architecture',
-  'architect', 'design', 'designed', 'built', 'created', 'maintained'
-])
-
-const ACTION_VERBS = new Set([
-  'architected', 'spearheaded', 'engineered', 'optimized', 'developed',
-  'implemented', 'designed', 'constructed', 'accelerated', 'automated',
-  'launched', 'refactored', 'maximized', 'scaled', 'delivered', 'revamped',
-  'managed', 'led', 'built', 'created', 'directed', 'orchestrated',
-  'pioneered', 'expanded', 'overhauled', 'reduced', 'increased', 'achieved',
-  'improved', 'solved', 'mentored', 'integrated'
-])
-
-const TECH_TAXONOMY = new Set([
-  'microservices', 'java', 'backend', 'frontend', 'fullstack', 'python',
-  'javascript', 'typescript', 'c++', 'c#', 'golang', 'go', 'rust', 'ruby',
-  'php', 'swift', 'kotlin', 'scala', 'sql', 'nosql', 'react', 'angular',
-  'vue', 'next.js', 'node', 'nodejs', 'express', 'spring', 'spring boot',
-  'django', 'flask', 'fastapi', '.net', 'dotnet', 'graphql', 'rest api',
-  'restful', 'kafka', 'rabbitmq', 'aws', 'azure', 'gcp', 'docker',
-  'kubernetes', 'terraform', 'jenkins', 'ci/cd', 'git', 'github', 'gitlab',
-  'linux', 'bash', 'redis', 'mongodb', 'postgresql', 'mysql', 'oracle',
-  'elasticsearch', 'dynamodb', 'agile', 'scrum', 'jira', 'unit testing',
-  'integration testing', 'jest', 'junit', 'cypress', 'selenium', 'system design',
-  'object oriented', 'design patterns', 'cloud architecture', 'devops',
-  'machine learning', 'data science', 'ai', 'deep learning', 'nlp', 'security',
-  'oauth', 'jwt', 'html', 'css', 'tailwind', 'sass', 'bootstrap', 'webpack',
-  'vite', 'maven', 'gradle', 'npm', 'yarn', 'pnpm', 'red hat', 'openstack',
-  'monitoring', 'prometheus', 'grafana', 'ci cd', 'rest', 'api', 'apis',
-  'cloud', 'database', 'databases', 'orm', 'hibernate', 'jpa', 'jdbc',
-  'data structures', 'algorithms', 'oop', 'mvc', 'tdd', 'bdd', 'serverless',
-  'lambda', 's3', 'ec2', 'ecs', 'eks', 'gke', 'aks', 'helm', 'ansible',
-  'puppet', 'chef', 'vault', 'consul', 'istio', 'envoy', 'grpc', 'protobuf',
-  'swagger', 'openapi', 'websockets', 'pwa', 'spa', 'ssr', 'redux', 'mobx',
-  'zustand', 'recoil', 'rxjs', 'storybook', 'babel', 'es6', 'json', 'xml',
-  'yaml', 'apache', 'nginx', 'tomcat', 'jetty', 'netty', 'weblogic',
-  'memcached', 'solr', 'cassandra', 'hbase', 'neo4j', 'influxdb', 'couchdb',
-  'mariadb', 'sqlite', 'snowflake', 'bigquery', 'redshift', 'databricks',
-  'spark', 'hadoop', 'hive', 'flink', 'kafka streams', 'airflow', 'dbt',
-  'pandas', 'numpy', 'scikit-learn', 'tensorflow', 'pytorch', 'keras',
-  'opencv', 'spacy', 'nltk', 'bert', 'llm', 'rag', 'langchain', 'transformers',
-  'huggingface', 'onnx', 'cuda', 'tableau', 'power bi', 'looker', 'metabase',
-  'etl', 'elt', 'data warehouse', 'data lake', 'data pipeline',
-  'salesforce', 'hubspot', 'sap', 'workday', 'figma', 'ui', 'ux'
-])
-
 /**
- * Filter function checking if a token is a legitimate technical or domain skill keyword.
+ * ═══════════════════════════════════════════════════════════════
+ *  ATS Recruiter Decision Engine — Dashboard Workspace
+ *  ───────────────────────────────────────────────────────────
+ *  Premium analytics dashboard that estimates Interview
+ *  Probability through 10 scoring dimensions with full
+ *  explainability.
+ *
+ *  Architecture:
+ *    Resume + JD → Multi-Agent Scoring → Learning-to-Rank
+ *    → Interview Probability + Dimension Breakdown
+ * ═══════════════════════════════════════════════════════════════
  */
-function isHighValueKeyword(token) {
-  if (!token || token.length < 3) return false
-  if (STOP_WORDS.has(token) || PROSE_NOISE_WORDS.has(token) || ACTION_VERBS.has(token)) {
-    return false
-  }
-  if (TECH_TAXONOMY.has(token)) return true
-  // If it's not a generic prose word and is an alphanumeric term, keep it
-  return /^[a-z0-9\+\#\.\-]+$/i.test(token)
-}
 
-/**
- * Tokenization Algorithm: Converts text into a frequency map of high-value skill keywords & n-grams.
- */
-function tokenizeText(text) {
-  if (!text) return { tfMap: new Map(), uniqueTokens: new Set() }
+import React, { useState, useMemo, useCallback } from 'react';
+import useResumeStore from '../../store/resumeStore';
+import { runFullAnalysis } from '../../utils/ats-engine/scoringEngine';
+import '../../styles/ats-engine.css';
 
-  const cleanText = text.toLowerCase().replace(/[^a-z0-9\+\#\.\-\s]/g, ' ')
-  const words = cleanText.split(/\s+/).filter(w => w.length > 1 && !STOP_WORDS.has(w))
+// ── SVG Radar Chart Component ────────────────────────────────
 
-  const tfMap = new Map()
-  const uniqueTokens = new Set()
+function RadarChart({ dimensions }) {
+  const cx = 200, cy = 200, maxR = 150;
+  const n = dimensions.length;
+  if (n === 0) return null;
 
-  // Unigrams filter
-  words.forEach(w => {
-    if (isHighValueKeyword(w)) {
-      tfMap.set(w, (tfMap.get(w) || 0) + 1)
-      uniqueTokens.add(w)
-    }
-  })
+  const angleStep = (2 * Math.PI) / n;
 
-  // Bi-grams (to capture phrases like 'spring boot', 'system design', 'rest api')
-  for (let i = 0; i < words.length - 1; i++) {
-    const bigram = `${words[i]} ${words[i + 1]}`
-    if (TECH_TAXONOMY.has(bigram) || (isHighValueKeyword(words[i]) && isHighValueKeyword(words[i + 1]))) {
-      tfMap.set(bigram, (tfMap.get(bigram) || 0) + 1.5) // Weighted higher for multi-word phrases
-      uniqueTokens.add(bigram)
-    }
+  // Generate grid polygons (at 25%, 50%, 75%, 100%)
+  const gridLevels = [0.25, 0.5, 0.75, 1.0];
+
+  function polarToCart(angle, radius) {
+    const x = cx + radius * Math.sin(angle);
+    const y = cy - radius * Math.cos(angle);
+    return { x, y };
   }
 
-  return { tfMap, uniqueTokens }
-}
-
-/**
- * Cosine Similarity Algorithm: Vector Dot Product over Vector Magnitudes.
- */
-function calculateCosineSimilarity(tf1, tf2) {
-  let dotProduct = 0
-  let mag1Sq = 0
-  let mag2Sq = 0
-
-  tf1.forEach((freq1, token) => {
-    mag1Sq += freq1 * freq1
-    if (tf2.has(token)) {
-      dotProduct += freq1 * tf2.get(token)
-    }
-  })
-
-  tf2.forEach(freq2 => {
-    mag2Sq += freq2 * freq2
-  })
-
-  if (mag1Sq === 0 || mag2Sq === 0) return 0
-  return dotProduct / (Math.sqrt(mag1Sq) * Math.sqrt(mag2Sq))
-}
-
-/**
- * Jaccard Index Algorithm: Intersection over Union of Token Sets.
- */
-function calculateJaccardIndex(set1, set2) {
-  if (set1.size === 0 || set2.size === 0) return 0
-
-  let intersectionCount = 0
-  set1.forEach(token => {
-    if (set2.has(token)) intersectionCount++
-  })
-
-  const unionSize = set1.size + set2.size - intersectionCount
-  return unionSize > 0 ? intersectionCount / unionSize : 0
-}
-
-export default function ATSCheckerWorkspace() {
-  const resume = useResumeStore((s) => s.resume)
-  const [jobDescription, setJobDescription] = useState('')
-
-  // Compute ATS Audit using NLP & DS Algorithms
-  const analysis = useMemo(() => {
-    if (!resume || !resume.data) {
-      return {
-        score: 0,
-        criteria: [],
-        fixes: [],
-        suggestions: [],
-        verbRatio: 0,
-        metricRatio: 0,
-        keywordsMatch: null
-      }
-    }
-
-    const { personalInfo = {}, summary = '', experiences = [], skillCategories = [], educations = [] } = resume.data
-    const criteria = []
-    const fixes = []
-    const suggestions = []
-
-    // 1. Contact Information Vector (Max 15 pts)
-    let contactPts = 0
-    const missingContact = []
-    if (personalInfo.email) contactPts += 3
-    else missingContact.push('Email')
-    if (personalInfo.phone) contactPts += 3
-    else missingContact.push('Phone')
-    if (personalInfo.location) contactPts += 3
-    else missingContact.push('Location')
-    if (personalInfo.linkedin) contactPts += 3
-    else missingContact.push('LinkedIn')
-    if (personalInfo.github || personalInfo.leetcode) contactPts += 3
-    else missingContact.push('GitHub/Portfolio')
-
-    criteria.push({ name: 'Contact Information', score: contactPts, max: 15 })
-    if (missingContact.length > 0) {
-      fixes.push(`Add missing contact info: ${missingContact.join(', ')}.`)
-    }
-
-    // 2. Summary Density Analysis (Max 10 pts)
-    const summaryWords = summary ? summary.trim().split(/\s+/).length : 0
-    let summaryPts = 0
-    if (summaryWords >= 25 && summaryWords <= 90) summaryPts = 10
-    else if (summaryWords > 0) summaryPts = 5
-
-    criteria.push({ name: 'Professional Summary', score: summaryPts, max: 10 })
-    if (summaryPts === 0) {
-      fixes.push('Add a 30–80 word Professional Summary to help ATS parsers classify your profile.')
-    } else if (summaryPts === 5) {
-      suggestions.push('Expand your summary slightly (target 30–80 words) to enrich key role competencies.')
-    }
-
-    // 3. Experience Impact & Action Verbs Analysis (Max 30 pts)
-    let expPts = 0
-    let totalBullets = 0
-    let actionVerbCount = 0
-    let metricBulletCount = 0
-
-    // Metric pattern regex: % percentages, $ amounts, numbers with multipliers/units
-    const metricRegex = /\b(\d+%\b|\$\d+|\d+x\b|\d+\+?\s*(users|clients|ms|sec|min|hours|days|percent|k|m|b))\b/i
-
-    if (experiences.length > 0) {
-      expPts += 10 // base presence
-      experiences.forEach(e => {
-        if (e.achievements) {
-          e.achievements.forEach(ach => {
-            if (!ach.trim()) return
-            totalBullets++
-            const firstWord = ach.trim().toLowerCase().split(/\s+/)[0]
-            if (ACTION_VERBS.has(firstWord)) {
-              actionVerbCount++
-            }
-            if (metricRegex.test(ach)) {
-              metricBulletCount++
-            }
-          })
-        }
+  function polygonPoints(radius) {
+    return dimensions
+      .map((_, i) => {
+        const { x, y } = polarToCart(i * angleStep, radius);
+        return `${x},${y}`;
       })
+      .join(' ');
+  }
 
-      const verbRatio = totalBullets > 0 ? actionVerbCount / totalBullets : 0
-      const metricRatio = totalBullets > 0 ? metricBulletCount / totalBullets : 0
+  // Data polygon
+  const dataPoints = dimensions.map((d, i) => {
+    const r = (d.score / 100) * maxR;
+    return polarToCart(i * angleStep, r);
+  });
+  const dataPolygon = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
 
-      if (verbRatio >= 0.5) expPts += 10
-      else if (verbRatio >= 0.25) expPts += 5
-
-      if (metricRatio >= 0.3) expPts += 10
-      else if (metricRatio >= 0.15) expPts += 5
-
-      if (actionVerbCount < 3) {
-        fixes.push('Begin experience bullet points with strong Action Verbs (e.g., Spearheaded, Engineered, Optimized).')
-      }
-      if (metricBulletCount === 0) {
-        suggestions.push('Include quantifiable metrics (e.g. "reduced latency by 35%", "scaled to 10k users") in your work experience.')
-      }
-    } else {
-      fixes.push('Include at least one Work Experience section with bullet point achievements.')
-    }
-
-    criteria.push({ name: 'Work History & Impact', score: expPts, max: 30 })
-
-    // 4. Skills Categorization (Max 20 pts)
-    let skillPts = 0
-    if (skillCategories.length >= 3) skillPts = 20
-    else if (skillCategories.length > 0) skillPts = 10
-
-    criteria.push({ name: 'Skills & Domain Mapping', score: skillPts, max: 20 })
-    if (skillCategories.length === 0) {
-      fixes.push('Create structured Skills categories to match ATS technical filters.')
-    }
-
-    // 5. Education & Formatting Structure (Max 25 pts)
-    let eduPts = 0
-    if (educations.length > 0) {
-      eduPts += 15
-      const hasFormattedEdu = educations.some(e => e.degree && e.institution)
-      if (hasFormattedEdu) eduPts += 10
-    }
-
-    criteria.push({ name: 'Education & Structural Format', score: eduPts, max: 25 })
-    if (educations.length === 0) {
-      fixes.push('Add your Education credentials (Degree, Institution).')
-    }
-
-    const structuralScore = contactPts + summaryPts + expPts + skillPts + eduPts
-    const verbRatioPct = totalBullets > 0 ? Math.round((actionVerbCount / totalBullets) * 100) : 0
-    const metricRatioPct = totalBullets > 0 ? Math.round((metricBulletCount / totalBullets) * 100) : 0
-
-    // 6. Vector Similarity & Keyword Match (Cosine Similarity + Jaccard Index)
-    let finalScore = structuralScore
-    let keywordsMatch = null
-
-    if (jobDescription.trim().length > 15) {
-      const resumeSerialized = JSON.stringify(resume.data)
-      const resumeTokenObj = tokenizeText(resumeSerialized)
-      const jdTokenObj = tokenizeText(jobDescription)
-
-      const cosSim = calculateCosineSimilarity(resumeTokenObj.tfMap, jdTokenObj.tfMap)
-      const jaccardIdx = calculateJaccardIndex(resumeTokenObj.uniqueTokens, jdTokenObj.uniqueTokens)
-
-      // Weighted Skill Keyword Similarity Rate
-      const rawMatch = (0.7 * cosSim + 0.3 * jaccardIdx) * 100
-      const scaledMatchRate = Math.min(100, Math.max(10, Math.round(rawMatch * 3.2)))
-
-      // Composite Score: 60% Structural Quality + 40% Target JD Skill Keyword Alignment
-      finalScore = Math.min(100, Math.round(0.6 * structuralScore + 0.4 * scaledMatchRate))
-
-      // Extract present vs missing high-frequency skill keywords
-      const present = []
-      const missing = []
-
-      // Rank JD keywords by frequency and taxonomy relevance
-      const sortedJdTokens = Array.from(jdTokenObj.tfMap.entries())
-        .sort((a, b) => {
-          const scoreA = (TECH_TAXONOMY.has(a[0]) ? 3 : 1) * a[1]
-          const scoreB = (TECH_TAXONOMY.has(b[0]) ? 3 : 1) * b[1]
-          return scoreB - scoreA
-        })
-        .map(([t]) => t)
-
-      sortedJdTokens.forEach(token => {
-        if (resumeTokenObj.tfMap.has(token)) {
-          if (!present.includes(token)) present.push(token)
-        } else {
-          if (!missing.includes(token)) missing.push(token)
-        }
-      })
-
-      keywordsMatch = {
-        matchRate: scaledMatchRate,
-        cosineSim: (cosSim * 100).toFixed(1),
-        jaccardSim: (jaccardIdx * 100).toFixed(1),
-        present: present.slice(0, 15),
-        missing: missing.slice(0, 15)
-      }
-    }
-
-    return {
-      score: finalScore,
-      criteria,
-      fixes,
-      suggestions,
-      verbRatio: verbRatioPct,
-      metricRatio: metricRatioPct,
-      keywordsMatch
-    }
-  }, [resume, jobDescription])
+  // Label positions (slightly beyond the max radius)
+  const labelR = maxR + 30;
 
   return (
-    <div className="workspace-container">
-      <style>{`
-        .workspace-container {
-          padding: 32px;
-          color: #f8fafc;
-          overflow-y: auto;
-          height: 100%;
-          box-sizing: border-box;
-          display: flex;
-          gap: 32px;
-        }
-        .ats-panel-left {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-          background: #1e293b;
-          border: 1px solid #334155;
-          border-radius: 12px;
-          padding: 24px;
-        }
-        .ats-panel-right {
-          flex: 1.2;
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-        .ats-header {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-          padding-bottom: 20px;
-          border-bottom: 1px solid #334155;
-        }
-        .score-circle-wrapper {
-          position: relative;
-          width: 90px;
-          height: 90px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          background: radial-gradient(closest-side, #1e293b 80%, transparent 0%),
-                      conic-gradient(#0284c7 ${analysis.score}%, #334155 0%);
-          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
-          flex-shrink: 0;
-        }
-        .score-circle-text {
-          font-size: 24px;
-          font-weight: 700;
-          color: #f8fafc;
-        }
-        .score-label {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .score-label h3 {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 600;
-        }
-        .score-label span {
-          font-size: 13px;
-          color: #94a3b8;
-        }
-        .algo-metrics-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          margin-top: 8px;
-        }
-        .algo-metric-card {
-          background: #0f172a;
-          border: 1px solid #334155;
-          border-radius: 8px;
-          padding: 12px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .algo-metric-title {
-          font-size: 11px;
-          color: #94a3b8;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .algo-metric-val {
-          font-size: 18px;
-          font-weight: 700;
-          color: #38bdf8;
-        }
-        .criteria-list {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-        .criteria-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 13px;
-        }
-        .criteria-name {
-          color: #cbd5e1;
-        }
-        .criteria-bar-container {
-          flex-grow: 1;
-          max-width: 120px;
-          height: 6px;
-          background: #334155;
-          border-radius: 3px;
-          margin: 0 16px;
-          overflow: hidden;
-        }
-        .criteria-bar {
-          height: 100%;
-          background: #0284c7;
-          border-radius: 3px;
-        }
-        .criteria-value {
-          color: #94a3b8;
-          font-family: monospace;
-        }
-        .section-card {
-          background: #1e293b;
-          border: 1px solid #334155;
-          border-radius: 12px;
-          padding: 20px;
-        }
-        .section-title {
-          font-size: 15px;
-          font-weight: 600;
-          color: #f8fafc;
-          margin: 0 0 12px 0;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .checklist {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-        .check-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          font-size: 13px;
-          line-height: 1.5;
-        }
-        .check-icon-red {
-          color: #ef4444;
-          flex-shrink: 0;
-        }
-        .check-icon-yellow {
-          color: #f59e0b;
-          flex-shrink: 0;
-        }
-        .check-icon-green {
-          color: #10b981;
-          flex-shrink: 0;
-        }
-        .jd-textarea {
-          width: 100%;
-          height: 100px;
-          background: #0f172a;
-          border: 1px solid #334155;
-          color: #f8fafc;
-          border-radius: 6px;
-          padding: 10px;
-          font-size: 13px;
-          outline: none;
-          resize: none;
-          box-sizing: border-box;
-        }
-        .jd-textarea:focus {
-          border-color: #0284c7;
-        }
-        .kw-badge-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          margin-top: 10px;
-        }
-        .kw-badge {
-          font-size: 11px;
-          font-weight: 600;
-          padding: 4px 10px;
-          border-radius: 6px;
-        }
-        .kw-badge.present {
-          background: rgba(16, 185, 129, 0.12);
-          color: #10b981;
-          border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        .kw-badge.missing {
-          background: rgba(239, 68, 68, 0.12);
-          color: #ef4444;
-          border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-      `}</style>
+    <svg className="ats-radar-svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+      {/* Grid polygons */}
+      {gridLevels.map((level, idx) => (
+        <polygon
+          key={idx}
+          className="ats-radar-grid"
+          points={polygonPoints(maxR * level)}
+        />
+      ))}
 
-      <div className="ats-panel-left">
-        <div className="ats-header">
-          <div className="score-circle-wrapper">
-            <span className="score-circle-text">{analysis.score}%</span>
-          </div>
-          <div className="score-label">
-            <h3>ATS Compliance Audit</h3>
-            <span>Skill Taxonomy & Vector Overlap Analysis.</span>
-          </div>
-        </div>
+      {/* Axis lines */}
+      {dimensions.map((_, i) => {
+        const end = polarToCart(i * angleStep, maxR);
+        return (
+          <line
+            key={i}
+            className="ats-radar-axis"
+            x1={cx}
+            y1={cy}
+            x2={end.x}
+            y2={end.y}
+          />
+        );
+      })}
 
-        <div className="algo-metrics-grid">
-          <div className="algo-metric-card">
-            <span className="algo-metric-title">Action Verb Coverage</span>
-            <span className="algo-metric-val">{analysis.verbRatio}%</span>
-          </div>
-          <div className="algo-metric-card">
-            <span className="algo-metric-title">Quantifiable Impact</span>
-            <span className="algo-metric-val">{analysis.metricRatio}%</span>
-          </div>
-        </div>
+      {/* Data shape */}
+      <polygon className="ats-radar-shape" points={dataPolygon} />
 
-        <div className="criteria-list" style={{ marginTop: '12px' }}>
-          <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600' }}>
-            Structural Criteria Weighting
-          </h4>
-          {analysis.criteria.map((c, i) => (
-            <div className="criteria-item" key={i}>
-              <span className="criteria-name">{c.name}</span>
-              <div className="criteria-bar-container">
-                <div className="criteria-bar" style={{ width: `${(c.score / c.max) * 100}%` }} />
-              </div>
-              <span className="criteria-value">{c.score}/{c.max}</span>
-            </div>
-          ))}
+      {/* Data points */}
+      {dataPoints.map((p, i) => (
+        <circle key={i} className="ats-radar-point" cx={p.x} cy={p.y} r={4}>
+          <title>{dimensions[i].name}: {dimensions[i].score}</title>
+        </circle>
+      ))}
+
+      {/* Labels */}
+      {dimensions.map((d, i) => {
+        const pos = polarToCart(i * angleStep, labelR);
+        // Adjust text anchor based on position
+        let anchor = 'middle';
+        if (pos.x < cx - 10) anchor = 'end';
+        else if (pos.x > cx + 10) anchor = 'start';
+
+        let dy = '0.35em';
+        if (pos.y < cy - maxR) dy = '0em';
+        else if (pos.y > cy + maxR) dy = '0.7em';
+
+        // Shorten names for radar
+        const shortName = d.name
+          .replace('Confidence', 'Conf.')
+          .replace('Relevance', 'Relev.')
+          .replace('Progression', 'Growth')
+          .replace('Alignment', 'Align.')
+          .replace('Complexity', 'Complex.')
+          .replace('Coverage', 'Cover.')
+          .replace('Evidence', 'Evid.');
+
+        return (
+          <text
+            key={i}
+            className="ats-radar-label"
+            x={pos.x}
+            y={pos.y}
+            textAnchor={anchor}
+            dominantBaseline="central"
+          >
+            {shortName}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
+
+// ── Score Color Helper ───────────────────────────────────────
+
+function getScoreColor(score) {
+  if (score >= 70) return 'var(--ats-score-good)';
+  if (score >= 40) return 'var(--ats-score-medium)';
+  return 'var(--ats-score-poor)';
+}
+
+function getScoreBg(score) {
+  if (score >= 70) return 'var(--ats-score-good-bg)';
+  if (score >= 40) return 'var(--ats-score-medium-bg)';
+  return 'var(--ats-score-poor-bg)';
+}
+
+function getScoreClass(score) {
+  if (score >= 70) return 'score-high';
+  if (score >= 40) return 'score-medium';
+  return 'score-low';
+}
+
+function getMatchClass(score) {
+  if (score >= 0.7) return 'strong';
+  if (score >= 0.4) return 'moderate';
+  return 'weak';
+}
+
+
+// ── Dimension Card Component ─────────────────────────────────
+
+function DimensionCard({ dimension, isExpanded, onToggle }) {
+  const { name, icon, score, explanation } = dimension;
+  const { positives = [], negatives = [], recommendations = [] } = explanation;
+
+  return (
+    <div
+      className={`ats-dimension-card ${isExpanded ? 'expanded' : ''}`}
+      onClick={onToggle}
+    >
+      <div className="ats-dimension-header">
+        <span className="ats-dimension-name">{icon} {name}</span>
+        <span
+          className="ats-dimension-score"
+          style={{
+            background: getScoreBg(score),
+            color: getScoreColor(score),
+          }}
+        >
+          {score}/100
+        </span>
+        <span className="ats-dimension-chevron">
+          {isExpanded ? '▲' : '▼'}
+        </span>
+        <div className="ats-dimension-bar">
+          <div
+            className={`ats-dimension-bar-fill ${getScoreClass(score)}`}
+            style={{ width: `${score}%` }}
+          />
         </div>
       </div>
 
-      <div className="ats-panel-right">
-        <div className="section-card">
-          <h3 className="section-title">
-            <span className="check-icon-red">⚠️</span> Prioritized Recommendations
-          </h3>
-          <div className="checklist">
-            {analysis.fixes.map((f, i) => (
-              <div className="check-item" key={`fix-${i}`}>
-                <span className="check-icon-red">✕</span>
-                <span>{f}</span>
-              </div>
-            ))}
-            {analysis.suggestions.map((s, i) => (
-              <div className="check-item" key={`sug-${i}`}>
-                <span className="check-icon-yellow">💡</span>
-                <span>{s}</span>
-              </div>
-            ))}
-            {analysis.fixes.length === 0 && analysis.suggestions.length === 0 && (
-              <div className="check-item">
-                <span className="check-icon-green">✓</span>
-                <span style={{ color: '#10b981' }}>
-                  Excellent! Your resume passes all core structural & impact ATS benchmarks.
-                </span>
-              </div>
-            )}
+      <div className="ats-dimension-details">
+        {positives.map((item, i) => (
+          <div key={`p-${i}`} className="ats-detail-item positive">
+            <span>{item.text}</span>
+            <span className="ats-detail-impact">+{item.impact}</span>
           </div>
-        </div>
+        ))}
+        {negatives.map((item, i) => (
+          <div key={`n-${i}`} className="ats-detail-item negative">
+            <span>{item.text}</span>
+            <span className="ats-detail-impact">{item.impact}</span>
+          </div>
+        ))}
+        {recommendations.map((rec, i) => (
+          <div key={`r-${i}`} className="ats-recommendation-item">
+            {rec}
+          </div>
+        ))}
+        {positives.length === 0 && negatives.length === 0 && (
+          <div style={{ color: '#64748b', fontStyle: 'italic' }}>
+            Paste a job description for detailed analysis
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-        <div className="section-card">
-          <h3 className="section-title">📊 Technical Skill Keyword Scanner</h3>
-          <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 12px 0' }}>
-            Paste your target Job Description to extract genuine technical competencies & domain skills.
-          </p>
-          <textarea
-            className="jd-textarea"
-            placeholder="Paste Job Description / Requirements details..."
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-          />
 
-          {analysis.keywordsMatch && (
-            <div style={{ marginTop: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontSize: '13px', fontWeight: '500', color: '#cbd5e1' }}>
-                  Technical Skill Match Score
+// ── Main ATSCheckerWorkspace Component ───────────────────────
+
+export default function ATSCheckerWorkspace() {
+  const resume = useResumeStore((s) => s.resume);
+  const [jobDescription, setJobDescription] = useState('');
+  const [expandedCards, setExpandedCards] = useState(new Set());
+  const [showJdInput, setShowJdInput] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResults, setAiResults] = useState(null);
+
+  // Run full analysis whenever resume or JD changes
+  const analysis = useMemo(() => {
+    return runFullAnalysis(resume?.data, jobDescription);
+  }, [resume?.data, jobDescription]);
+
+  const toggleCard = useCallback((dimName) => {
+    setExpandedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(dimName)) next.delete(dimName);
+      else next.add(dimName);
+      return next;
+    });
+  }, []);
+
+  const expandAll = useCallback(() => {
+    setExpandedCards(new Set(analysis.dimensions.map(d => d.name)));
+  }, [analysis.dimensions]);
+
+  const collapseAll = useCallback(() => {
+    setExpandedCards(new Set());
+  }, []);
+
+  // AI Deep Analysis (optional Gemini integration)
+  const runAiAnalysis = useCallback(async () => {
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+      alert('Please set your Gemini API Key in Settings first.');
+      return;
+    }
+    if (!jobDescription.trim()) {
+      alert('Please paste a job description for AI analysis.');
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const resumeText = buildResumeText(resume?.data);
+      const response = await fetch('/api/v1/ai/recruiter-evaluate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Gemini-Key': apiKey,
+        },
+        body: JSON.stringify({
+          resumeText,
+          jobDescription,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAiResults(data);
+      } else {
+        console.error('AI analysis failed:', response.statusText);
+        setAiResults(null);
+      }
+    } catch (err) {
+      console.error('AI analysis error:', err);
+      setAiResults(null);
+    } finally {
+      setAiLoading(false);
+    }
+  }, [jobDescription, resume?.data]);
+
+  // Build resume text for AI endpoint
+  function buildResumeText(data) {
+    if (!data) return '';
+    const parts = [];
+    const pi = data.personalInfo || {};
+    parts.push(`${pi.firstName || ''} ${pi.lastName || ''} - ${pi.title || ''}`);
+    if (data.summary) parts.push(`Summary: ${data.summary}`);
+    (data.skillCategories || []).forEach(sc => {
+      parts.push(`${sc.category}: ${sc.skills}`);
+    });
+    (data.experiences || []).forEach(exp => {
+      parts.push(`${exp.role} at ${exp.company} (${exp.startDate} - ${exp.endDate})`);
+      (exp.achievements || []).forEach(a => parts.push(`  - ${a}`));
+    });
+    (data.educations || []).forEach(ed => {
+      parts.push(`${ed.degree} from ${ed.institution}`);
+    });
+    return parts.join('\n');
+  }
+
+  // Destructure analysis
+  const {
+    interviewProbability,
+    confidenceInterval,
+    hasJD,
+    dimensions,
+    personas,
+    skillAnalysis,
+    responsibilityMatches,
+    achievementAnalysis,
+  } = analysis;
+
+  return (
+    <div className="ats-dashboard">
+
+      {/* ── JD Input Section ──────────────────────────────── */}
+      <div className="ats-dashboard-header">
+        <div className="ats-jd-input-section">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              cursor: 'pointer',
+              marginBottom: showJdInput ? '1rem' : 0,
+            }}
+            onClick={() => setShowJdInput(!showJdInput)}
+          >
+            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
+              📋 Job Description
+            </h2>
+            <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+              {showJdInput ? '▲ Collapse' : '▼ Expand'} {jobDescription ? '(Active)' : ''}
+            </span>
+          </div>
+
+          {showJdInput && (
+            <>
+              <textarea
+                className="ats-jd-textarea"
+                placeholder="Paste the target job description here for a comprehensive multi-dimensional analysis. Without a JD, only structural scoring is performed..."
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                rows={5}
+              />
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '0.75rem' }}>
+                <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                  {jobDescription.trim().split(/\s+/).filter(Boolean).length} words
                 </span>
-                <span style={{ fontSize: '16px', fontWeight: '700', color: '#0284c7' }}>
-                  {analysis.keywordsMatch.matchRate}%
-                </span>
+                {jobDescription && (
+                  <button
+                    className="ats-analyze-btn"
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', marginTop: 0, background: 'rgba(239,68,68,0.2)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
+                    onClick={() => setJobDescription('')}
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
-
-              <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden', marginBottom: '12px' }}>
-                <div style={{ height: '100%', background: '#0284c7', width: `${analysis.keywordsMatch.matchRate}%` }} />
-              </div>
-
-              <div style={{ display: 'flex', gap: '16px', fontSize: '11px', color: '#64748b', marginBottom: '14px' }}>
-                <span>Skill Vector Cosine: <strong style={{ color: '#cbd5e1' }}>{analysis.keywordsMatch.cosineSim}%</strong></span>
-                <span>Jaccard Overlap: <strong style={{ color: '#cbd5e1' }}>{analysis.keywordsMatch.jaccardSim}%</strong></span>
-              </div>
-
-              {analysis.keywordsMatch.present.length > 0 && (
-                <div style={{ marginBottom: '12px' }}>
-                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '500' }}>
-                    Matched Technical Skills
-                  </span>
-                  <div className="kw-badge-grid">
-                    {analysis.keywordsMatch.present.map((kw, i) => (
-                      <span className="kw-badge present" key={i}>{kw}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {analysis.keywordsMatch.missing.length > 0 && (
-                <div>
-                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '500' }}>
-                    Missing High-Value JD Technical Skills
-                  </span>
-                  <div className="kw-badge-grid">
-                    {analysis.keywordsMatch.missing.map((kw, i) => (
-                      <span className="kw-badge missing" key={i}>{kw}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            </>
           )}
         </div>
       </div>
+
+      {/* ── Hero Section ──────────────────────────────────── */}
+      <div className="ats-hero-section">
+
+        {/* Left: Interview Probability */}
+        <div className="ats-probability-card">
+          <div
+            className="ats-score-ring"
+            style={{
+              '--score-deg': `${(interviewProbability / 100) * 360}deg`,
+              background: `conic-gradient(${getScoreColor(interviewProbability)} ${(interviewProbability / 100) * 360}deg, rgba(255,255,255,0.1) 0deg)`,
+            }}
+          >
+            <div className="ats-score-ring-inner">
+              <span className="ats-score-ring-value">{interviewProbability}</span>
+              <span className="ats-score-ring-label">Score</span>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div className="ats-probability-label">Interview Probability</div>
+            <div className="ats-confidence-interval">
+              ±{confidenceInterval}% confidence interval
+            </div>
+          </div>
+
+          {/* Persona scores */}
+          <div className="ats-persona-scores">
+            {Object.values(personas).map((p) => (
+              <div className="ats-persona-item" key={p.label}>
+                <span className="ats-persona-label">{p.icon} {p.label}</span>
+                <span
+                  className="ats-persona-score"
+                  style={{ color: getScoreColor(p.score) }}
+                >
+                  {p.score}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Radar Chart */}
+        <div className="ats-radar-card">
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: '#94a3b8' }}>
+            Multi-Dimensional Analysis
+          </h3>
+          <RadarChart dimensions={dimensions} />
+        </div>
+      </div>
+
+      {/* ── Dimension Score Cards ─────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h2 className="ats-section-title" style={{ marginBottom: 0 }}>
+          📊 Scoring Dimensions
+        </h2>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={expandAll}
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(99,102,241,0.3)',
+              color: '#94a3b8',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+            }}
+          >
+            Expand All
+          </button>
+          <button
+            onClick={collapseAll}
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(99,102,241,0.3)',
+              color: '#94a3b8',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+            }}
+          >
+            Collapse All
+          </button>
+        </div>
+      </div>
+
+      <div className="ats-dimensions-section">
+        {dimensions.map((dim) => (
+          <DimensionCard
+            key={dim.name}
+            dimension={dim}
+            isExpanded={expandedCards.has(dim.name)}
+            onToggle={() => toggleCard(dim.name)}
+          />
+        ))}
+      </div>
+
+      {/* ── Responsibility Match Table ────────────────────── */}
+      {hasJD && responsibilityMatches.length > 0 && (
+        <div className="ats-responsibility-section">
+          <h2 className="ats-section-title">✅ Responsibility Match Analysis</h2>
+          <table className="ats-match-table">
+            <thead>
+              <tr>
+                <th>JD Requirement</th>
+                <th>Best Resume Match</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {responsibilityMatches.slice(0, 12).map((match, i) => (
+                <tr key={i} className={`ats-match-row ${getMatchClass(match.score)}`}>
+                  <td style={{ maxWidth: '300px' }}>
+                    {match.requirement.length > 80
+                      ? match.requirement.substring(0, 77) + '...'
+                      : match.requirement}
+                  </td>
+                  <td style={{ maxWidth: '300px', color: '#94a3b8' }}>
+                    {match.bestMatch
+                      ? (match.bestMatch.length > 80
+                          ? match.bestMatch.substring(0, 77) + '...'
+                          : match.bestMatch)
+                      : '(no match)'}
+                  </td>
+                  <td>
+                    <span className="ats-match-score-badge">
+                      {Math.round(match.score * 100)}%
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Skill Ontology Grid ───────────────────────────── */}
+      {hasJD && skillAnalysis && (skillAnalysis.matched.length > 0 || skillAnalysis.missing.length > 0) && (
+        <div className="ats-skills-section">
+          <h2 className="ats-section-title">🎯 Skill Ontology Map</h2>
+
+          {/* Group by category */}
+          {(() => {
+            const categories = {};
+
+            skillAnalysis.matched.forEach(skill => {
+              const cat = skill.category || 'Other';
+              if (!categories[cat]) categories[cat] = { matched: [], missing: [] };
+              categories[cat].matched.push(skill);
+            });
+
+            skillAnalysis.missing.forEach(skill => {
+              const cat = skill.category || 'Other';
+              if (!categories[cat]) categories[cat] = { matched: [], missing: [] };
+              categories[cat].missing.push(skill);
+            });
+
+            return Object.entries(categories)
+              .sort(([, a], [, b]) => (b.matched.length + b.missing.length) - (a.matched.length + a.missing.length))
+              .map(([cat, { matched, missing }]) => (
+                <div className="ats-skill-category" key={cat}>
+                  <div className="ats-skill-category-name">
+                    {cat.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                    <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#64748b' }}>
+                      ({matched.length}/{matched.length + missing.length})
+                    </span>
+                  </div>
+                  <div className="ats-skill-badges">
+                    {matched.map(skill => (
+                      <span
+                        key={skill.id || skill.name}
+                        className={`ats-skill-badge ${skill.inferred ? 'inferred' : 'matched'}`}
+                        title={skill.inferred ? 'Inferred from context' : 'Direct match'}
+                      >
+                        {skill.inferred ? '⚡' : '●'} {skill.name}
+                        {skill.demandScore && (
+                          <span className="ats-skill-demand">{skill.demandScore}</span>
+                        )}
+                      </span>
+                    ))}
+                    {missing.map(skill => (
+                      <span
+                        key={skill.id || skill.name}
+                        className="ats-skill-badge missing"
+                        title="Missing from resume"
+                      >
+                        ○ {skill.name}
+                        {skill.demandScore && (
+                          <span className="ats-skill-demand">{skill.demandScore}</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ));
+          })()}
+
+          <div style={{ marginTop: '1rem', display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
+            <span><span style={{ color: 'var(--ats-score-good)' }}>●</span> Matched</span>
+            <span><span style={{ color: 'var(--ats-score-inferred)' }}>⚡</span> Inferred</span>
+            <span><span style={{ color: 'var(--ats-score-poor)' }}>○</span> Missing</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Achievement Quality Heatmap ───────────────────── */}
+      {achievementAnalysis && achievementAnalysis.bullets && achievementAnalysis.bullets.length > 0 && (
+        <div className="ats-achievement-section">
+          <h2 className="ats-section-title">
+            🏆 Achievement Quality Analysis
+            <span style={{ marginLeft: '1rem', fontSize: '0.9rem', color: '#64748b', fontWeight: 400 }}>
+              Avg: {achievementAnalysis.averageQuality?.toFixed(1) || '0.0'}/10
+            </span>
+          </h2>
+
+          <div className="ats-achievement-list">
+            {achievementAnalysis.bullets
+              .sort((a, b) => b.qualityScore - a.qualityScore)
+              .slice(0, 15)
+              .map((bullet, i) => (
+                <div className="ats-achievement-item" key={i}>
+                  <div className="ats-achievement-text">
+                    {bullet.text?.length > 120
+                      ? bullet.text.substring(0, 117) + '...'
+                      : bullet.text}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div className="ats-achievement-bar" style={{ flex: 1 }}>
+                      <div
+                        className="ats-achievement-bar-fill"
+                        style={{
+                          width: `${(bullet.qualityScore / 10) * 100}%`,
+                          background: `linear-gradient(90deg, ${getScoreColor(bullet.qualityScore * 10)}, ${getScoreColor(Math.min(100, bullet.qualityScore * 12))})`,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className="ats-achievement-score"
+                      style={{ color: getScoreColor(bullet.qualityScore * 10) }}
+                    >
+                      {bullet.qualityScore?.toFixed(1)}/10
+                    </span>
+                  </div>
+                  <div className="ats-achievement-tags">
+                    {bullet.hasActionVerb && bullet.action && (
+                      <span className="ats-achievement-tag action">⚡ {bullet.action}</span>
+                    )}
+                    {bullet.hasQuantification && bullet.impact && (
+                      <span className="ats-achievement-tag metric">📊 {bullet.impact}</span>
+                    )}
+                    {bullet.hasTechnicalContext && bullet.method && (
+                      <span className="ats-achievement-tag method">🔧 {bullet.method}</span>
+                    )}
+                    {bullet.hasBusinessImpact && (
+                      <span className="ats-achievement-tag impact">💰 Business Impact</span>
+                    )}
+                    {bullet.difficulty && bullet.difficulty !== 'Low' && (
+                      <span className="ats-achievement-tag action">🎯 {bullet.difficulty}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── AI Deep Analysis (Optional) ───────────────────── */}
+      <div className="ats-ai-section">
+        <button
+          className="ats-ai-btn"
+          onClick={runAiAnalysis}
+          disabled={aiLoading || !jobDescription.trim()}
+        >
+          {aiLoading ? (
+            <>
+              <span className="ats-ai-loading" />
+              Analyzing...
+            </>
+          ) : (
+            <>✨ AI Deep Analysis (Gemini)</>
+          )}
+        </button>
+        {!localStorage.getItem('gemini_api_key') && (
+          <div style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+            Set your Gemini API Key in Settings to enable AI analysis
+          </div>
+        )}
+
+        {aiResults && (
+          <div className="ats-ai-results">
+            {aiResults.recruiter && (
+              <div className="ats-ai-persona-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="ats-ai-persona-avatar">🔍</div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>Recruiter</div>
+                    <div style={{ color: getScoreColor(aiResults.recruiter.score), fontWeight: 700, fontSize: '1.25rem' }}>
+                      {aiResults.recruiter.score}%
+                    </div>
+                  </div>
+                </div>
+                <div className="ats-ai-persona-verdict">
+                  {aiResults.recruiter.reasoning}
+                </div>
+              </div>
+            )}
+            {aiResults.hiringManager && (
+              <div className="ats-ai-persona-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="ats-ai-persona-avatar" style={{ background: '#06b6d4' }}>👔</div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>Hiring Manager</div>
+                    <div style={{ color: getScoreColor(aiResults.hiringManager.score), fontWeight: 700, fontSize: '1.25rem' }}>
+                      {aiResults.hiringManager.score}%
+                    </div>
+                  </div>
+                </div>
+                <div className="ats-ai-persona-verdict">
+                  {aiResults.hiringManager.reasoning}
+                </div>
+              </div>
+            )}
+            {aiResults.techLead && (
+              <div className="ats-ai-persona-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="ats-ai-persona-avatar" style={{ background: '#10b981' }}>⚙️</div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>Tech Lead</div>
+                    <div style={{ color: getScoreColor(aiResults.techLead.score), fontWeight: 700, fontSize: '1.25rem' }}>
+                      {aiResults.techLead.score}%
+                    </div>
+                  </div>
+                </div>
+                <div className="ats-ai-persona-verdict">
+                  {aiResults.techLead.reasoning}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
     </div>
-  )
+  );
 }

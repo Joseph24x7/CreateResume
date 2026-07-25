@@ -26,6 +26,44 @@ public class AIController {
     public record QuestionsRequest(String resumeText, String jobTitle) {}
     public record EvaluateRequest(String question, String answer) {}
     public record CoverLetterRequest(String resumeText, String jobTitle, String company, String jobDescription) {}
+    public record RecruiterEvaluateRequest(String resumeText, String jobDescription) {}
+
+    @PostMapping("/recruiter-evaluate")
+    public Map<String, Object> recruiterEvaluate(
+            @RequestHeader(value = "X-Gemini-Key", required = false) String geminiKey,
+            @RequestBody RecruiterEvaluateRequest req) {
+
+        if (geminiKey == null || geminiKey.trim().isEmpty()) {
+            return getMockRecruiterEvaluation();
+        }
+
+        String prompt = "You are simulating three independent hiring reviewers evaluating a candidate's resume " +
+                "against a job description. For each reviewer persona, provide a confidence score (0-100) and a " +
+                "2-3 sentence reasoning.\n\n" +
+                "RESUME:\n" + req.resumeText() + "\n\n" +
+                "JOB DESCRIPTION:\n" + req.jobDescription() + "\n\n" +
+                "Output your response strictly as a JSON object (no markdown fences) with this exact structure:\n" +
+                "{\n" +
+                "  \"recruiter\": { \"score\": <number 0-100>, \"confidence\": <number 0-100>, \"reasoning\": \"<string>\" },\n" +
+                "  \"hiringManager\": { \"score\": <number 0-100>, \"confidence\": <number 0-100>, \"reasoning\": \"<string>\" },\n" +
+                "  \"techLead\": { \"score\": <number 0-100>, \"confidence\": <number 0-100>, \"reasoning\": \"<string>\" },\n" +
+                "  \"strengths\": [\"<string>\", ...],\n" +
+                "  \"weaknesses\": [\"<string>\", ...]\n" +
+                "}\n\n" +
+                "Persona guidelines:\n" +
+                "- Recruiter: Focus on keyword match, formatting, ATS compatibility, role alignment.\n" +
+                "- Hiring Manager: Focus on career growth, leadership, team fit, communication.\n" +
+                "- Tech Lead: Focus on technical depth, architecture decisions, problem-solving evidence.";
+
+        try {
+            String aiResult = callGemini(geminiKey, prompt);
+            aiResult = aiResult.replaceAll("```json", "").replaceAll("```", "").trim();
+            return objectMapper.readValue(aiResult, Map.class);
+        } catch (Exception e) {
+            System.err.println("Gemini recruiter evaluation failed, falling back to mock: " + e.getMessage());
+            return getMockRecruiterEvaluation();
+        }
+    }
 
     @PostMapping("/generate-questions")
     public List<String> generateQuestions(
@@ -194,5 +232,47 @@ public class AIController {
                 "Thank you for your time and consideration.\n\n" +
                 "Sincerely,\n" +
                 "Applicant";
+    }
+
+    private Map<String, Object> getMockRecruiterEvaluation() {
+        Map<String, Object> result = new HashMap<>();
+
+        Map<String, Object> recruiter = new HashMap<>();
+        recruiter.put("score", 78);
+        recruiter.put("confidence", 80);
+        recruiter.put("reasoning", "Resume shows good keyword alignment with common ATS filters. " +
+                "Skills section is well-structured and experience history is clear. " +
+                "Consider adding more industry-specific terminology to boost match rate.");
+        result.put("recruiter", recruiter);
+
+        Map<String, Object> hiringManager = new HashMap<>();
+        hiringManager.put("score", 72);
+        hiringManager.put("confidence", 75);
+        hiringManager.put("reasoning", "Candidate demonstrates solid career progression with relevant experience. " +
+                "Leadership signals are present but could be stronger. " +
+                "Would appreciate more context on team size and business impact of projects.");
+        result.put("hiringManager", hiringManager);
+
+        Map<String, Object> techLead = new HashMap<>();
+        techLead.put("score", 75);
+        techLead.put("confidence", 70);
+        techLead.put("reasoning", "Technical depth appears adequate with exposure to modern stack. " +
+                "Architecture decision-making evidence is moderate. " +
+                "Would benefit from more specific examples of system design and performance optimization.");
+        result.put("techLead", techLead);
+
+        List<String> strengths = new ArrayList<>();
+        strengths.add("Well-structured resume with clear sections");
+        strengths.add("Good technical skill coverage");
+        strengths.add("Quantified achievements present");
+        result.put("strengths", strengths);
+
+        List<String> weaknesses = new ArrayList<>();
+        weaknesses.add("Could strengthen leadership narrative");
+        weaknesses.add("Domain-specific terminology could be enhanced");
+        weaknesses.add("Consider adding more system design context");
+        result.put("weaknesses", weaknesses);
+
+        return result;
     }
 }
