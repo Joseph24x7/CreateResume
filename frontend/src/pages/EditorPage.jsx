@@ -7,10 +7,7 @@ import ATSScore from '../components/ui/ATSScore'
 import EditorTopbar from '../components/ui/EditorTopbar'
 import CoverLetterWorkspace from '../components/workspace/CoverLetterWorkspace'
 import ATSCheckerWorkspace from '../components/workspace/ATSCheckerWorkspace'
-import PortfolioWorkspace from '../components/workspace/PortfolioWorkspace'
-import InterviewWorkspace from '../components/workspace/InterviewWorkspace'
 import JobTrackerWorkspace from '../components/workspace/JobTrackerWorkspace'
-import OfferComparisonWorkspace from '../components/workspace/OfferComparisonWorkspace'
 import '../styles/editor.css'
 
 class ErrorBoundary extends React.Component {
@@ -316,36 +313,12 @@ export default function EditorPage() {
               <span className="tab-label">ATS Score</span>
             </button>
             <button 
-              className={`sidebar-tab ${activeTab === 'portfolio' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('portfolio')}
-              title="Portfolio Converter"
-            >
-              <span className="tab-icon">🌐</span>
-              <span className="tab-label">Portfolio</span>
-            </button>
-            <button 
-              className={`sidebar-tab ${activeTab === 'interview' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('interview')}
-              title="AI Interview Prep"
-            >
-              <span className="tab-icon">💬</span>
-              <span className="tab-label">Interview</span>
-            </button>
-            <button 
               className={`sidebar-tab ${activeTab === 'job-tracker' ? 'active' : ''}`} 
               onClick={() => setActiveTab('job-tracker')}
               title="Job Tracker Dashboard"
             >
               <span className="tab-icon">📋</span>
               <span className="tab-label">Tracker</span>
-            </button>
-            <button 
-              className={`sidebar-tab ${activeTab === 'offer-comparison' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('offer-comparison')}
-              title="Offer Letter Comparison"
-            >
-              <span className="tab-icon">⚖️</span>
-              <span className="tab-label">Offers</span>
             </button>
 
             {/* API Settings Gear at bottom */}
@@ -370,10 +343,7 @@ export default function EditorPage() {
             )}
             {activeTab === 'cover-letter' && <CoverLetterWorkspace />}
             {activeTab === 'ats-checker' && <ATSCheckerWorkspace />}
-            {activeTab === 'portfolio' && <PortfolioWorkspace />}
-            {activeTab === 'interview' && <InterviewWorkspace />}
             {activeTab === 'job-tracker' && <JobTrackerWorkspace />}
-            {activeTab === 'offer-comparison' && <OfferComparisonWorkspace />}
           </div>
         </div>
       </div>
