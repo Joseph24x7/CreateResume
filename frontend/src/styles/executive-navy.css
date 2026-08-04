@@ -705,109 +705,106 @@ svg[stroke="currentColor"].en-svg-icon {
   box-shadow: -3px 0 0 0 #111111;
 }
 
-/* 2. Elegant Diamond Template (Premium Executive style) */
+/* 2. Elegant Diamond Template (Clean, Space-Efficient) */
 .template-elegant-diamond .en-resume {
   color: #2b2b2b;
   font-family: 'Lora', 'Georgia', serif;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .template-elegant-diamond .en-header {
   background: transparent;
-  padding: 28px 28px 6px;
+  padding: 20px 24px 4px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  position: relative;
 }
 
 .template-elegant-diamond .en-name {
   color: #1b2340;
-  font-size: 34px;
-  font-weight: 800;
+  font-size: 26px;
+  font-weight: 700;
   font-family: 'Lora', 'Georgia', serif;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
   line-height: 1.15;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
 }
 
 .template-elegant-diamond .en-job-title {
   color: #6c7382;
-  font-size: 13.5px;
+  font-size: 11px;
   font-weight: 600;
   font-style: italic;
   font-family: 'Lora', 'Georgia', serif;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
 }
 
 .template-elegant-diamond .en-summary-band {
   background: transparent;
-  padding: 4px 28px 18px;
+  padding: 2px 24px 10px;
   margin: 0;
 }
 
 .template-elegant-diamond .en-summary-text {
   color: #2b2b2b;
-  font-size: 9.5px;
-  line-height: 1.65;
+  font-size: 9px;
+  line-height: 1.55;
   font-family: 'Lora', 'Georgia', serif;
 }
 
 .template-elegant-diamond .en-contact-bar {
-  border-top: 1px solid #c8d3e6;
-  border-bottom: 1px solid #c8d3e6;
-  padding: 12px 28px 8px;
+  border-top: 1px solid #d1d9e6;
+  border-bottom: 1px solid #d1d9e6;
+  padding: 6px 24px 5px;
   background: #f8fafc;
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 
 .template-elegant-diamond .en-contact-col {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 
 .template-elegant-diamond .en-contact-item {
   color: #2b2b2b;
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
 }
 
 .template-elegant-diamond .en-icon {
   color: #304d89;
-  font-size: 11px;
+  font-size: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 
 .template-elegant-diamond .en-section {
-  padding: 0 28px;
-  margin-top: 14px;
+  padding: 0 24px;
+  margin-top: 8px;
 }
 
 .template-elegant-diamond .en-section-header {
   display: flex;
   align-items: center;
-  margin-bottom: 14px;
-  position: relative;
+  margin-bottom: 6px;
 }
 
 .template-elegant-diamond .en-section-title {
   color: #1b2340;
-  font-size: 11.5px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   margin-bottom: 0;
   font-family: 'Lora', 'Georgia', serif;
   display: flex;
@@ -817,96 +814,90 @@ svg[stroke="currentColor"].en-svg-icon {
 .template-elegant-diamond .en-section-rule {
   flex-grow: 1;
   height: 1px;
-  background: linear-gradient(to right, #304d89, #c8d3e6 40%, transparent 95%);
-  margin-left: 14px;
-  position: relative;
+  background: linear-gradient(to right, #b0bdd4, transparent 80%);
+  margin-left: 10px;
 }
 
 .template-elegant-diamond .en-section-rule::after {
-  content: '◆';
-  position: absolute;
-  left: 0;
-  top: -5px;
-  font-size: 8px;
-  color: #304d89;
+  content: '';
+  display: none;
 }
 
 .template-elegant-diamond .en-skills-row {
   display: flex;
   justify-content: space-between;
-  gap: 28px;
+  gap: 20px;
 }
-
 
 .template-elegant-diamond .en-skill-row {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  padding: 3px 0;
+  gap: 8px;
+  padding: 1.5px 0;
 }
 
 .template-elegant-diamond .en-skill-category {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   color: #1b2340;
-  width: 125px;
-  min-width: 125px;
-  max-width: 125px;
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
   flex-shrink: 0;
 }
 
 .template-elegant-diamond .en-skill-values {
-  font-size: 9.5px;
+  font-size: 9px;
   color: #2b2b2b;
-  line-height: 1.5;
+  line-height: 1.45;
   flex: 1;
 }
 
 .template-elegant-diamond .en-experience {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .template-elegant-diamond .en-exp-role,
 .template-elegant-diamond .en-edu-degree {
   color: #304d89;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .template-elegant-diamond .en-exp-company,
 .template-elegant-diamond .en-edu-institution {
   color: #2b2b2b;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .template-elegant-diamond .en-exp-meta,
 .template-elegant-diamond .en-edu-meta {
   color: #6c7382;
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 500;
   font-style: normal;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .template-elegant-diamond .en-exp-project {
   color: #2b2b2b;
-  font-size: 9px;
+  font-size: 8.5px;
   font-style: italic;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .template-elegant-diamond .en-exp-ach-label {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 600;
   color: #6c7382;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .template-elegant-diamond .en-exp-bullets {
@@ -917,55 +908,56 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-exp-bullets li {
   color: #2b2b2b;
-  font-size: 9.5px;
-  line-height: 1.6;
-  margin-bottom: 4px;
+  font-size: 9px;
+  line-height: 1.5;
+  margin-bottom: 2px;
   position: relative;
-  padding-left: 16px;
+  padding-left: 12px;
 }
 
 .template-elegant-diamond .en-exp-bullets li::before {
-  content: '◆';
+  content: '▸';
   position: absolute;
   left: 0;
   color: #304d89;
-  font-size: 7px;
-  top: 1px;
+  font-size: 8px;
+  top: 0px;
 }
 
 .template-elegant-diamond .en-achievement-cell {
-  font-size: 9.5px;
-  line-height: 1.55;
+  font-size: 9px;
+  line-height: 1.45;
   color: #2b2b2b;
 }
 
 .template-elegant-diamond .en-languages-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
 .template-elegant-diamond .en-lang-name {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 600;
   color: #1b2340;
 }
 
 .template-elegant-diamond .en-lang-proficiency {
-  font-size: 9px;
+  font-size: 8.5px;
   color: #6c7382;
   font-style: italic;
 }
+
+.template-elegant-diamond .canvas-block-wrapper:hover {
+  box-shadow: -3px 0 0 0 #304d89;
+}
+
 
 /* ── PREVIEW ADOBE ACROBAT-STYLE ELEVATION ── */
 .preview-page-sheet-container {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 8px rgba(0, 0, 0, 0.04) !important;
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 4px;
-}
-
-.template-elegant-diamond .canvas-block-wrapper:hover {
-  box-shadow: -3px 0 0 0 #304d89;
 }
 
 /* ── FONT SIZE MODIFIERS ── */
