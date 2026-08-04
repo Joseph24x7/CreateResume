@@ -725,7 +725,6 @@ svg[stroke="currentColor"].en-svg-icon {
   color: #1b2340;
   font-size: 26px;
   font-weight: 700;
-  font-family: 'Lora', 'Georgia', serif;
   letter-spacing: -0.3px;
   line-height: 1.15;
   margin-bottom: 3px;
@@ -733,10 +732,9 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-job-title {
   color: #6c7382;
-  font-size: 11px;
+  font-size: 11.2px;
   font-weight: 600;
   font-style: italic;
-  font-family: 'Lora', 'Georgia', serif;
   letter-spacing: 0.3px;
   margin-bottom: 2px;
 }
@@ -749,9 +747,8 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-summary-text {
   color: #2b2b2b;
-  font-size: 9px;
+  font-size: 9.2px;
   line-height: 1.55;
-  font-family: 'Lora', 'Georgia', serif;
 }
 
 .template-elegant-diamond .en-contact-bar {
@@ -772,7 +769,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-contact-item {
   color: #2b2b2b;
-  font-size: 8.5px;
+  font-size: 8.7px;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -791,7 +788,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-section {
   padding: 0 24px;
-  margin-top: 8px;
+  margin-top: 9px;
 }
 
 .template-elegant-diamond .en-section-header {
@@ -802,20 +799,21 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-section-title {
   color: #1b2340;
-  font-size: 10px;
+  font-size: 10.2px;
   font-weight: 700;
   letter-spacing: 1.2px;
   margin-bottom: 0;
-  font-family: 'Lora', 'Georgia', serif;
   display: flex;
   align-items: center;
 }
 
 .template-elegant-diamond .en-section-rule {
   flex-grow: 1;
-  height: 1px;
-  background: linear-gradient(to right, #b0bdd4, transparent 80%);
+  height: 0;
+  border: none;
+  border-bottom: 1px solid #b0bdd4;
   margin-left: 10px;
+  background: none;
 }
 
 .template-elegant-diamond .en-section-rule::after {
@@ -837,7 +835,7 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .template-elegant-diamond .en-skill-category {
-  font-size: 9px;
+  font-size: 9.2px;
   font-weight: 700;
   color: #1b2340;
   width: 110px;
@@ -847,7 +845,7 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .template-elegant-diamond .en-skill-values {
-  font-size: 9px;
+  font-size: 9.2px;
   color: #2b2b2b;
   line-height: 1.45;
   flex: 1;
@@ -860,7 +858,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .template-elegant-diamond .en-exp-role,
 .template-elegant-diamond .en-edu-degree {
   color: #304d89;
-  font-size: 10px;
+  font-size: 10.2px;
   font-weight: 700;
   margin-bottom: 1px;
 }
@@ -868,7 +866,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .template-elegant-diamond .en-exp-company,
 .template-elegant-diamond .en-edu-institution {
   color: #2b2b2b;
-  font-size: 9.5px;
+  font-size: 9.7px;
   font-weight: 600;
   margin-bottom: 2px;
 }
@@ -876,7 +874,7 @@ svg[stroke="currentColor"].en-svg-icon {
 .template-elegant-diamond .en-exp-meta,
 .template-elegant-diamond .en-edu-meta {
   color: #6c7382;
-  font-size: 8.5px;
+  font-size: 8.7px;
   font-weight: 500;
   font-style: normal;
   display: flex;
@@ -886,13 +884,13 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-exp-project {
   color: #2b2b2b;
-  font-size: 8.5px;
+  font-size: 8.7px;
   font-style: italic;
   margin-bottom: 2px;
 }
 
 .template-elegant-diamond .en-exp-ach-label {
-  font-size: 8.5px;
+  font-size: 8.7px;
   font-weight: 600;
   color: #6c7382;
   margin-bottom: 2px;
@@ -908,7 +906,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-elegant-diamond .en-exp-bullets li {
   color: #2b2b2b;
-  font-size: 9px;
+  font-size: 9.2px;
   line-height: 1.5;
   margin-bottom: 2px;
   position: relative;
@@ -925,7 +923,7 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .template-elegant-diamond .en-achievement-cell {
-  font-size: 9px;
+  font-size: 9.2px;
   line-height: 1.45;
   color: #2b2b2b;
 }
@@ -937,13 +935,13 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 .template-elegant-diamond .en-lang-name {
-  font-size: 9px;
+  font-size: 9.2px;
   font-weight: 600;
   color: #1b2340;
 }
 
 .template-elegant-diamond .en-lang-proficiency {
-  font-size: 8.5px;
+  font-size: 8.7px;
   color: #6c7382;
   font-style: italic;
 }
