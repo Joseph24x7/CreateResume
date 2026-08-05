@@ -1023,133 +1023,184 @@ svg[stroke="currentColor"].en-svg-icon {
 }
 
 /* ── TEMPLATE 4 ONLY: Enhanced Overrides ── */
-/* Using .en-resume.template-4 for higher specificity to guarantee override */
 
-/* Name — +0.4px */
-.en-resume.template-4 .en-name {
-  font-size: 26.6px;
+/* Name — +0.8px from initial (27.0px) */
+.en-resume.template-4 .en-name,
+.template-4 .en-name,
+.template-template-4 .en-name {
+  font-size: 27.0px !important;
 }
 
-/* Tagline — clean sans-serif for long professional titles, +0.4px */
-.en-resume.template-4 .en-job-title {
-  font-family: 'Merriweather Sans', 'Inter', Arial, sans-serif;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 11.2px;
-  letter-spacing: 0.6px;
-  color: #475569;
-  text-transform: uppercase;
+/* Tagline — clean sans-serif for long professional titles, +0.8px (11.8px) */
+.en-resume.template-4 .en-job-title,
+.template-4 .en-job-title,
+.template-template-4 .en-job-title {
+  font-family: 'Merriweather Sans', 'Inter', Arial, sans-serif !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  font-size: 11.8px !important;
+  letter-spacing: 0.6px !important;
+  color: #475569 !important;
+  text-transform: uppercase !important;
 }
 
-/* Summary — +0.4px */
-.en-resume.template-4 .en-summary-text {
-  font-size: 9.8px;
+/* Summary — +0.8px (10.2px) */
+.en-resume.template-4 .en-summary-text,
+.template-4 .en-summary-text,
+.template-template-4 .en-summary-text {
+  font-size: 10.2px !important;
 }
 
-/* Contact — +0.4px */
-.en-resume.template-4 .en-contact-item {
-  font-size: 9.3px;
+/* Contact — +0.8px (9.7px) */
+.en-resume.template-4 .en-contact-item,
+.template-4 .en-contact-item,
+.template-template-4 .en-contact-item {
+  font-size: 9.7px !important;
 }
 
-/* Section title — +0.4px */
-.en-resume.template-4 .en-section-title {
-  font-size: 10.8px;
+/* Section title — +0.8px (11.2px) */
+.en-resume.template-4 .en-section-title,
+.template-4 .en-section-title,
+.template-template-4 .en-section-title {
+  font-size: 11.2px !important;
 }
 
-/* Skills — compact full-width layout, +0.4px */
-.en-resume.template-4 .en-skills-grid {
-  gap: 0;
+/* Skills — compact full-width layout, +0.8px (10.0px) */
+.en-resume.template-4 .en-skills-grid,
+.template-4 .en-skills-grid,
+.template-template-4 .en-skills-grid {
+  gap: 0 !important;
 }
 
-.en-resume.template-4 .en-skills-row {
-  gap: 16px;
+.en-resume.template-4 .en-skills-row,
+.template-4 .en-skills-row,
+.template-template-4 .en-skills-row {
+  gap: 16px !important;
 }
 
-.en-resume.template-4 .en-skill-row {
-  padding: 1px 0;
-  gap: 6px;
+.en-resume.template-4 .en-skill-row,
+.template-4 .en-skill-row,
+.template-template-4 .en-skill-row {
+  padding: 1px 0 !important;
+  gap: 6px !important;
 }
 
-.en-resume.template-4 .en-skill-category {
-  font-size: 9.6px;
-  font-weight: 700;
-  width: 95px;
-  min-width: 95px;
-  max-width: 95px;
-  color: #1e3a5f;
+.en-resume.template-4 .en-skill-category,
+.template-4 .en-skill-category,
+.template-template-4 .en-skill-category {
+  font-size: 10.0px !important;
+  font-weight: 700 !important;
+  width: 95px !important;
+  min-width: 95px !important;
+  max-width: 95px !important;
+  color: #1e3a5f !important;
 }
 
-.en-resume.template-4 .en-skill-category::after {
-  content: ':';
+.en-resume.template-4 .en-skill-category::after,
+.template-4 .en-skill-category::after,
+.template-template-4 .en-skill-category::after {
+  content: ':' !important;
 }
 
-.en-resume.template-4 .en-skill-values {
-  font-size: 9.6px;
-  line-height: 1.4;
+.en-resume.template-4 .en-skill-values,
+.template-4 .en-skill-values,
+.template-template-4 .en-skill-values {
+  font-size: 10.0px !important;
+  line-height: 1.4 !important;
 }
 
-/* Role / Degree — +0.4px */
+/* Role / Degree — +0.8px (11.2px) */
 .en-resume.template-4 .en-exp-role,
-.en-resume.template-4 .en-edu-degree {
-  font-size: 10.8px;
+.en-resume.template-4 .en-edu-degree,
+.template-4 .en-exp-role,
+.template-4 .en-edu-degree,
+.template-template-4 .en-exp-role,
+.template-template-4 .en-edu-degree {
+  font-size: 11.2px !important;
 }
 
-/* Company / Institution — +0.4px */
+/* Company / Institution — +0.8px (10.7px) */
 .en-resume.template-4 .en-exp-company,
-.en-resume.template-4 .en-edu-institution {
-  font-size: 10.3px;
+.en-resume.template-4 .en-edu-institution,
+.template-4 .en-exp-company,
+.template-4 .en-edu-institution,
+.template-template-4 .en-exp-company,
+.template-template-4 .en-edu-institution {
+  font-size: 10.7px !important;
 }
 
-/* Meta dates/location — +0.4px */
+/* Meta dates/location — +0.8px (9.7px) */
 .en-resume.template-4 .en-exp-meta,
-.en-resume.template-4 .en-edu-meta {
-  font-size: 9.3px;
+.en-resume.template-4 .en-edu-meta,
+.template-4 .en-exp-meta,
+.template-4 .en-edu-meta,
+.template-template-4 .en-exp-meta,
+.template-template-4 .en-edu-meta {
+  font-size: 9.7px !important;
 }
 
-/* Project — +0.4px */
-.en-resume.template-4 .en-exp-project {
-  font-size: 9.3px;
+/* Project — +0.8px (9.7px) */
+.en-resume.template-4 .en-exp-project,
+.template-4 .en-exp-project,
+.template-template-4 .en-exp-project {
+  font-size: 9.7px !important;
 }
 
-/* Achievement label — +0.4px */
-.en-resume.template-4 .en-exp-ach-label {
-  font-size: 9.3px;
+/* Achievement label — +0.8px (9.7px) */
+.en-resume.template-4 .en-exp-ach-label,
+.template-4 .en-exp-ach-label,
+.template-template-4 .en-exp-ach-label {
+  font-size: 9.7px !important;
 }
 
 /* Tighter section spacing */
-.en-resume.template-4 .en-section {
+.en-resume.template-4 .en-section,
+.template-4 .en-section,
+.template-template-4 .en-section {
   margin-top: 7px;
 }
 
-.en-resume.template-4 .en-section-header {
+.en-resume.template-4 .en-section-header,
+.template-4 .en-section-header,
+.template-template-4 .en-section-header {
   margin-bottom: 5px;
 }
 
 /* Tighter experience blocks */
-.en-resume.template-4 .en-experience {
+.en-resume.template-4 .en-experience,
+.template-4 .en-experience,
+.template-template-4 .en-experience {
   margin-bottom: 8px;
 }
 
-/* Bullets — +0.4px */
-.en-resume.template-4 .en-exp-bullets li {
-  font-size: 9.8px;
+/* Bullets — +0.8px (10.2px) */
+.en-resume.template-4 .en-exp-bullets li,
+.template-4 .en-exp-bullets li,
+.template-template-4 .en-exp-bullets li {
+  font-size: 10.2px !important;
   margin-bottom: 1px;
   line-height: 1.45;
 }
 
-/* Achievement cell — +0.4px */
-.en-resume.template-4 .en-achievement-cell {
-  font-size: 9.8px;
+/* Achievement cell — +0.8px (10.2px) */
+.en-resume.template-4 .en-achievement-cell,
+.template-4 .en-achievement-cell,
+.template-template-4 .en-achievement-cell {
+  font-size: 10.2px !important;
 }
 
-/* Language name — +0.4px */
-.en-resume.template-4 .en-lang-name {
-  font-size: 9.8px;
+/* Language name — +0.8px (10.2px) */
+.en-resume.template-4 .en-lang-name,
+.template-4 .en-lang-name,
+.template-template-4 .en-lang-name {
+  font-size: 10.2px !important;
 }
 
-/* Language proficiency — +0.4px */
-.en-resume.template-4 .en-lang-proficiency {
-  font-size: 9.3px;
+/* Language proficiency — +0.8px (9.7px) */
+.en-resume.template-4 .en-lang-proficiency,
+.template-4 .en-lang-proficiency,
+.template-template-4 .en-lang-proficiency {
+  font-size: 9.7px !important;
 }
 
 /* ── PREVIEW ADOBE ACROBAT-STYLE ELEVATION ── */
