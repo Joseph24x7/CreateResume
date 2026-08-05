@@ -1024,16 +1024,40 @@ svg[stroke="currentColor"].en-svg-icon {
 
 /* ── TEMPLATE 4 ONLY: Enhanced Overrides ── */
 
-/* Tagline — clean sans-serif for long professional titles */
+/* Name — +0.4px */
+.template-4 .en-name,
+.template-template-4 .en-name {
+  font-size: 26.6px;
+}
+
+/* Tagline — clean sans-serif for long professional titles, +0.4px */
 .template-4 .en-job-title,
 .template-template-4 .en-job-title {
   font-family: 'Merriweather Sans', 'Inter', Arial, sans-serif;
   font-style: normal;
   font-weight: 500;
-  font-size: 10.8px;
+  font-size: 11.2px;
   letter-spacing: 0.6px;
   color: #475569;
   text-transform: uppercase;
+}
+
+/* Summary — +0.4px */
+.template-4 .en-summary-text,
+.template-template-4 .en-summary-text {
+  font-size: 9.8px;
+}
+
+/* Contact — +0.4px */
+.template-4 .en-contact-item,
+.template-template-4 .en-contact-item {
+  font-size: 9.3px;
+}
+
+/* Section title — +0.4px */
+.template-4 .en-section-title,
+.template-template-4 .en-section-title {
+  font-size: 10.8px;
 }
 
 /* Skills — compact full-width layout */
@@ -1055,7 +1079,7 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-4 .en-skill-category,
 .template-template-4 .en-skill-category {
-  font-size: 9.2px;
+  font-size: 9.6px;
   font-weight: 700;
   width: 95px;
   min-width: 95px;
@@ -1070,8 +1094,44 @@ svg[stroke="currentColor"].en-svg-icon {
 
 .template-4 .en-skill-values,
 .template-template-4 .en-skill-values {
-  font-size: 9.2px;
+  font-size: 9.6px;
   line-height: 1.4;
+}
+
+/* Role / Degree — +0.4px */
+.template-4 .en-exp-role,
+.template-4 .en-edu-degree,
+.template-template-4 .en-exp-role,
+.template-template-4 .en-edu-degree {
+  font-size: 10.8px;
+}
+
+/* Company / Institution — +0.4px */
+.template-4 .en-exp-company,
+.template-4 .en-edu-institution,
+.template-template-4 .en-exp-company,
+.template-template-4 .en-edu-institution {
+  font-size: 10.3px;
+}
+
+/* Meta dates/location — +0.4px */
+.template-4 .en-exp-meta,
+.template-4 .en-edu-meta,
+.template-template-4 .en-exp-meta,
+.template-template-4 .en-edu-meta {
+  font-size: 9.3px;
+}
+
+/* Project — +0.4px */
+.template-4 .en-exp-project,
+.template-template-4 .en-exp-project {
+  font-size: 9.3px;
+}
+
+/* Achievement label — +0.4px */
+.template-4 .en-exp-ach-label,
+.template-template-4 .en-exp-ach-label {
+  font-size: 9.3px;
 }
 
 /* Tighter section spacing */
@@ -1091,10 +1151,30 @@ svg[stroke="currentColor"].en-svg-icon {
   margin-bottom: 8px;
 }
 
+/* Bullets — +0.4px */
 .template-4 .en-exp-bullets li,
 .template-template-4 .en-exp-bullets li {
+  font-size: 9.8px;
   margin-bottom: 1px;
   line-height: 1.45;
+}
+
+/* Achievement cell — +0.4px */
+.template-4 .en-achievement-cell,
+.template-template-4 .en-achievement-cell {
+  font-size: 9.8px;
+}
+
+/* Language name — +0.4px */
+.template-4 .en-lang-name,
+.template-template-4 .en-lang-name {
+  font-size: 9.8px;
+}
+
+/* Language proficiency — +0.4px */
+.template-4 .en-lang-proficiency,
+.template-template-4 .en-lang-proficiency {
+  font-size: 9.3px;
 }
 
 /* ── PREVIEW ADOBE ACROBAT-STYLE ELEVATION ── */
