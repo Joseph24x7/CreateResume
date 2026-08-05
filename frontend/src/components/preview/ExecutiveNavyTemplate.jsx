@@ -374,7 +374,7 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
   } = useResumeStore()
 
   const template = data?.template || 'executive-navy'
-  const activeData = (template === 'template-4' && data?.template4Data) ? data.template4Data : (data || {})
+  const activeData = data || {}
 
   const {
     personalInfo: rawPersonalInfo,
@@ -546,14 +546,14 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     updateLanguages([...languages, { id: newUuid(), language: '', proficiency: 'Full Professional Proficiency' }])
   }
 
-  const templateClass = template === 'template-4' ? 'template-4' : `template-${template}`
+  const templateClass = `template-${template}`
 
   return (
-    <div ref={containerRef} className={`en-resume ${templateClass} template-${template} size-${fontSize}`} style={{ fontFamily: getFontFamily(font) }}>
+    <div ref={containerRef} className={`en-resume ${templateClass} size-${fontSize}`} style={{ fontFamily: getFontFamily(font) }}>
 
 
         <header className="en-header" style={{ display: 'flex', alignItems: 'center' }}>
-          {(template === 'elegant-diamond' || template === 'template-4') && showMonogram && (
+          {template === 'elegant-diamond' && showMonogram && (
             <div className="en-header-monogram" style={{ marginRight: '20px' }}>
               <div className="monogram-diamond">
                 <span className="monogram-text">

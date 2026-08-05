@@ -168,133 +168,77 @@ const useResumeStore = create((set, get) => ({
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, ...patch } })
-    } else {
-      updateResumeData({ ...data, ...patch })
-    }
+    updateResumeData({ ...data, ...patch })
   },
 
   updatePersonalInfo: (personalInfo) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, personalInfo } })
-    } else {
-      updateResumeData({ ...data, personalInfo })
-    }
+    updateResumeData({ ...data, personalInfo })
   },
 
   updateSummary: (summary) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, summary } })
-    } else {
-      updateResumeData({ ...data, summary })
-    }
+    updateResumeData({ ...data, summary })
   },
 
   updateSkillCategories: (skillCategories) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, skillCategories } })
-    } else {
-      updateResumeData({ ...data, skillCategories })
-    }
+    updateResumeData({ ...data, skillCategories })
   },
 
   updateExperiences: (experiences) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, experiences } })
-    } else {
-      updateResumeData({ ...data, experiences })
-    }
+    updateResumeData({ ...data, experiences })
   },
 
   updateAchievements: (achievements) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, achievements } })
-    } else {
-      updateResumeData({ ...data, achievements })
-    }
+    updateResumeData({ ...data, achievements })
   },
 
   updateEducations: (educations) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, educations } })
-    } else {
-      updateResumeData({ ...data, educations })
-    }
+    updateResumeData({ ...data, educations })
   },
 
   updateLanguages: (languages) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, template4Data: { ...t4Data, languages } })
-    } else {
-      updateResumeData({ ...data, languages })
-    }
+    updateResumeData({ ...data, languages })
   },
 
   updateFont: (font) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, font, template4Data: { ...t4Data, font } })
-    } else {
-      updateResumeData({ ...data, font })
-    }
+    updateResumeData({ ...data, font })
   },
 
   updateTemplate: (template) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (template === 'template-4' && !data.template4Data) {
-      const t4Copy = JSON.parse(JSON.stringify(data))
-      t4Copy.template = 'template-4'
-      updateResumeData({ ...data, template, template4Data: t4Copy })
-    } else {
-      updateResumeData({ ...data, template })
-    }
+    updateResumeData({ ...data, template })
   },
 
   updateFontSize: (fontSize) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
     const data = resume.data || {}
-    if (data.template === 'template-4') {
-      const t4Data = data.template4Data || JSON.parse(JSON.stringify(data))
-      updateResumeData({ ...data, fontSize, template4Data: { ...t4Data, fontSize } })
-    } else {
-      updateResumeData({ ...data, fontSize })
-    }
+    updateResumeData({ ...data, fontSize })
   },
 
   fetchResumeList: async () => {

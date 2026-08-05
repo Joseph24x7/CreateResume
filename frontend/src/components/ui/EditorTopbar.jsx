@@ -98,8 +98,8 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
 
       <div className="topbar-right">
 
-        {/* Monogram Toggle (Elegant Diamond and Template 4 only) */}
-        {(template === 'elegant-diamond' || template === 'template-4') && (
+        {/* Monogram Toggle (Elegant Diamond only) */}
+        {template === 'elegant-diamond' && (
           <label style={{ display: 'flex', alignItems: 'center', color: 'var(--text-1)', fontSize: '13px', marginRight: '12px', cursor: 'pointer', userSelect: 'none' }}>
             <input
               type="checkbox"
@@ -120,8 +120,7 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
         >
           <option value="executive-navy">Template: Executive Navy</option>
           <option value="minimalist-accent">Template: Minimalist Accent</option>
-          <option value="elegant-diamond">Template: Elegant Diamond</option>
-          <option value="template-4">Template 4: Executive Diamond (Optimized)</option>
+          <option value="elegant-diamond">Template 3: Elegant Diamond</option>
         </select>
 
         <select
