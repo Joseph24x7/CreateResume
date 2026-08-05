@@ -546,8 +546,10 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     updateLanguages([...languages, { id: newUuid(), language: '', proficiency: 'Full Professional Proficiency' }])
   }
 
+  const templateClass = template === 'template-4' ? 'template-4' : `template-${template}`
+
   return (
-    <div ref={containerRef} className={`en-resume template-${template} size-${fontSize}`} style={{ fontFamily: getFontFamily(font) }}>
+    <div ref={containerRef} className={`en-resume ${templateClass} template-${template} size-${fontSize}`} style={{ fontFamily: getFontFamily(font) }}>
 
 
         <header className="en-header" style={{ display: 'flex', alignItems: 'center' }}>
