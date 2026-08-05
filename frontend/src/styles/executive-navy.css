@@ -1022,7 +1022,80 @@ svg[stroke="currentColor"].en-svg-icon {
   box-shadow: -3px 0 0 0 #304d89;
 }
 
+/* ── TEMPLATE 4 ONLY: Enhanced Overrides ── */
 
+/* Tagline — clean sans-serif for long professional titles */
+.template-4 .en-job-title,
+.template-template-4 .en-job-title {
+  font-family: 'Merriweather Sans', 'Inter', Arial, sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 10.8px;
+  letter-spacing: 0.6px;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+/* Skills — compact full-width layout */
+.template-4 .en-skills-grid,
+.template-template-4 .en-skills-grid {
+  gap: 0;
+}
+
+.template-4 .en-skills-row,
+.template-template-4 .en-skills-row {
+  gap: 16px;
+}
+
+.template-4 .en-skill-row,
+.template-template-4 .en-skill-row {
+  padding: 1px 0;
+  gap: 6px;
+}
+
+.template-4 .en-skill-category,
+.template-template-4 .en-skill-category {
+  font-size: 9.2px;
+  font-weight: 700;
+  width: 95px;
+  min-width: 95px;
+  max-width: 95px;
+  color: #1e3a5f;
+}
+
+.template-4 .en-skill-category::after,
+.template-template-4 .en-skill-category::after {
+  content: ':';
+}
+
+.template-4 .en-skill-values,
+.template-template-4 .en-skill-values {
+  font-size: 9.2px;
+  line-height: 1.4;
+}
+
+/* Tighter section spacing */
+.template-4 .en-section,
+.template-template-4 .en-section {
+  margin-top: 7px;
+}
+
+.template-4 .en-section-header,
+.template-template-4 .en-section-header {
+  margin-bottom: 5px;
+}
+
+/* Tighter experience blocks */
+.template-4 .en-experience,
+.template-template-4 .en-experience {
+  margin-bottom: 8px;
+}
+
+.template-4 .en-exp-bullets li,
+.template-template-4 .en-exp-bullets li {
+  margin-bottom: 1px;
+  line-height: 1.45;
+}
 
 /* ── PREVIEW ADOBE ACROBAT-STYLE ELEVATION ── */
 .preview-page-sheet-container {
