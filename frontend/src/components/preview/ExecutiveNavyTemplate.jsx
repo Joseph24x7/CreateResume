@@ -740,10 +740,10 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
                     </span>
                   </div>
                   <div className="en-exp-project">
-                    Project Team:{' '}
-                    <EditableText value={exp.project} onChange={(val) => updateExp(exp.id, 'project', val)} placeholder="Project/Team Description" singleLine />
+                    Project:{' '}
+                    <EditableText value={exp.project} onChange={(val) => updateExp(exp.id, 'project', val)} placeholder="Project Description" singleLine />
                   </div>
-                  <div className="en-exp-ach-label">Achievements/Tasks</div>
+                  <div className="en-exp-ach-label">Key Contributions</div>
                 </div>
 
                 <ul className="en-exp-bullets">
