@@ -61,7 +61,7 @@ function BlockControls({ onMoveUp, onMoveDown, onDelete }) {
 }
 
 const SectionIcon = ({ type, template }) => {
-  if (template !== 'minimalist-accent' && template !== 'elegant-diamond') return null
+  if (template !== 'minimalist-accent' && template !== 'elegant-diamond' && template !== 'template-4') return null
 
   const minimalistIcons = {
     skills: '⚡',
@@ -79,7 +79,7 @@ const SectionIcon = ({ type, template }) => {
     languages: '❖',
   }
 
-  const iconSymbol = template === 'elegant-diamond' 
+  const iconSymbol = (template === 'elegant-diamond' || template === 'template-4')
     ? diamondIcons[type] 
     : minimalistIcons[type]
 
@@ -373,6 +373,9 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     toggleSection
   } = useResumeStore()
 
+  const template = data?.template || 'executive-navy'
+  const activeData = (template === 'template-4' && data?.template4Data) ? data.template4Data : (data || {})
+
   const {
     personalInfo: rawPersonalInfo,
     summary = '',
@@ -383,10 +386,9 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
     languages: rawLanguages,
     hiddenSections: rawHiddenSections,
     font = 'Merriweather Sans',
-    template = 'executive-navy',
     fontSize = 'medium',
     showMonogram = false
-  } = data || {}
+  } = activeData
 
   const getFontFamily = (fontName) => {
     if (fontName === 'Merriweather Sans') {
@@ -549,7 +551,7 @@ export default function ExecutiveNavyTemplate({ data, spacers: propsSpacers = {}
 
 
         <header className="en-header" style={{ display: 'flex', alignItems: 'center' }}>
-          {template === 'elegant-diamond' && showMonogram && (
+          {(template === 'elegant-diamond' || template === 'template-4') && showMonogram && (
             <div className="en-header-monogram" style={{ marginRight: '20px' }}>
               <div className="monogram-diamond">
                 <span className="monogram-text">
