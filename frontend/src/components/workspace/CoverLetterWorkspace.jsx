@@ -34,12 +34,12 @@ export default function CoverLetterWorkspace() {
   const resume = useResumeStore((s) => s.resume)
   const pi = resume?.data?.personalInfo || {}
 
-  const candidateName = `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || 'Alex Morgan'
-  const candidateTitle = pi.title || 'Senior Software Engineer'
-  const email = pi.email || 'alex.morgan@example.com'
-  const phone = pi.phone || '+1 (555) 234-5678'
-  const location = pi.location || 'San Francisco, CA'
-  const linkedin = pi.linkedin || 'linkedin.com/in/alexmorgan'
+  const candidateName = localStorage.getItem('user_full_name') || `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || 'Alex Morgan'
+  const candidateTitle = localStorage.getItem('user_title') || pi.title || 'Senior Software Engineer'
+  const email = localStorage.getItem('user_email') || pi.email || 'alex.morgan@example.com'
+  const phone = localStorage.getItem('user_phone') || pi.phone || '+1 (555) 234-5678'
+  const location = localStorage.getItem('user_location') || pi.location || 'San Francisco, CA'
+  const linkedin = localStorage.getItem('user_linkedin') || pi.linkedin || 'linkedin.com/in/alexmorgan'
 
   const todayFormatted = new Date().toLocaleDateString('en-US', {
     day: 'numeric',

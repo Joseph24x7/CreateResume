@@ -8,13 +8,24 @@ import '../styles/landing.css'
 
 export default function LandingPage() {
   const navigate = useNavigate()
-  const { resumeList, loading, fetchResumeList, createResume, deleteResume, loadResume, resume } = useResumeStore()
+  const { resumeList, loading, fetchResumeList, createResume, deleteResume, loadResume, resume, updatePersonalInfo } = useResumeStore()
   const [activeTab, setActiveTab] = useState('resumes')
   const [creating, setCreating] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [showInput, setShowInput] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('profile') // 'profile' | 'ai'
+
   const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('gemini_api_key') || '')
+
+  // Default Profile & Contact Info State
+  const pi = resume?.data?.personalInfo || {}
+  const [fullName, setFullName] = useState(() => localStorage.getItem('user_full_name') || `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || '')
+  const [title, setTitle] = useState(() => localStorage.getItem('user_title') || pi.title || '')
+  const [email, setEmail] = useState(() => localStorage.getItem('user_email') || pi.email || '')
+  const [phone, setPhone] = useState(() => localStorage.getItem('user_phone') || pi.phone || '')
+  const [location, setLocation] = useState(() => localStorage.getItem('user_location') || pi.location || '')
+  const [linkedin, setLinkedin] = useState(() => localStorage.getItem('user_linkedin') || pi.linkedin || '')
 
   useEffect(() => {
     fetchResumeList()
@@ -26,6 +37,50 @@ export default function LandingPage() {
       loadResume(resumeList[0].id)
     }
   }, [resumeList, resume, loadResume])
+
+  // Sync profile inputs when active resume loads
+  useEffect(() => {
+    if (resume?.data?.personalInfo) {
+      const info = resume.data.personalInfo
+      const nameStr = `${info.firstName || ''} ${info.lastName || ''}`.trim()
+      if (nameStr && !localStorage.getItem('user_full_name')) setFullName(nameStr)
+      if (info.title && !localStorage.getItem('user_title')) setTitle(info.title)
+      if (info.email && !localStorage.getItem('user_email')) setEmail(info.email)
+      if (info.phone && !localStorage.getItem('user_phone')) setPhone(info.phone)
+      if (info.location && !localStorage.getItem('user_location')) setLocation(info.location)
+      if (info.linkedin && !localStorage.getItem('user_linkedin')) setLinkedin(info.linkedin)
+    }
+  }, [resume])
+
+  const handleSaveSettings = () => {
+    // Save to localStorage
+    localStorage.setItem('user_full_name', fullName)
+    localStorage.setItem('user_title', title)
+    localStorage.setItem('user_email', email)
+    localStorage.setItem('user_phone', phone)
+    localStorage.setItem('user_location', location)
+    localStorage.setItem('user_linkedin', linkedin)
+    localStorage.setItem('gemini_api_key', geminiKey)
+
+    // Also update active resume personalInfo if active
+    if (resume) {
+      const nameParts = fullName.trim().split(' ')
+      const firstName = nameParts[0] || ''
+      const lastName = nameParts.slice(1).join(' ') || ''
+      updatePersonalInfo({
+        ...pi,
+        firstName,
+        lastName,
+        title,
+        email,
+        phone,
+        location,
+        linkedin,
+      })
+    }
+
+    setShowSettingsModal(false)
+  }
 
   const handleCreate = async () => {
     if (creating) return
@@ -100,9 +155,9 @@ export default function LandingPage() {
           <button
             className="nav-settings-btn"
             onClick={() => setShowSettingsModal(true)}
-            title="AI Settings"
+            title="Profile & Settings"
           >
-            ⚙️ Settings
+            👤 Profile & Settings
           </button>
         </div>
       </nav>
@@ -275,34 +330,138 @@ export default function LandingPage() {
 
       {showSettingsModal && (
         <div className="settings-modal-overlay">
-          <div className="settings-modal">
+          <div className="settings-modal" style={{ maxWidth: '540px' }}>
             <div className="settings-modal-header">
-              <h3>AI Settings</h3>
+              <h3>Profile & App Settings</h3>
               <button className="close-btn" onClick={() => setShowSettingsModal(false)}>
                 ✕
               </button>
             </div>
-            <div className="settings-modal-body">
-              <div className="form-group">
-                <label htmlFor="gemini-key-input">Gemini API Key</label>
-                <input
-                  id="gemini-key-input"
-                  type="password"
-                  placeholder="Enter your Gemini API key (e.g. AIzaSy...)"
-                  value={geminiKey}
-                  onChange={(e) => {
-                    setGeminiKey(e.target.value)
-                    localStorage.setItem('gemini_api_key', e.target.value)
-                  }}
-                />
-                <small className="help-text">
-                  Your key is saved locally in your browser and sent only to the backend to generate cover letters. If left blank, a smart local mock simulator will be used.
-                </small>
-              </div>
+
+            <div style={{ display: 'flex', borderBottom: '1px solid #334155', background: '#0f172a' }}>
+              <button
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  background: settingsTab === 'profile' ? '#1e293b' : 'transparent',
+                  color: settingsTab === 'profile' ? '#38bdf8' : '#94a3b8',
+                  border: 'none',
+                  borderBottom: settingsTab === 'profile' ? '2px solid #38bdf8' : 'none',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => setSettingsTab('profile')}
+              >
+                👤 Default Contact Details
+              </button>
+              <button
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  background: settingsTab === 'ai' ? '#1e293b' : 'transparent',
+                  color: settingsTab === 'ai' ? '#38bdf8' : '#94a3b8',
+                  border: 'none',
+                  borderBottom: settingsTab === 'ai' ? '2px solid #38bdf8' : 'none',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => setSettingsTab('ai')}
+              >
+                ⚙️ AI Settings
+              </button>
             </div>
+
+            <div className="settings-modal-body">
+              {settingsTab === 'profile' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0' }}>
+                    Set your default personal profile details below. These are automatically used for your cover letters and new resumes.
+                  </p>
+                  <div className="form-group">
+                    <label htmlFor="user-name">Full Name</label>
+                    <input
+                      id="user-name"
+                      type="text"
+                      placeholder="e.g. Alex Morgan"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="user-title">Professional Title</label>
+                    <input
+                      id="user-title"
+                      type="text"
+                      placeholder="e.g. Senior Software Engineer"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="user-email">Email Address</label>
+                    <input
+                      id="user-email"
+                      type="text"
+                      placeholder="e.g. alex.morgan@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="user-phone">Mobile / Phone</label>
+                    <input
+                      id="user-phone"
+                      type="text"
+                      placeholder="e.g. +1 (555) 234-5678"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="user-location">City, State</label>
+                    <input
+                      id="user-location"
+                      type="text"
+                      placeholder="e.g. San Francisco, CA"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="user-linkedin">LinkedIn Profile URL</label>
+                    <input
+                      id="user-linkedin"
+                      type="text"
+                      placeholder="e.g. linkedin.com/in/alexmorgan"
+                      value={linkedin}
+                      onChange={(e) => setLinkedin(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {settingsTab === 'ai' && (
+                <div className="form-group">
+                  <label htmlFor="gemini-key-input">Gemini API Key</label>
+                  <input
+                    id="gemini-key-input"
+                    type="password"
+                    placeholder="Enter your Gemini API key (e.g. AIzaSy...)"
+                    value={geminiKey}
+                    onChange={(e) => setGeminiKey(e.target.value)}
+                  />
+                  <small className="help-text">
+                    Your key is saved locally in your browser and sent only to the backend to generate questions & cover letters.
+                  </small>
+                </div>
+              )}
+            </div>
+
             <div className="settings-modal-footer">
-              <button className="btn-primary" onClick={() => setShowSettingsModal(false)}>
-                Save & Close
+              <button className="btn-primary" onClick={handleSaveSettings}>
+                Save Profile & Settings
               </button>
             </div>
           </div>
