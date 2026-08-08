@@ -1,16 +1,78 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import useResumeStore from '../../store/resumeStore'
 import { formatResumeToText } from '../../utils/resumeFormatter'
+import EditableText from '../canvas/EditableText'
 
 export default function CoverLetterWorkspace() {
   const resume = useResumeStore((s) => s.resume)
-  const [jobTitle, setJobTitle] = useState(resume?.data?.personalInfo?.title || '')
-  const [company, setCompany] = useState('')
+  const pi = resume?.data?.personalInfo || {}
+
+  const defaultCandidateName = `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || 'Alex Morgan'
+  const defaultCandidateTitle = pi.title || 'Senior Software Engineer'
+  const defaultEmail = pi.email || 'alex.morgan@example.com'
+  const defaultPhone = pi.phone || '+1 (555) 234-5678'
+  const defaultLocation = pi.location || 'San Francisco, CA'
+  const defaultLinkedin = pi.linkedin || 'linkedin.com/in/alexmorgan'
+
+  const todayFormatted = new Date().toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+
+  // Target inputs
+  const [jobTitle, setJobTitle] = useState(pi.title || 'Senior Software Engineer')
+  const [company, setCompany] = useState('Acme Corporation')
   const [jobDescription, setJobDescription] = useState('')
-  const [coverLetter, setCoverLetter] = useState('')
+  const [showDescInput, setShowDescInput] = useState(false)
+
+  // Document state (WYSIWYG Editable)
+  const [candidateName, setCandidateName] = useState(defaultCandidateName)
+  const [candidateTitle, setCandidateTitle] = useState(defaultCandidateTitle)
+  const [email, setEmail] = useState(defaultEmail)
+  const [phone, setPhone] = useState(defaultPhone)
+  const [location, setLocation] = useState(defaultLocation)
+  const [linkedin, setLinkedin] = useState(defaultLinkedin)
+
+  const [dateStr, setDateStr] = useState(todayFormatted)
+  const [recipientName, setRecipientName] = useState('Hiring Manager')
+  const [companyName, setCompanyName] = useState('Acme Corporation')
+  const [companyAddress, setCompanyAddress] = useState('100 Innovation Way, San Francisco, CA 94105')
+  const [subjectText, setSubjectText] = useState('Re: Application for Senior Software Engineer')
+
+  const [salutation, setSalutation] = useState('Dear Hiring Manager,')
+  const [coverLetter, setCoverLetter] = useState(
+    `I am writing to express my strong enthusiasm for the Senior Software Engineer position at Acme Corporation. With over 7 years of hands-on experience designing high-throughput microservices, optimizing distributed databases, and leading agile engineering teams, I am confident in my ability to make an immediate, meaningful impact on your engineering operations.\n\nThroughout my career, I have consistently driven technical excellence and business results. In my recent role, I spearheaded the architectural migration from a legacy monolithic infrastructure to event-driven microservices using Spring Boot, Kafka, and Kubernetes. This transformation reduced application latency by 45% and enabled continuous deployment with zero downtime.\n\nWhat particularly draws me to Acme Corporation is your commitment to innovative product engineering and scalable technology solutions. I thrive in collaborative environments where complex technical challenges are solved with elegant, maintainable code.\n\nThank you for your time and consideration. I welcome the opportunity to discuss how my technical background and leadership skills align with Acme Corporation's goals.`
+  )
+  const [signOff, setSignOff] = useState('Sincerely,')
+
   const [loading, setLoading] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // Auto-sync candidate details when active resume changes
+  useEffect(() => {
+    if (pi.firstName || pi.lastName) {
+      setCandidateName(`${pi.firstName || ''} ${pi.lastName || ''}`.trim())
+    }
+    if (pi.title) setCandidateTitle(pi.title)
+    if (pi.email) setEmail(pi.email)
+    if (pi.phone) setPhone(pi.phone)
+    if (pi.location) setLocation(pi.location)
+    if (pi.linkedin) setLinkedin(pi.linkedin)
+  }, [pi.firstName, pi.lastName, pi.title, pi.email, pi.phone, pi.location, pi.linkedin])
+
+  // Sync subject line when jobTitle changes
+  const handleJobTitleChange = (val) => {
+    setJobTitle(val)
+    setSubjectText(`Re: Application for ${val || 'Position'}`)
+  }
+
+  // Sync company name when company input changes
+  const handleCompanyChange = (val) => {
+    setCompany(val)
+    setCompanyName(val || 'Target Organization')
+  }
 
   const handleGenerate = async () => {
     setLoading(true)
@@ -35,7 +97,9 @@ export default function CoverLetterWorkspace() {
 
       if (res.ok) {
         const data = await res.json()
-        setCoverLetter(data.coverLetter || '')
+        if (data.coverLetter) {
+          setCoverLetter(data.coverLetter)
+        }
       } else {
         alert('Failed to generate cover letter.')
       }
@@ -48,29 +112,15 @@ export default function CoverLetterWorkspace() {
   }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(coverLetter)
+    const fullText = `${candidateName}\n${candidateTitle}\n${email} | ${phone} | ${location}\n\n${dateStr}\n\n${recipientName}\n${companyName}\n${companyAddress}\n\n${subjectText}\n\n${salutation}\n\n${coverLetter}\n\n${signOff}\n${candidateName}`
+    navigator.clipboard.writeText(fullText)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleDownloadPdf = async () => {
-    if (!coverLetter) return
     setPdfLoading(true)
     try {
-      const pi = resume?.data?.personalInfo || {}
-      const candidateName = `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || 'Applicant'
-      const candidateTitle = pi.title || jobTitle || 'Professional'
-      const email = pi.email || ''
-      const phone = pi.phone || ''
-      const location = pi.location || ''
-      const linkedin = pi.linkedin || ''
-
-      const today = new Date().toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-
       const contactItems = [email, phone, location, linkedin].filter(Boolean).join('  •  ')
 
       const singlePageHtml = `<!DOCTYPE html>
@@ -80,11 +130,11 @@ export default function CoverLetterWorkspace() {
   <style>
     @page { size: A4 portrait; margin: 0 !important; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-    body { margin: 0; padding: 0; background: #ffffff; font-family: 'Georgia', 'Merriweather', serif; color: #1e293b; }
+    body { margin: 0; padding: 0; background: #ffffff; font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif; color: #1e293b; }
     .page-container {
       width: 794px;
       height: 1123px;
-      padding: 56px 64px;
+      padding: 54px 60px;
       position: relative;
       overflow: hidden;
       display: flex;
@@ -93,56 +143,78 @@ export default function CoverLetterWorkspace() {
       background: #ffffff;
     }
     .header-name {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
-      color: #0f172a;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      color: #1b2340;
+      letter-spacing: -0.3px;
       margin: 0 0 4px 0;
+      line-height: 1.15;
     }
     .header-title {
-      font-family: Arial, Helvetica, sans-serif;
       font-size: 13px;
-      font-weight: 600;
-      color: #0284c7;
+      font-weight: 500;
+      color: #475569;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.6px;
       margin: 0 0 16px 0;
     }
     .contact-bar {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 11px;
-      color: #475569;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #0284c7;
-      margin-bottom: 28px;
+      font-size: 10.5px;
+      color: #334155;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-top: 1px solid #d1d9e6;
+      border-bottom: 1px solid #d1d9e6;
+      margin-bottom: 24px;
     }
     .meta-date {
-      font-size: 12px;
-      color: #475569;
-      margin-bottom: 20px;
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 16px;
+      font-weight: 500;
     }
     .recipient-info {
-      font-size: 13px;
+      font-size: 12.5px;
       color: #1e293b;
-      margin-bottom: 24px;
-      line-height: 1.5;
+      margin-bottom: 20px;
+      line-height: 1.45;
     }
-    .subject-line {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 13.5px;
+    .recipient-name {
       font-weight: 700;
       color: #0f172a;
-      margin-bottom: 24px;
     }
-    .letter-content {
-      font-size: 13px;
-      line-height: 1.7;
+    .subject-line {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1b2340;
+      margin-bottom: 20px;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid #0ea5e9;
+    }
+    .salutation {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 14px;
+    }
+    .letter-body {
+      font-size: 11.5px;
+      line-height: 1.65;
       color: #334155;
       white-space: pre-wrap;
       flex-grow: 1;
       text-align: justify;
+    }
+    .sign-off-block {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+    .sign-off-name {
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 16px;
     }
   </style>
 </head>
@@ -152,16 +224,23 @@ export default function CoverLetterWorkspace() {
     <div class="header-title">${candidateTitle}</div>
     <div class="contact-bar">${contactItems}</div>
 
-    <div class="meta-date">${today}</div>
+    <div class="meta-date">${dateStr}</div>
 
     <div class="recipient-info">
-      <strong>Hiring Manager</strong><br/>
-      ${company || 'Target Organization'}
+      <div class="recipient-name">${recipientName}</div>
+      <div>${companyName}</div>
+      <div>${companyAddress}</div>
     </div>
 
-    <div class="subject-line">Re: Application for ${jobTitle || 'Position'}</div>
+    <div class="subject-line">${subjectText}</div>
+    <div class="salutation">${salutation}</div>
 
-    <div class="letter-content">${coverLetter}</div>
+    <div class="letter-body">${coverLetter}</div>
+
+    <div class="sign-off-block">
+      <div>${signOff}</div>
+      <div class="sign-off-name">${candidateName}</div>
+    </div>
   </div>
 </body>
 </html>`
@@ -171,7 +250,7 @@ export default function CoverLetterWorkspace() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           html: singlePageHtml,
-          filename: `${(company || 'Cover_Letter').replace(/\s+/g, '_')}_Cover_Letter`,
+          filename: `${(companyName || 'Cover_Letter').replace(/\s+/g, '_')}_Cover_Letter`,
         }),
       })
 
@@ -180,7 +259,7 @@ export default function CoverLetterWorkspace() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `${(company || 'Cover_Letter').replace(/[^a-zA-Z0-9\-_]/g, '_')}_Cover_Letter.pdf`
+        a.download = `${(companyName || 'Cover_Letter').replace(/[^a-zA-Z0-9\-_]/g, '_')}_Cover_Letter.pdf`
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -196,231 +275,172 @@ export default function CoverLetterWorkspace() {
   }
 
   return (
-    <div className="workspace-container">
-      <style>{`
-        .workspace-container {
-          padding: 32px;
-          color: #f8fafc;
-          overflow-y: auto;
-          height: 100%;
-          box-sizing: border-box;
-          display: flex;
-          gap: 32px;
-        }
-        .ws-panel-left {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-          background: #1e293b;
-          border: 1px solid #334155;
-          border-radius: 12px;
-          padding: 24px;
-        }
-        .ws-panel-right {
-          flex: 1.2;
-          display: flex;
-          flex-direction: column;
-          background: #1e293b;
-          border: 1px solid #334155;
-          border-radius: 12px;
-          padding: 24px;
-          min-height: 400px;
-        }
-        .ws-title {
-          font-size: 20px;
-          font-weight: 600;
-          color: #f8fafc;
-          margin: 0 0 4px 0;
-        }
-        .ws-desc {
-          font-size: 13px;
-          color: #94a3b8;
-          margin: 0 0 16px 0;
-        }
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-        .form-group label {
-          font-size: 13px;
-          font-weight: 500;
-          color: #cbd5e1;
-        }
-        .form-group input, .form-group textarea {
-          background: #0f172a;
-          border: 1px solid #334155;
-          color: #f8fafc;
-          border-radius: 6px;
-          padding: 10px 12px;
-          font-size: 14px;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .form-group input:focus, .form-group textarea:focus {
-          border-color: #0284c7;
-        }
-        .form-group textarea {
-          resize: vertical;
-          min-height: 110px;
-          font-family: inherit;
-        }
-        .help-text {
-          font-size: 11px;
-          color: #64748b;
-          line-height: 1.4;
-        }
-        .btn-ws {
-          background: #0284c7;
-          color: #ffffff;
-          border: none;
-          border-radius: 6px;
-          padding: 12px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background-color 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-        .btn-ws:hover:not(:disabled) {
-          background: #0369a1;
-        }
-        .btn-ws:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-        .letter-actions {
-          margin-top: auto;
-          display: flex;
-          gap: 12px;
-          padding-top: 16px;
-          border-top: 1px solid #334155;
-        }
-        .btn-sec {
-          background: #334155;
-          color: #f8fafc;
-          border: 1px solid #475569;
-        }
-        .btn-sec:hover {
-          background: #475569;
-        }
-        .letter-display {
-          flex-grow: 1;
-          background: #0f172a;
-          border: 1px solid #334155;
-          border-radius: 6px;
-          padding: 16px;
-          color: #cbd5e1;
-          font-family: 'Lora', Georgia, serif;
-          font-size: 14px;
-          line-height: 1.6;
-          outline: none;
-          white-space: pre-wrap;
-          overflow-y: auto;
-        }
-        .letter-empty {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          color: #64748b;
-          gap: 12px;
-        }
-        .letter-empty-icon {
-          font-size: 48px;
-        }
-      `}</style>
-
-      <div className="ws-panel-left">
-        <div>
-          <h3 className="ws-title">Cover Letter Builder</h3>
-          <p className="ws-desc">
-            Tailor a professional cover letter using your active resume highlights.
-          </p>
+    <div className="cl-workspace-wrapper">
+      {/* ── TOP ACTION BAR ── */}
+      <div className="cl-top-toolbar">
+        <div className="cl-toolbar-left">
+          <div className="cl-input-pill">
+            <span className="cl-pill-label">Role:</span>
+            <input
+              type="text"
+              value={jobTitle}
+              onChange={(e) => handleJobTitleChange(e.target.value)}
+              placeholder="Target Job Title"
+            />
+          </div>
+          <div className="cl-input-pill">
+            <span className="cl-pill-label">Company:</span>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => handleCompanyChange(e.target.value)}
+              placeholder="Target Company"
+            />
+          </div>
+          <button
+            className="cl-btn-secondary"
+            onClick={() => setShowDescInput(!showDescInput)}
+            title="Toggle Job Description Input"
+          >
+            {showDescInput ? '▲ Hide Description' : '▼ Add Job Description'}
+          </button>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="job-title-cl">Job Title *</label>
-          <input
-            id="job-title-cl"
-            type="text"
-            placeholder="e.g. Senior Software Engineer"
-            value={jobTitle}
-            onChange={(e) => setJobTitle(e.target.value)}
-          />
+        <div className="cl-toolbar-right">
+          <button
+            className="cl-btn-ai"
+            onClick={handleGenerate}
+            disabled={loading || !jobTitle.trim() || !company.trim()}
+          >
+            {loading ? '⟳ Generating with AI...' : '✦ Generate with AI'}
+          </button>
+          <button className="cl-btn-secondary" onClick={handleCopy}>
+            {copied ? 'Copied! ✓' : '📋 Copy Text'}
+          </button>
+          <button
+            className="cl-btn-primary"
+            onClick={handleDownloadPdf}
+            disabled={pdfLoading}
+          >
+            {pdfLoading ? '⟳ Exporting PDF...' : '↓ Download PDF'}
+          </button>
         </div>
-
-        <div className="form-group">
-          <label htmlFor="company-cl">Company Name *</label>
-          <input
-            id="company-cl"
-            type="text"
-            placeholder="e.g. Google"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="desc-cl">Job Description / Requirements (Optional)</label>
-          <textarea
-            id="desc-cl"
-            placeholder="Paste job posting requirements here to tailor specific skills in your letter..."
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-          />
-          <small className="help-text">
-            Optional: If provided, key requirements will be addressed in the letter. If left blank, we generate a letter based on Job Title & Company Name.
-          </small>
-        </div>
-
-        <button
-          className="btn-ws"
-          onClick={handleGenerate}
-          disabled={loading || !jobTitle.trim() || !company.trim()}
-        >
-          {loading ? 'Generating tailored letter...' : 'Generate Tailored Cover Letter ✦'}
-        </button>
       </div>
 
-      <div className="ws-panel-right">
-        {coverLetter ? (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#cbd5e1' }}>
-                Tailored Cover Letter
-              </span>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Editable text below</span>
+      {/* ── COLLAPSIBLE JOB DESCRIPTION DRAWER ── */}
+      {showDescInput && (
+        <div className="cl-desc-drawer">
+          <label htmlFor="cl-jd-text">Job Posting / Key Requirements (Optional AI Context)</label>
+          <textarea
+            id="cl-jd-text"
+            rows="3"
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            placeholder="Paste job posting details here to tailor AI generation to specific skills and requirements..."
+          />
+        </div>
+      )}
+
+      {/* ── LIVE WYSIWYG CANVAS ── */}
+      <div className="cl-canvas-container">
+        <div className="cl-sheet-card">
+          {/* CANDIDATE HEADER */}
+          <div className="cl-header-block">
+            <h1 className="cl-candidate-name">
+              <EditableText
+                value={candidateName}
+                onChange={setCandidateName}
+                placeholder="Your Full Name"
+                singleLine
+              />
+            </h1>
+            <div className="cl-candidate-title">
+              <EditableText
+                value={candidateTitle}
+                onChange={setCandidateTitle}
+                placeholder="Your Professional Title"
+                singleLine
+              />
             </div>
-            <textarea
-              className="letter-display"
+          </div>
+
+          {/* CONTACT BAR */}
+          <div className="cl-contact-bar">
+            <EditableText value={email} onChange={setEmail} placeholder="Email" singleLine />
+            <span className="cl-sep">•</span>
+            <EditableText value={phone} onChange={setPhone} placeholder="Phone" singleLine />
+            <span className="cl-sep">•</span>
+            <EditableText value={location} onChange={setLocation} placeholder="Location" singleLine />
+            <span className="cl-sep">•</span>
+            <EditableText value={linkedin} onChange={setLinkedin} placeholder="LinkedIn" singleLine />
+          </div>
+
+          {/* DATE & RECIPIENT META */}
+          <div className="cl-meta-block">
+            <div className="cl-date">
+              <EditableText value={dateStr} onChange={setDateStr} placeholder="Date" singleLine />
+            </div>
+
+            <div className="cl-recipient">
+              <EditableText
+                className="cl-recipient-name"
+                value={recipientName}
+                onChange={setRecipientName}
+                placeholder="Hiring Manager Name / Title"
+                singleLine
+              />
+              <EditableText
+                value={companyName}
+                onChange={setCompanyName}
+                placeholder="Company Name"
+                singleLine
+              />
+              <EditableText
+                value={companyAddress}
+                onChange={setCompanyAddress}
+                placeholder="Company Location / Address"
+                singleLine
+              />
+            </div>
+
+            <div className="cl-subject">
+              <EditableText
+                value={subjectText}
+                onChange={setSubjectText}
+                placeholder="Subject Line"
+                singleLine
+              />
+            </div>
+
+            <div className="cl-salutation">
+              <EditableText
+                value={salutation}
+                onChange={setSalutation}
+                placeholder="Salutation (e.g. Dear Hiring Manager,)"
+                singleLine
+              />
+            </div>
+          </div>
+
+          {/* EDITABLE LETTER BODY */}
+          <div className="cl-body-block">
+            <EditableText
+              tagName="div"
+              className="cl-body-text"
               value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
+              onChange={setCoverLetter}
+              placeholder="Click here to write or paste your cover letter paragraphs..."
             />
-            <div className="letter-actions">
-              <button className="btn-ws btn-sec" onClick={handleCopy}>
-                {copied ? 'Copied! ✓' : 'Copy Text'}
-              </button>
-              <button
-                className="btn-ws"
-                onClick={handleDownloadPdf}
-                disabled={pdfLoading}
-              >
-                {pdfLoading ? 'Generating PDF...' : 'Download Single-Page PDF 📄'}
-              </button>
+          </div>
+
+          {/* CLOSING SIGN-OFF */}
+          <div className="cl-signoff-block">
+            <EditableText value={signOff} onChange={setSignOff} placeholder="Closing (e.g. Sincerely,)" singleLine />
+            <div className="cl-signoff-name">
+              <EditableText value={candidateName} onChange={setCandidateName} placeholder="Your Name" singleLine />
             </div>
           </div>
-        ) : (
-          <div className="letter-empty">
-            <span className="letter-empty-icon">✉️</span>
-            <span>Your tailored cover letter will appear here once generated.</span>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   )
