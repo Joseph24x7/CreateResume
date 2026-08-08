@@ -51,10 +51,8 @@ export default function CoverLetterWorkspace() {
   // Target inputs
   const [jobTitle, setJobTitle] = useState(pi.title || 'Senior Software Engineer')
   const [company, setCompany] = useState('Acme Corporation')
-  const [jobDescription, setJobDescription] = useState('')
-  const [showDescInput, setShowDescInput] = useState(false)
 
-  // Document state (WYSIWYG Editable)
+  // Candidate Contact Info state (edited via input text boxes in toolbar)
   const [candidateName, setCandidateName] = useState(defaultCandidateName)
   const [candidateTitle, setCandidateTitle] = useState(defaultCandidateTitle)
   const [email, setEmail] = useState(defaultEmail)
@@ -62,6 +60,7 @@ export default function CoverLetterWorkspace() {
   const [location, setLocation] = useState(defaultLocation)
   const [linkedin, setLinkedin] = useState(defaultLinkedin)
 
+  // Document state (Editable on sheet)
   const [dateStr, setDateStr] = useState(todayFormatted)
   const [recipientName, setRecipientName] = useState('Hiring Manager')
   const [companyName, setCompanyName] = useState('Acme Corporation')
@@ -77,15 +76,6 @@ export default function CoverLetterWorkspace() {
   const [loading, setLoading] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [copied, setCopied] = useState(false)
-
-  // Compute initials for monogram emblem
-  const initials = candidateName
-    .split(' ')
-    .filter(Boolean)
-    .map((n) => n[0])
-    .join('')
-    .substring(0, 2)
-    .toUpperCase() || 'AM'
 
   // Auto-sync candidate details when active resume changes
   useEffect(() => {
@@ -128,7 +118,6 @@ export default function CoverLetterWorkspace() {
           resumeText,
           jobTitle,
           company,
-          jobDescription,
         }),
       })
 
@@ -149,7 +138,8 @@ export default function CoverLetterWorkspace() {
   }
 
   const handleCopy = () => {
-    const fullText = `${candidateName}\n${candidateTitle}\n${email} | ${phone} | ${location}\n\n${dateStr}\n\n${recipientName}\n${companyName}\n${companyAddress}\n\n${subjectText}\n\n${salutation}\n\n${coverLetter}\n\n${signOff}\n${candidateName}`
+    const contactLine = [email, phone, location, linkedin].filter(Boolean).join(' | ')
+    const fullText = `${candidateName}\n${candidateTitle}\n${contactLine}\n\n${dateStr}\n\n${recipientName}\n${companyName}\n${companyAddress}\n\n${subjectText}\n\n${salutation}\n\n${coverLetter}\n\n${signOff}\n${candidateName}`
     navigator.clipboard.writeText(fullText)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -158,6 +148,13 @@ export default function CoverLetterWorkspace() {
   const handleDownloadPdf = async () => {
     setPdfLoading(true)
     try {
+      const contactItemsHtml = [
+        email ? `<span>📧 ${email}</span>` : '',
+        phone ? `<span>📞 ${phone}</span>` : '',
+        location ? `<span>📍 ${location}</span>` : '',
+        linkedin ? `<span>🔗 ${linkedin}</span>` : '',
+      ].filter(Boolean).join('')
+
       const singlePageHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -168,7 +165,7 @@ export default function CoverLetterWorkspace() {
     body { margin: 0; padding: 0; background: #ffffff; font-family: 'Merriweather Sans', Arial, Helvetica, sans-serif; color: #1e293b; }
     .page-container {
       width: 794px;
-      height: 1123px;
+      min-height: 1123px;
       padding: 50px 56px;
       position: relative;
       overflow: hidden;
@@ -178,28 +175,7 @@ export default function CoverLetterWorkspace() {
       background: #ffffff;
     }
     .cl-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       margin-bottom: 12px;
-    }
-    .cl-monogram {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #1b2340 0%, #304d89 100%);
-      color: #ffffff;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      margin-right: 18px;
-      flex-shrink: 0;
-    }
-    .cl-header-text {
-      flex-grow: 1;
     }
     .header-name {
       font-size: 29px;
@@ -228,6 +204,7 @@ export default function CoverLetterWorkspace() {
       display: flex;
       gap: 16px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .meta-date {
       font-size: 11px;
@@ -270,11 +247,10 @@ export default function CoverLetterWorkspace() {
       line-height: 1.65;
       color: #334155;
       white-space: pre-wrap;
-      flex-grow: 1;
       text-align: justify;
     }
     .sign-off-block {
-      margin-top: 28px;
+      margin-top: 24px;
       font-size: 12px;
       color: #1e293b;
       line-height: 1.5;
@@ -284,25 +260,19 @@ export default function CoverLetterWorkspace() {
     .sign-off-name {
       font-weight: 700;
       color: #0f172a;
-      margin-top: 16px;
+      margin-top: 12px;
     }
   </style>
 </head>
 <body>
   <div class="page-container">
     <div class="cl-header">
-      <div class="cl-monogram">${initials}</div>
-      <div class="cl-header-text">
-        <h1 class="header-name">${candidateName}</h1>
-        <div class="header-title">${candidateTitle}</div>
-      </div>
+      <h1 class="header-name">${candidateName}</h1>
+      <div class="header-title">${candidateTitle}</div>
     </div>
 
     <div class="contact-bar">
-      <span>📧 ${email}</span>
-      <span>📞 ${phone}</span>
-      <span>📍 ${location}</span>
-      <span>🔗 ${linkedin}</span>
+      ${contactItemsHtml}
     </div>
 
     <div class="meta-date">${dateStr}</div>
@@ -359,7 +329,7 @@ export default function CoverLetterWorkspace() {
 
   return (
     <div className="cl-workspace-wrapper">
-      {/* ── TOP ACTION BAR ── */}
+      {/* ── TOP TOOLBAR: TARGET & CONTACT INPUT CONTROL BAR ── */}
       <div className="cl-top-toolbar">
         <div className="cl-toolbar-left">
           <div className="cl-input-pill">
@@ -380,13 +350,42 @@ export default function CoverLetterWorkspace() {
               placeholder="Target Company"
             />
           </div>
-          <button
-            className="cl-btn-secondary"
-            onClick={() => setShowDescInput(!showDescInput)}
-            title="Toggle Job Description Input"
-          >
-            {showDescInput ? '▲ Hide Requirements' : '▼ Add Requirements'}
-          </button>
+          <div className="cl-input-pill">
+            <span className="cl-pill-label">Email:</span>
+            <input
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email Address"
+            />
+          </div>
+          <div className="cl-input-pill">
+            <span className="cl-pill-label">Mobile:</span>
+            <input
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Mobile Number"
+            />
+          </div>
+          <div className="cl-input-pill">
+            <span className="cl-pill-label">City:</span>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="City, State"
+            />
+          </div>
+          <div className="cl-input-pill">
+            <span className="cl-pill-label">LinkedIn:</span>
+            <input
+              type="text"
+              value={linkedin}
+              onChange={(e) => setLinkedin(e.target.value)}
+              placeholder="LinkedIn (Optional)"
+            />
+          </div>
         </div>
 
         <div className="cl-toolbar-right">
@@ -395,7 +394,7 @@ export default function CoverLetterWorkspace() {
             onClick={handleGenerate}
             disabled={loading || !jobTitle.trim() || !company.trim()}
           >
-            {loading ? '⟳ Generating with AI...' : '✦ Generate with AI'}
+            {loading ? '⟳ Generating...' : '✦ Generate with AI'}
           </button>
           <button className="cl-btn-secondary" onClick={handleCopy}>
             {copied ? 'Copied! ✓' : '📋 Copy Text'}
@@ -405,69 +404,60 @@ export default function CoverLetterWorkspace() {
             onClick={handleDownloadPdf}
             disabled={pdfLoading}
           >
-            {pdfLoading ? '⟳ Exporting PDF...' : '↓ Download PDF'}
+            {pdfLoading ? '⟳ Exporting...' : '↓ Download PDF'}
           </button>
         </div>
       </div>
-
-      {/* ── COLLAPSIBLE JOB DESCRIPTION DRAWER ── */}
-      {showDescInput && (
-        <div className="cl-desc-drawer">
-          <label htmlFor="cl-jd-text">Job Posting / Key Requirements (Optional AI Context)</label>
-          <textarea
-            id="cl-jd-text"
-            rows="3"
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste job posting details here to tailor AI generation to specific skills and requirements..."
-          />
-        </div>
-      )}
 
       {/* ── LIVE WYSIWYG CANVAS ── */}
       <div className="cl-canvas-container">
         <div className="cl-sheet-card">
           {/* CANDIDATE HEADER */}
-          <div className="cl-header-row">
-            <div className="cl-monogram-badge">{initials}</div>
-            <div className="cl-header-block">
-              <h1 className="cl-candidate-name">
-                <EditableText
-                  value={candidateName}
-                  onChange={setCandidateName}
-                  placeholder="Your Full Name"
-                  singleLine
-                />
-              </h1>
-              <div className="cl-candidate-title">
-                <EditableText
-                  value={candidateTitle}
-                  onChange={setCandidateTitle}
-                  placeholder="Your Professional Title"
-                  singleLine
-                />
-              </div>
+          <div className="cl-header-block">
+            <h1 className="cl-candidate-name">
+              <EditableText
+                value={candidateName}
+                onChange={setCandidateName}
+                placeholder="Your Full Name"
+                singleLine
+              />
+            </h1>
+            <div className="cl-candidate-title">
+              <EditableText
+                value={candidateTitle}
+                onChange={setCandidateTitle}
+                placeholder="Your Professional Title"
+                singleLine
+              />
             </div>
           </div>
 
-          {/* CONTACT BAR */}
+          {/* CONTACT BAR (Formated Display Sync'd with Control Bar Inputs) */}
           <div className="cl-contact-bar">
-            <div className="cl-contact-item">
-              <Icon type="email" />
-              <EditableText value={email} onChange={setEmail} placeholder="Email" singleLine />
-            </div>
-            <div className="cl-contact-item">
-              <Icon type="phone" />
-              <EditableText value={phone} onChange={setPhone} placeholder="Phone" singleLine />
-            </div>
-            <div className="cl-contact-item">
-              <Icon type="location" />
-              <EditableText value={location} onChange={setLocation} placeholder="Location" singleLine />
-            </div>
-            <div className="cl-contact-item">
-              <Icon type="linkedin" />
-              <EditableText value={linkedin} onChange={setLinkedin} placeholder="LinkedIn" singleLine />
-            </div>
+            {email && (
+              <div className="cl-contact-item">
+                <Icon type="email" />
+                <span>{email}</span>
+              </div>
+            )}
+            {phone && (
+              <div className="cl-contact-item">
+                <Icon type="phone" />
+                <span>{phone}</span>
+              </div>
+            )}
+            {location && (
+              <div className="cl-contact-item">
+                <Icon type="location" />
+                <span>{location}</span>
+              </div>
+            )}
+            {linkedin && (
+              <div className="cl-contact-item">
+                <Icon type="linkedin" />
+                <span>{linkedin}</span>
+              </div>
+            )}
           </div>
 
           {/* DATE & RECIPIENT META */}
@@ -530,11 +520,11 @@ export default function CoverLetterWorkspace() {
             />
           </div>
 
-          {/* CLOSING SIGN-OFF */}
+          {/* CLOSING SIGN-OFF (Positioned directly below cover letter content) */}
           <div className="cl-signoff-block">
             <EditableText value={signOff} onChange={setSignOff} placeholder="Closing (e.g. Sincerely,)" singleLine />
             <div className="cl-signoff-name">
-              <EditableText value={candidateName} onChange={setCandidateName} placeholder="Your Name" singleLine />
+              {candidateName}
             </div>
           </div>
         </div>
