@@ -34,12 +34,12 @@ export default function CoverLetterWorkspace() {
   const resume = useResumeStore((s) => s.resume)
   const pi = resume?.data?.personalInfo || {}
 
-  const defaultCandidateName = `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || 'Alex Morgan'
-  const defaultCandidateTitle = pi.title || 'Senior Software Engineer'
-  const defaultEmail = pi.email || 'alex.morgan@example.com'
-  const defaultPhone = pi.phone || '+1 (555) 234-5678'
-  const defaultLocation = pi.location || 'San Francisco, CA'
-  const defaultLinkedin = pi.linkedin || 'linkedin.com/in/alexmorgan'
+  const candidateName = `${pi.firstName || ''} ${pi.lastName || ''}`.trim() || 'Alex Morgan'
+  const candidateTitle = pi.title || 'Senior Software Engineer'
+  const email = pi.email || 'alex.morgan@example.com'
+  const phone = pi.phone || '+1 (555) 234-5678'
+  const location = pi.location || 'San Francisco, CA'
+  const linkedin = pi.linkedin || 'linkedin.com/in/alexmorgan'
 
   const todayFormatted = new Date().toLocaleDateString('en-US', {
     day: 'numeric',
@@ -47,17 +47,9 @@ export default function CoverLetterWorkspace() {
     year: 'numeric',
   })
 
-  // Target inputs
+  // Target application inputs
   const [jobTitle, setJobTitle] = useState(pi.title || 'Senior Software Engineer')
   const [company, setCompany] = useState('Acme Corporation')
-
-  // Candidate Contact Info state
-  const [candidateName, setCandidateName] = useState(defaultCandidateName)
-  const [candidateTitle, setCandidateTitle] = useState(defaultCandidateTitle)
-  const [email, setEmail] = useState(defaultEmail)
-  const [phone, setPhone] = useState(defaultPhone)
-  const [location, setLocation] = useState(defaultLocation)
-  const [linkedin, setLinkedin] = useState(defaultLinkedin)
 
   // Document state (Editable on sheet)
   const [dateStr, setDateStr] = useState(todayFormatted)
@@ -73,18 +65,6 @@ export default function CoverLetterWorkspace() {
   const [signOff, setSignOff] = useState('Sincerely,')
 
   const [pdfLoading, setPdfLoading] = useState(false)
-
-  // Auto-sync candidate details when active resume changes
-  useEffect(() => {
-    if (pi.firstName || pi.lastName) {
-      setCandidateName(`${pi.firstName || ''} ${pi.lastName || ''}`.trim())
-    }
-    if (pi.title) setCandidateTitle(pi.title)
-    if (pi.email) setEmail(pi.email)
-    if (pi.phone) setPhone(pi.phone)
-    if (pi.location) setLocation(pi.location)
-    if (pi.linkedin) setLinkedin(pi.linkedin)
-  }, [pi.firstName, pi.lastName, pi.title, pi.email, pi.phone, pi.location, pi.linkedin])
 
   // Sync subject line when jobTitle changes
   const handleJobTitleChange = (val) => {
@@ -282,115 +262,54 @@ export default function CoverLetterWorkspace() {
 
   return (
     <div className="cl-workspace-wrapper">
-      {/* ── PREMIUM EXECUTIVE CONTROL PANEL ── */}
-      <div className="cl-premium-control-panel">
-        <div className="cl-control-grid">
-          {/* Target Application Group */}
-          <div className="cl-control-group">
-            <span className="cl-group-title">🎯 TARGET APPLICATION</span>
-            <div className="cl-input-field">
-              <label htmlFor="cl-role-input">Role I am applying for</label>
-              <input
-                id="cl-role-input"
-                type="text"
-                value={jobTitle}
-                onChange={(e) => handleJobTitleChange(e.target.value)}
-                placeholder="e.g. Senior Software Engineer"
-              />
-            </div>
-            <div className="cl-input-field">
-              <label htmlFor="cl-company-input">Company I am applying to</label>
-              <input
-                id="cl-company-input"
-                type="text"
-                value={company}
-                onChange={(e) => handleCompanyChange(e.target.value)}
-                placeholder="e.g. Acme Corporation"
-              />
-            </div>
+      {/* ── ULTRA-PREMIUM TARGET APPLICATION BAR ── */}
+      <div className="cl-target-app-bar">
+        <div className="cl-target-card">
+          <div className="cl-target-badge">
+            <span className="cl-badge-icon">🎯</span>
+            <span className="cl-badge-text">TARGET APPLICATION</span>
           </div>
 
-          {/* Your Information Group */}
-          <div className="cl-control-group">
-            <span className="cl-group-title">👤 YOUR DETAILS</span>
-            <div className="cl-input-field">
-              <label htmlFor="cl-name-input">Full Name</label>
-              <input
-                id="cl-name-input"
-                type="text"
-                value={candidateName}
-                onChange={(e) => setCandidateName(e.target.value)}
-                placeholder="Full Name"
-              />
+          <div className="cl-target-inputs">
+            <div className="cl-target-field">
+              <span className="cl-field-icon">💼</span>
+              <div className="cl-field-content">
+                <label htmlFor="cl-role-input">ROLE YOU ARE APPLYING FOR</label>
+                <input
+                  id="cl-role-input"
+                  type="text"
+                  value={jobTitle}
+                  onChange={(e) => handleJobTitleChange(e.target.value)}
+                  placeholder="e.g. Senior Software Engineer"
+                />
+              </div>
             </div>
-            <div className="cl-input-field">
-              <label htmlFor="cl-title-input">Professional Title</label>
-              <input
-                id="cl-title-input"
-                type="text"
-                value={candidateTitle}
-                onChange={(e) => setCandidateTitle(e.target.value)}
-                placeholder="Professional Title"
-              />
-            </div>
-          </div>
 
-          {/* Contact Details Group */}
-          <div className="cl-control-group">
-            <span className="cl-group-title">📬 CONTACT INFO</span>
-            <div className="cl-input-field">
-              <label htmlFor="cl-email-input">Email</label>
-              <input
-                id="cl-email-input"
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email Address"
-              />
-            </div>
-            <div className="cl-input-field">
-              <label htmlFor="cl-phone-input">Mobile</label>
-              <input
-                id="cl-phone-input"
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Mobile Number"
-              />
-            </div>
-            <div className="cl-input-field">
-              <label htmlFor="cl-location-input">City, State</label>
-              <input
-                id="cl-location-input"
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="City, State"
-              />
-            </div>
-            <div className="cl-input-field">
-              <label htmlFor="cl-linkedin-input">LinkedIn (Optional)</label>
-              <input
-                id="cl-linkedin-input"
-                type="text"
-                value={linkedin}
-                onChange={(e) => setLinkedin(e.target.value)}
-                placeholder="LinkedIn URL"
-              />
+            <div className="cl-target-divider" />
+
+            <div className="cl-target-field">
+              <span className="cl-field-icon">🏢</span>
+              <div className="cl-field-content">
+                <label htmlFor="cl-company-input">COMPANY YOU ARE APPLYING TO</label>
+                <input
+                  id="cl-company-input"
+                  type="text"
+                  value={company}
+                  onChange={(e) => handleCompanyChange(e.target.value)}
+                  placeholder="e.g. Acme Corporation"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="cl-control-actions">
-          <button
-            className="cl-btn-primary-lg"
-            onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-          >
-            {pdfLoading ? '⟳ Exporting PDF...' : '↓ Download Cover Letter PDF'}
-          </button>
-        </div>
+        <button
+          className="cl-btn-download-glow"
+          onClick={handleDownloadPdf}
+          disabled={pdfLoading}
+        >
+          {pdfLoading ? '⟳ Exporting PDF...' : '↓ Download Cover Letter PDF'}
+        </button>
       </div>
 
       {/* ── LIVE WYSIWYG CANVAS ── */}
@@ -406,7 +325,7 @@ export default function CoverLetterWorkspace() {
             </div>
           </div>
 
-          {/* CONTACT BAR (Formatted Display Sync'd with Control Panel Text Boxes) */}
+          {/* CONTACT BAR (Auto-synced from user profile) */}
           {hasContactItems && (
             <div className="cl-contact-bar">
               {email && (
