@@ -3,6 +3,34 @@ import useResumeStore from '../../store/resumeStore'
 import { formatResumeToText } from '../../utils/resumeFormatter'
 import EditableText from '../canvas/EditableText'
 
+const Icon = ({ type }) => {
+  const icons = {
+    email: (
+      <svg className="cl-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <polyline points="22,6 12,13 2,6" />
+      </svg>
+    ),
+    phone: (
+      <svg className="cl-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+      </svg>
+    ),
+    location: (
+      <svg className="cl-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
+    linkedin: (
+      <svg className="cl-svg-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+      </svg>
+    ),
+  }
+  return <span className="cl-icon">{icons[type] || '•'}</span>
+}
+
 export default function CoverLetterWorkspace() {
   const resume = useResumeStore((s) => s.resume)
   const pi = resume?.data?.personalInfo || {}
@@ -49,6 +77,15 @@ export default function CoverLetterWorkspace() {
   const [loading, setLoading] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // Compute initials for monogram emblem
+  const initials = candidateName
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase() || 'AM'
 
   // Auto-sync candidate details when active resume changes
   useEffect(() => {
@@ -121,8 +158,6 @@ export default function CoverLetterWorkspace() {
   const handleDownloadPdf = async () => {
     setPdfLoading(true)
     try {
-      const contactItems = [email, phone, location, linkedin].filter(Boolean).join('  •  ')
-
       const singlePageHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -134,7 +169,7 @@ export default function CoverLetterWorkspace() {
     .page-container {
       width: 794px;
       height: 1123px;
-      padding: 54px 60px;
+      padding: 50px 56px;
       position: relative;
       overflow: hidden;
       display: flex;
@@ -142,54 +177,87 @@ export default function CoverLetterWorkspace() {
       box-sizing: border-box;
       background: #ffffff;
     }
+    .cl-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .cl-monogram {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #1b2340 0%, #304d89 100%);
+      color: #ffffff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-right: 18px;
+      flex-shrink: 0;
+    }
+    .cl-header-text {
+      flex-grow: 1;
+    }
     .header-name {
-      font-size: 26px;
+      font-size: 29px;
       font-weight: 700;
       color: #1b2340;
       letter-spacing: -0.3px;
-      margin: 0 0 4px 0;
+      margin: 0 0 3px 0;
       line-height: 1.15;
     }
     .header-title {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 500;
       color: #475569;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      margin: 0 0 16px 0;
+      margin: 0;
     }
     .contact-bar {
-      font-size: 10.5px;
-      color: #334155;
-      padding: 8px 12px;
+      font-size: 11px;
+      color: #2b2b2b;
+      padding: 8px 16px;
       background: #f8fafc;
       border-top: 1px solid #d1d9e6;
       border-bottom: 1px solid #d1d9e6;
       margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
     }
     .meta-date {
       font-size: 11px;
-      color: #64748b;
-      margin-bottom: 16px;
+      color: #6c7382;
+      margin-bottom: 14px;
       font-weight: 500;
     }
-    .recipient-info {
-      font-size: 12.5px;
-      color: #1e293b;
+    .recipient-card {
+      border-left: 3px solid #304d89;
+      padding-left: 12px;
       margin-bottom: 20px;
+    }
+    .recipient-info {
+      font-size: 12px;
+      color: #1e293b;
       line-height: 1.45;
     }
     .recipient-name {
       font-weight: 700;
       color: #0f172a;
     }
-    .subject-line {
+    .subject-banner {
       font-size: 13.5px;
       font-weight: 700;
       color: #1b2340;
       margin-bottom: 20px;
-      padding-bottom: 6px;
-      border-bottom: 1.5px solid #0ea5e9;
+      padding: 8px 14px;
+      background: #f0f9ff;
+      border-left: 3px solid #0284c7;
+      border-radius: 0 4px 4px 0;
     }
     .salutation {
       font-size: 12.5px;
@@ -206,10 +274,12 @@ export default function CoverLetterWorkspace() {
       text-align: justify;
     }
     .sign-off-block {
-      margin-top: 24px;
+      margin-top: 28px;
       font-size: 12px;
       color: #1e293b;
       line-height: 1.5;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
     }
     .sign-off-name {
       font-weight: 700;
@@ -220,19 +290,32 @@ export default function CoverLetterWorkspace() {
 </head>
 <body>
   <div class="page-container">
-    <h1 class="header-name">${candidateName}</h1>
-    <div class="header-title">${candidateTitle}</div>
-    <div class="contact-bar">${contactItems}</div>
+    <div class="cl-header">
+      <div class="cl-monogram">${initials}</div>
+      <div class="cl-header-text">
+        <h1 class="header-name">${candidateName}</h1>
+        <div class="header-title">${candidateTitle}</div>
+      </div>
+    </div>
+
+    <div class="contact-bar">
+      <span>📧 ${email}</span>
+      <span>📞 ${phone}</span>
+      <span>📍 ${location}</span>
+      <span>🔗 ${linkedin}</span>
+    </div>
 
     <div class="meta-date">${dateStr}</div>
 
-    <div class="recipient-info">
-      <div class="recipient-name">${recipientName}</div>
-      <div>${companyName}</div>
-      <div>${companyAddress}</div>
+    <div class="recipient-card">
+      <div class="recipient-info">
+        <div class="recipient-name">${recipientName}</div>
+        <div>${companyName}</div>
+        <div>${companyAddress}</div>
+      </div>
     </div>
 
-    <div class="subject-line">${subjectText}</div>
+    <div class="subject-banner">${subjectText}</div>
     <div class="salutation">${salutation}</div>
 
     <div class="letter-body">${coverLetter}</div>
@@ -302,7 +385,7 @@ export default function CoverLetterWorkspace() {
             onClick={() => setShowDescInput(!showDescInput)}
             title="Toggle Job Description Input"
           >
-            {showDescInput ? '▲ Hide Description' : '▼ Add Job Description'}
+            {showDescInput ? '▲ Hide Requirements' : '▼ Add Requirements'}
           </button>
         </div>
 
@@ -345,34 +428,46 @@ export default function CoverLetterWorkspace() {
       <div className="cl-canvas-container">
         <div className="cl-sheet-card">
           {/* CANDIDATE HEADER */}
-          <div className="cl-header-block">
-            <h1 className="cl-candidate-name">
-              <EditableText
-                value={candidateName}
-                onChange={setCandidateName}
-                placeholder="Your Full Name"
-                singleLine
-              />
-            </h1>
-            <div className="cl-candidate-title">
-              <EditableText
-                value={candidateTitle}
-                onChange={setCandidateTitle}
-                placeholder="Your Professional Title"
-                singleLine
-              />
+          <div className="cl-header-row">
+            <div className="cl-monogram-badge">{initials}</div>
+            <div className="cl-header-block">
+              <h1 className="cl-candidate-name">
+                <EditableText
+                  value={candidateName}
+                  onChange={setCandidateName}
+                  placeholder="Your Full Name"
+                  singleLine
+                />
+              </h1>
+              <div className="cl-candidate-title">
+                <EditableText
+                  value={candidateTitle}
+                  onChange={setCandidateTitle}
+                  placeholder="Your Professional Title"
+                  singleLine
+                />
+              </div>
             </div>
           </div>
 
           {/* CONTACT BAR */}
           <div className="cl-contact-bar">
-            <EditableText value={email} onChange={setEmail} placeholder="Email" singleLine />
-            <span className="cl-sep">•</span>
-            <EditableText value={phone} onChange={setPhone} placeholder="Phone" singleLine />
-            <span className="cl-sep">•</span>
-            <EditableText value={location} onChange={setLocation} placeholder="Location" singleLine />
-            <span className="cl-sep">•</span>
-            <EditableText value={linkedin} onChange={setLinkedin} placeholder="LinkedIn" singleLine />
+            <div className="cl-contact-item">
+              <Icon type="email" />
+              <EditableText value={email} onChange={setEmail} placeholder="Email" singleLine />
+            </div>
+            <div className="cl-contact-item">
+              <Icon type="phone" />
+              <EditableText value={phone} onChange={setPhone} placeholder="Phone" singleLine />
+            </div>
+            <div className="cl-contact-item">
+              <Icon type="location" />
+              <EditableText value={location} onChange={setLocation} placeholder="Location" singleLine />
+            </div>
+            <div className="cl-contact-item">
+              <Icon type="linkedin" />
+              <EditableText value={linkedin} onChange={setLinkedin} placeholder="LinkedIn" singleLine />
+            </div>
           </div>
 
           {/* DATE & RECIPIENT META */}
@@ -381,29 +476,31 @@ export default function CoverLetterWorkspace() {
               <EditableText value={dateStr} onChange={setDateStr} placeholder="Date" singleLine />
             </div>
 
-            <div className="cl-recipient">
-              <EditableText
-                className="cl-recipient-name"
-                value={recipientName}
-                onChange={setRecipientName}
-                placeholder="Hiring Manager Name / Title"
-                singleLine
-              />
-              <EditableText
-                value={companyName}
-                onChange={setCompanyName}
-                placeholder="Company Name"
-                singleLine
-              />
-              <EditableText
-                value={companyAddress}
-                onChange={setCompanyAddress}
-                placeholder="Company Location / Address"
-                singleLine
-              />
+            <div className="cl-recipient-card">
+              <div className="cl-recipient">
+                <EditableText
+                  className="cl-recipient-name"
+                  value={recipientName}
+                  onChange={setRecipientName}
+                  placeholder="Hiring Manager Name / Title"
+                  singleLine
+                />
+                <EditableText
+                  value={companyName}
+                  onChange={setCompanyName}
+                  placeholder="Company Name"
+                  singleLine
+                />
+                <EditableText
+                  value={companyAddress}
+                  onChange={setCompanyAddress}
+                  placeholder="Company Location / Address"
+                  singleLine
+                />
+              </div>
             </div>
 
-            <div className="cl-subject">
+            <div className="cl-subject-banner">
               <EditableText
                 value={subjectText}
                 onChange={setSubjectText}
