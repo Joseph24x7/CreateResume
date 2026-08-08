@@ -1167,20 +1167,20 @@
 }
 
 .cl-header-block {
-  flex-grow: 1;
+  margin-bottom: 8px;
 }
 
 .cl-candidate-name {
-  font-size: 29px;
+  font-size: 28px;
   font-weight: 700;
   color: #1b2340;
   letter-spacing: -0.3px;
   line-height: 1.15;
-  margin: 0 0 3px 0;
+  margin: 0 0 2px 0;
 }
 
 .cl-candidate-title {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   color: #475569;
   text-transform: uppercase;
@@ -1193,13 +1193,14 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
-  font-size: 11px;
+  font-size: 10.5px;
   color: #2b2b2b;
-  padding: 8px 16px;
+  padding: 6px 14px;
   background: #f8fafc;
   border-top: 1px solid #d1d9e6;
   border-bottom: 1px solid #d1d9e6;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
+  margin-top: 6px;
 }
 
 .cl-contact-item {
@@ -1226,8 +1227,8 @@
 .cl-meta-block {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .cl-date {
@@ -1247,7 +1248,7 @@
   gap: 2px;
   font-size: 12px;
   color: #1e293b;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .cl-recipient-name {
@@ -1256,10 +1257,10 @@
 }
 
 .cl-subject-banner {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #1b2340;
-  padding: 8px 14px;
+  padding: 6px 12px;
   background: #f0f9ff;
   border-left: 3px solid #0284c7;
   border-radius: 0 4px 4px 0;
@@ -1285,13 +1286,13 @@
 }
 
 .cl-signoff-block {
-  margin-top: 24px;
+  margin-top: 20px;
   font-size: 12px;
   color: #1e293b;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 16px;
+  gap: 10px;
+  padding-top: 12px;
   border-top: 1px solid #e2e8f0;
 }
 

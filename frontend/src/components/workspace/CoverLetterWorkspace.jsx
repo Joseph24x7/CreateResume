@@ -145,6 +145,8 @@ export default function CoverLetterWorkspace() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const hasContactItems = Boolean(email || phone || location || linkedin)
+
   const handleDownloadPdf = async () => {
     setPdfLoading(true)
     try {
@@ -166,7 +168,7 @@ export default function CoverLetterWorkspace() {
     .page-container {
       width: 794px;
       min-height: 1123px;
-      padding: 50px 56px;
+      padding: 48px 56px;
       position: relative;
       overflow: hidden;
       display: flex;
@@ -175,18 +177,18 @@ export default function CoverLetterWorkspace() {
       background: #ffffff;
     }
     .cl-header {
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .header-name {
-      font-size: 29px;
+      font-size: 28px;
       font-weight: 700;
       color: #1b2340;
       letter-spacing: -0.3px;
-      margin: 0 0 3px 0;
+      margin: 0 0 2px 0;
       line-height: 1.15;
     }
     .header-title {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 500;
       color: #475569;
       text-transform: uppercase;
@@ -194,13 +196,13 @@ export default function CoverLetterWorkspace() {
       margin: 0;
     }
     .contact-bar {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #2b2b2b;
-      padding: 8px 16px;
+      padding: 6px 14px;
       background: #f8fafc;
       border-top: 1px solid #d1d9e6;
       border-bottom: 1px solid #d1d9e6;
-      margin-bottom: 24px;
+      margin-bottom: 14px;
       display: flex;
       gap: 16px;
       align-items: center;
@@ -209,29 +211,29 @@ export default function CoverLetterWorkspace() {
     .meta-date {
       font-size: 11px;
       color: #6c7382;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
       font-weight: 500;
     }
     .recipient-card {
       border-left: 3px solid #304d89;
       padding-left: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
     .recipient-info {
       font-size: 12px;
       color: #1e293b;
-      line-height: 1.45;
+      line-height: 1.4;
     }
     .recipient-name {
       font-weight: 700;
       color: #0f172a;
     }
     .subject-banner {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       color: #1b2340;
-      margin-bottom: 20px;
-      padding: 8px 14px;
+      margin-bottom: 12px;
+      padding: 6px 12px;
       background: #f0f9ff;
       border-left: 3px solid #0284c7;
       border-radius: 0 4px 4px 0;
@@ -240,7 +242,7 @@ export default function CoverLetterWorkspace() {
       font-size: 12.5px;
       font-weight: 600;
       color: #0f172a;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .letter-body {
       font-size: 11.5px;
@@ -250,17 +252,17 @@ export default function CoverLetterWorkspace() {
       text-align: justify;
     }
     .sign-off-block {
-      margin-top: 24px;
+      margin-top: 20px;
       font-size: 12px;
       color: #1e293b;
-      line-height: 1.5;
-      padding-top: 16px;
+      line-height: 1.45;
+      padding-top: 12px;
       border-top: 1px solid #e2e8f0;
     }
     .sign-off-name {
       font-weight: 700;
       color: #0f172a;
-      margin-top: 12px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -271,9 +273,7 @@ export default function CoverLetterWorkspace() {
       <div class="header-title">${candidateTitle}</div>
     </div>
 
-    <div class="contact-bar">
-      ${contactItemsHtml}
-    </div>
+    ${contactItemsHtml ? `<div class="contact-bar">${contactItemsHtml}</div>` : ''}
 
     <div class="meta-date">${dateStr}</div>
 
@@ -432,33 +432,35 @@ export default function CoverLetterWorkspace() {
             </div>
           </div>
 
-          {/* CONTACT BAR (Formated Display Sync'd with Control Bar Inputs) */}
-          <div className="cl-contact-bar">
-            {email && (
-              <div className="cl-contact-item">
-                <Icon type="email" />
-                <span>{email}</span>
-              </div>
-            )}
-            {phone && (
-              <div className="cl-contact-item">
-                <Icon type="phone" />
-                <span>{phone}</span>
-              </div>
-            )}
-            {location && (
-              <div className="cl-contact-item">
-                <Icon type="location" />
-                <span>{location}</span>
-              </div>
-            )}
-            {linkedin && (
-              <div className="cl-contact-item">
-                <Icon type="linkedin" />
-                <span>{linkedin}</span>
-              </div>
-            )}
-          </div>
+          {/* CONTACT BAR (Formatted Display Sync'd with Control Bar Inputs) */}
+          {hasContactItems && (
+            <div className="cl-contact-bar">
+              {email && (
+                <div className="cl-contact-item">
+                  <Icon type="email" />
+                  <span>{email}</span>
+                </div>
+              )}
+              {phone && (
+                <div className="cl-contact-item">
+                  <Icon type="phone" />
+                  <span>{phone}</span>
+                </div>
+              )}
+              {location && (
+                <div className="cl-contact-item">
+                  <Icon type="location" />
+                  <span>{location}</span>
+                </div>
+              )}
+              {linkedin && (
+                <div className="cl-contact-item">
+                  <Icon type="linkedin" />
+                  <span>{linkedin}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* DATE & RECIPIENT META */}
           <div className="cl-meta-block">
@@ -520,7 +522,7 @@ export default function CoverLetterWorkspace() {
             />
           </div>
 
-          {/* CLOSING SIGN-OFF (Positioned directly below cover letter content) */}
+          {/* CLOSING SIGN-OFF */}
           <div className="cl-signoff-block">
             <EditableText value={signOff} onChange={setSignOff} placeholder="Closing (e.g. Sincerely,)" singleLine />
             <div className="cl-signoff-name">
