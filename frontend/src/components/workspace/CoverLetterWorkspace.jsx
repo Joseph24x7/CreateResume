@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import useResumeStore from '../../store/resumeStore'
-import { formatResumeToText } from '../../utils/resumeFormatter'
 import EditableText from '../canvas/EditableText'
 
 const Icon = ({ type }) => {
@@ -52,7 +51,7 @@ export default function CoverLetterWorkspace() {
   const [jobTitle, setJobTitle] = useState(pi.title || 'Senior Software Engineer')
   const [company, setCompany] = useState('Acme Corporation')
 
-  // Candidate Contact Info state (edited via input text boxes in toolbar)
+  // Candidate Contact Info state
   const [candidateName, setCandidateName] = useState(defaultCandidateName)
   const [candidateTitle, setCandidateTitle] = useState(defaultCandidateTitle)
   const [email, setEmail] = useState(defaultEmail)
@@ -73,9 +72,7 @@ export default function CoverLetterWorkspace() {
   )
   const [signOff, setSignOff] = useState('Sincerely,')
 
-  const [loading, setLoading] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
-  const [copied, setCopied] = useState(false)
 
   // Auto-sync candidate details when active resume changes
   useEffect(() => {
@@ -99,50 +96,6 @@ export default function CoverLetterWorkspace() {
   const handleCompanyChange = (val) => {
     setCompany(val)
     setCompanyName(val || 'Target Organization')
-  }
-
-  const handleGenerate = async () => {
-    setLoading(true)
-    setCopied(false)
-    try {
-      const resumeText = formatResumeToText(resume)
-      const geminiKey = localStorage.getItem('gemini_api_key') || ''
-
-      const res = await fetch('http://localhost:8080/api/v1/ai/generate-cover-letter', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Gemini-Key': geminiKey,
-        },
-        body: JSON.stringify({
-          resumeText,
-          jobTitle,
-          company,
-        }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        if (data.coverLetter) {
-          setCoverLetter(data.coverLetter)
-        }
-      } else {
-        alert('Failed to generate cover letter.')
-      }
-    } catch (err) {
-      console.error(err)
-      alert('Error connecting to AI service.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCopy = () => {
-    const contactLine = [email, phone, location, linkedin].filter(Boolean).join(' | ')
-    const fullText = `${candidateName}\n${candidateTitle}\n${contactLine}\n\n${dateStr}\n\n${recipientName}\n${companyName}\n${companyAddress}\n\n${subjectText}\n\n${salutation}\n\n${coverLetter}\n\n${signOff}\n${candidateName}`
-    navigator.clipboard.writeText(fullText)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   const hasContactItems = Boolean(email || phone || location || linkedin)
@@ -329,82 +282,113 @@ export default function CoverLetterWorkspace() {
 
   return (
     <div className="cl-workspace-wrapper">
-      {/* ── TOP TOOLBAR: TARGET & CONTACT INPUT CONTROL BAR ── */}
-      <div className="cl-top-toolbar">
-        <div className="cl-toolbar-left">
-          <div className="cl-input-pill">
-            <span className="cl-pill-label">Role:</span>
-            <input
-              type="text"
-              value={jobTitle}
-              onChange={(e) => handleJobTitleChange(e.target.value)}
-              placeholder="Target Job Title"
-            />
+      {/* ── PREMIUM EXECUTIVE CONTROL PANEL ── */}
+      <div className="cl-premium-control-panel">
+        <div className="cl-control-grid">
+          {/* Target Application Group */}
+          <div className="cl-control-group">
+            <span className="cl-group-title">🎯 TARGET APPLICATION</span>
+            <div className="cl-input-field">
+              <label htmlFor="cl-role-input">Role I am applying for</label>
+              <input
+                id="cl-role-input"
+                type="text"
+                value={jobTitle}
+                onChange={(e) => handleJobTitleChange(e.target.value)}
+                placeholder="e.g. Senior Software Engineer"
+              />
+            </div>
+            <div className="cl-input-field">
+              <label htmlFor="cl-company-input">Company I am applying to</label>
+              <input
+                id="cl-company-input"
+                type="text"
+                value={company}
+                onChange={(e) => handleCompanyChange(e.target.value)}
+                placeholder="e.g. Acme Corporation"
+              />
+            </div>
           </div>
-          <div className="cl-input-pill">
-            <span className="cl-pill-label">Company:</span>
-            <input
-              type="text"
-              value={company}
-              onChange={(e) => handleCompanyChange(e.target.value)}
-              placeholder="Target Company"
-            />
+
+          {/* Your Information Group */}
+          <div className="cl-control-group">
+            <span className="cl-group-title">👤 YOUR DETAILS</span>
+            <div className="cl-input-field">
+              <label htmlFor="cl-name-input">Full Name</label>
+              <input
+                id="cl-name-input"
+                type="text"
+                value={candidateName}
+                onChange={(e) => setCandidateName(e.target.value)}
+                placeholder="Full Name"
+              />
+            </div>
+            <div className="cl-input-field">
+              <label htmlFor="cl-title-input">Professional Title</label>
+              <input
+                id="cl-title-input"
+                type="text"
+                value={candidateTitle}
+                onChange={(e) => setCandidateTitle(e.target.value)}
+                placeholder="Professional Title"
+              />
+            </div>
           </div>
-          <div className="cl-input-pill">
-            <span className="cl-pill-label">Email:</span>
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email Address"
-            />
-          </div>
-          <div className="cl-input-pill">
-            <span className="cl-pill-label">Mobile:</span>
-            <input
-              type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="Mobile Number"
-            />
-          </div>
-          <div className="cl-input-pill">
-            <span className="cl-pill-label">City:</span>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="City, State"
-            />
-          </div>
-          <div className="cl-input-pill">
-            <span className="cl-pill-label">LinkedIn:</span>
-            <input
-              type="text"
-              value={linkedin}
-              onChange={(e) => setLinkedin(e.target.value)}
-              placeholder="LinkedIn (Optional)"
-            />
+
+          {/* Contact Details Group */}
+          <div className="cl-control-group">
+            <span className="cl-group-title">📬 CONTACT INFO</span>
+            <div className="cl-input-field">
+              <label htmlFor="cl-email-input">Email</label>
+              <input
+                id="cl-email-input"
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email Address"
+              />
+            </div>
+            <div className="cl-input-field">
+              <label htmlFor="cl-phone-input">Mobile</label>
+              <input
+                id="cl-phone-input"
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Mobile Number"
+              />
+            </div>
+            <div className="cl-input-field">
+              <label htmlFor="cl-location-input">City, State</label>
+              <input
+                id="cl-location-input"
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="City, State"
+              />
+            </div>
+            <div className="cl-input-field">
+              <label htmlFor="cl-linkedin-input">LinkedIn (Optional)</label>
+              <input
+                id="cl-linkedin-input"
+                type="text"
+                value={linkedin}
+                onChange={(e) => setLinkedin(e.target.value)}
+                placeholder="LinkedIn URL"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="cl-toolbar-right">
+        {/* Action Button */}
+        <div className="cl-control-actions">
           <button
-            className="cl-btn-ai"
-            onClick={handleGenerate}
-            disabled={loading || !jobTitle.trim() || !company.trim()}
-          >
-            {loading ? '⟳ Generating...' : '✦ Generate with AI'}
-          </button>
-          <button className="cl-btn-secondary" onClick={handleCopy}>
-            {copied ? 'Copied! ✓' : '📋 Copy Text'}
-          </button>
-          <button
-            className="cl-btn-primary"
+            className="cl-btn-primary-lg"
             onClick={handleDownloadPdf}
             disabled={pdfLoading}
           >
-            {pdfLoading ? '⟳ Exporting...' : '↓ Download PDF'}
+            {pdfLoading ? '⟳ Exporting PDF...' : '↓ Download Cover Letter PDF'}
           </button>
         </div>
       </div>
@@ -415,24 +399,14 @@ export default function CoverLetterWorkspace() {
           {/* CANDIDATE HEADER */}
           <div className="cl-header-block">
             <h1 className="cl-candidate-name">
-              <EditableText
-                value={candidateName}
-                onChange={setCandidateName}
-                placeholder="Your Full Name"
-                singleLine
-              />
+              {candidateName}
             </h1>
             <div className="cl-candidate-title">
-              <EditableText
-                value={candidateTitle}
-                onChange={setCandidateTitle}
-                placeholder="Your Professional Title"
-                singleLine
-              />
+              {candidateTitle}
             </div>
           </div>
 
-          {/* CONTACT BAR (Formatted Display Sync'd with Control Bar Inputs) */}
+          {/* CONTACT BAR (Formatted Display Sync'd with Control Panel Text Boxes) */}
           {hasContactItems && (
             <div className="cl-contact-bar">
               {email && (
@@ -477,12 +451,7 @@ export default function CoverLetterWorkspace() {
                   placeholder="Hiring Manager Name / Title"
                   singleLine
                 />
-                <EditableText
-                  value={companyName}
-                  onChange={setCompanyName}
-                  placeholder="Company Name"
-                  singleLine
-                />
+                <div>{companyName}</div>
                 <EditableText
                   value={companyAddress}
                   onChange={setCompanyAddress}
@@ -493,12 +462,7 @@ export default function CoverLetterWorkspace() {
             </div>
 
             <div className="cl-subject-banner">
-              <EditableText
-                value={subjectText}
-                onChange={setSubjectText}
-                placeholder="Subject Line"
-                singleLine
-              />
+              {subjectText}
             </div>
 
             <div className="cl-salutation">
