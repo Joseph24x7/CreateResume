@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.resumemaker</groupId>
-    <artifactId>mynovoresume</artifactId>
+    <artifactId>freeresumecreator</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>MyNovoResume</name>
+    <name>FreeResumeCreator</name>
 
     <properties>
         <java.version>21</java.version>
