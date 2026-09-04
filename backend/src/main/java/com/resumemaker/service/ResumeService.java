@@ -21,6 +21,7 @@ public class ResumeService {
 
     private final ResumeRepository repo;
     private final ObjectMapper mapper;
+    private final javax.sql.DataSource dataSource;
 
     @Transactional(readOnly = true)
     public List<ResumeDto.Summary> findAll() {
@@ -35,6 +36,34 @@ public class ResumeService {
         resume.setDataJson(toJson(defaultData()));
         return toFull(repo.save(resume));
     }
+
+    public List<String> getSeedTemplates() {
+        return List.of("data/josephdata.sql", "data/sweetydata.sql");
+    }
+
+    public ResumeDto.Full createFromSeedTemplate(String templateName) {
+        String fileName = templateName.endsWith(".sql") ? templateName : templateName + ".sql";
+        if (!fileName.startsWith("data/")) {
+            fileName = "data/" + fileName;
+        }
+        var resource = new org.springframework.core.io.ClassPathResource(fileName);
+        if (!resource.exists()) {
+            throw new IllegalArgumentException("Seed template file not found: " + fileName);
+        }
+        try {
+            var populator = new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(resource);
+            populator.execute(dataSource);
+            
+            return repo.findAll().stream()
+                    .max(java.util.Comparator.comparing(Resume::getUpdatedAt))
+                    .map(this::toFull)
+                    .orElseThrow(() -> new RuntimeException("Failed to load resume from seed template"));
+        } catch (Exception e) {
+            throw new RuntimeException("Error executing seed template: " + fileName, e);
+        }
+    }
+
+
 
     @Transactional(readOnly = true)
     public ResumeDto.Full findById(UUID id) {

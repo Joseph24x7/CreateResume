@@ -12,8 +12,11 @@
 /out/
 .DS_Store
 
-# Local H2 Database
+# Local H2 Database & Sensitive Data Files
 /backend/data/
 /data/
+/backend/src/main/resources/data/
+**/src/main/resources/data/
 *.mv.db
 *.trace.db
+

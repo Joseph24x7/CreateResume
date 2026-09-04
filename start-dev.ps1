@@ -42,8 +42,13 @@ if (Wait-ForUrl -Url $backendUrl -TimeoutSec 5) {
     Write-Output "Backend is already available at $backendUrl."
 } else {
     $null = Stop-ListenerOnPort -Port 8080 -Name 'backend'
-    Write-Output "Starting backend..."
-    $backendArgs = @('-NoExit','-Command', "Set-Location -LiteralPath '$backendPath'; mvn spring-boot:run '-Dspring-boot.run.jvmArguments=--add-opens java.base/java.lang=ALL-UNNAMED'")
+    $mvnExe = "mvn"
+    $ideaMvn = "C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\plugins\maven-plugin\lib\maven3\bin\mvn.cmd"
+    if (-not (Get-Command mvn -ErrorAction SilentlyContinue) -and (Test-Path $ideaMvn)) {
+        $mvnExe = "& '$ideaMvn'"
+    }
+
+    $backendArgs = @('-NoExit','-Command', "Set-Location -LiteralPath '$backendPath'; $mvnExe spring-boot:run '-Dspring-boot.run.jvmArguments=--add-opens java.base/java.lang=ALL-UNNAMED'")
     Start-Process -FilePath 'powershell.exe' -ArgumentList $backendArgs
 }
 

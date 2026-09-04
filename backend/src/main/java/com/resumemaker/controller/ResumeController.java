@@ -32,6 +32,18 @@ public class ResumeController {
         return resumeService.create(req);
     }
 
+    @GetMapping("/seed-templates")
+    public List<String> getSeedTemplates() {
+        return resumeService.getSeedTemplates();
+    }
+
+    @PostMapping("/seed-templates/{templateName}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResumeDto.Full createFromSeedTemplate(@PathVariable String templateName) {
+        return resumeService.createFromSeedTemplate(templateName);
+    }
+
+
     @GetMapping("/{id}")
     public ResumeDto.Full getById(@PathVariable UUID id) {
         return resumeService.findById(id);
