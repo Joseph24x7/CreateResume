@@ -167,67 +167,78 @@ const useResumeStore = create((set, get) => ({
   updateData: (patch) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, ...patch })
+    const data = resume.data || {}
+    updateResumeData({ ...data, ...patch })
   },
 
   updatePersonalInfo: (personalInfo) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, personalInfo })
+    const data = resume.data || {}
+    updateResumeData({ ...data, personalInfo })
   },
 
   updateSummary: (summary) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, summary })
+    const data = resume.data || {}
+    updateResumeData({ ...data, summary })
   },
 
   updateSkillCategories: (skillCategories) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, skillCategories })
+    const data = resume.data || {}
+    updateResumeData({ ...data, skillCategories })
   },
 
   updateExperiences: (experiences) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, experiences })
+    const data = resume.data || {}
+    updateResumeData({ ...data, experiences })
   },
 
   updateAchievements: (achievements) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, achievements })
+    const data = resume.data || {}
+    updateResumeData({ ...data, achievements })
   },
 
   updateEducations: (educations) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, educations })
+    const data = resume.data || {}
+    updateResumeData({ ...data, educations })
   },
 
   updateLanguages: (languages) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, languages })
+    const data = resume.data || {}
+    updateResumeData({ ...data, languages })
   },
 
   updateFont: (font) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, font })
+    const data = resume.data || {}
+    updateResumeData({ ...data, font })
   },
 
   updateTemplate: (template) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, template })
+    const data = resume.data || {}
+    updateResumeData({ ...data, template })
   },
 
   updateFontSize: (fontSize) => {
     const { resume, updateResumeData } = get()
     if (!resume) return
-    updateResumeData({ ...resume.data, fontSize })
+    const data = resume.data || {}
+    updateResumeData({ ...data, fontSize })
   },
 
   fetchResumeList: async () => {

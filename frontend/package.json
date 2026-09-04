@@ -13,6 +13,8 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "axios": "^1.7.0",
+    "keyword-extractor": "^0.0.28",
+    "natural": "^8.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.0",

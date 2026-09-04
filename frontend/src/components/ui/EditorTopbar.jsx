@@ -120,7 +120,7 @@ const EditorTopbar = memo(function EditorTopbar({ printRef, zoom, setZoom, onDow
         >
           <option value="executive-navy">Template: Executive Navy</option>
           <option value="minimalist-accent">Template: Minimalist Accent</option>
-          <option value="elegant-diamond">Template: Elegant Diamond</option>
+          <option value="elegant-diamond">Template 3: Elegant Diamond</option>
         </select>
 
         <select

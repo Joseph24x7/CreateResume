@@ -30,3 +30,12 @@ logging:
   level:
     com.resumemaker: INFO
     org.hibernate.SQL: WARN
+
+app:
+  seed-data:
+    enabled: true
+    files:
+      - data/josephdata.sql
+      - data/sweetydata.sql
+
+

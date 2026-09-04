@@ -32,6 +32,18 @@ public class ResumeController {
         return resumeService.create(req);
     }
 
+    @GetMapping("/seed-templates")
+    public List<String> getSeedTemplates() {
+        return resumeService.getSeedTemplates();
+    }
+
+    @PostMapping("/seed-templates/{templateName}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResumeDto.Full createFromSeedTemplate(@PathVariable String templateName) {
+        return resumeService.createFromSeedTemplate(templateName);
+    }
+
+
     @GetMapping("/{id}")
     public ResumeDto.Full getById(@PathVariable UUID id) {
         return resumeService.findById(id);
@@ -49,6 +61,7 @@ public class ResumeController {
     }
 
     public record ExportPdfRequest(String html) {}
+    public record ExportRawPdfRequest(String html, String filename) {}
 
     @PostMapping("/{id}/export/pdf")
     public ResponseEntity<byte[]> exportPdf(@PathVariable UUID id, @RequestBody ExportPdfRequest req) {
@@ -58,6 +71,18 @@ public class ResumeController {
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment",
                 resume.title().replaceAll("[^a-zA-Z0-9\\-_]", "_") + ".pdf");
+        return ResponseEntity.ok().headers(headers).body(pdf);
+    }
+
+    @PostMapping("/export-pdf-raw")
+    public ResponseEntity<byte[]> exportPdfRaw(@RequestBody ExportRawPdfRequest req) {
+        byte[] pdf = pdfExportService.generatePdf(req.html());
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        String filename = (req.filename() != null && !req.filename().isEmpty())
+                ? req.filename().replaceAll("[^a-zA-Z0-9\\-_]", "_")
+                : "cover_letter";
+        headers.setContentDispositionFormData("attachment", filename + ".pdf");
         return ResponseEntity.ok().headers(headers).body(pdf);
     }
 }
