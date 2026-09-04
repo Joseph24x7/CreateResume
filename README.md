@@ -1,6 +1,6 @@
-# MyNovoResume
+# Free Resume Creator
 
-MyNovoResume is a premium, paid-tier-grade resume builder featuring a state-of-the-art WYSIWYG document editor and high-fidelity PDF export. It includes the executive **Elegant Diamond** template, fully designed for visual hierarchy, contrast harmony, and ATS compliance.
+Free Resume Creator is a state-of-the-art WYSIWYG document editor and high-fidelity PDF export platform. It includes executive templates fully designed for visual hierarchy, contrast harmony, and ATS compliance.
 
 ---
 

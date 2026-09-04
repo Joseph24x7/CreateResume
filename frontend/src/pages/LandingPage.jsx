@@ -115,8 +115,8 @@ export default function LandingPage() {
     <div className="landing">
       <nav className="landing-nav">
         <div className="landing-logo" onClick={() => setActiveTab('resumes')} style={{ cursor: 'pointer' }}>
-          <span className="logo-mark">N</span>
-          <span className="logo-text">MyNovoResume</span>
+          <span className="logo-mark">F</span>
+          <span className="logo-text">Free Resume Creator</span>
         </div>
 
         {/* HOME PAGE NAVIGATION TABS */}
@@ -166,7 +166,7 @@ export default function LandingPage() {
       {activeTab === 'resumes' && (
         <>
           <header className="landing-hero">
-            <div className="hero-badge">✦ Premium Resume Builder</div>
+            <div className="hero-badge">✦ Free Resume Creator</div>
             <h1 className="hero-title">
               Craft Resumes That<br />
               <span className="hero-gradient">Get You Hired</span>
